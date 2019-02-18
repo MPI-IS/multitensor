@@ -1,20 +1,75 @@
-# MultiTensor
-Multilayer network tensor factorization, for community detection, link prediction and measure layer interdependence.
+MultiTensor
+===========
 
-Implements the algorithm described in:
+The **MutliTensor** is a library for multilayer network tensor factorization that can be used
+for community detection, link prediction and measure layer interdependence.
 
-De Bacco, C., Power, E. A., Larremore, D. B., & Moore, C. (2017). *Community detection, link prediction, and layer interdependence in multilayer networks.* Physical Review E, 95(4), 042317.
 
-If you use this code please cite this [article](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.95.042317).  
-A _preprint_ version can be found [here](http://cdebacco.com/files/multitensor.pdf) or [here](https://arxiv.org/abs/1701.01369).
+Installation
+============
 
-Copyright (c) 2016 [Caterina De Bacco](http://cdebacco.com/).
+The project uses [CMake](https://cmake.org/) for building:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+- the main library
+- the [Python](https://www.python.org/) bindings
+- the tests
+- the documentation
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Requirements
+------------
+
+- [Boost](http://www.boost.org) for the unit tests
+- [CMake](https://cmake.org/) for building the project
+
+
+Configuring and building the project with CMake
+-----------------------------------------------
+
+To configure and build the project, simply type in:
+
+```
+cd $MULTI_TENSOR_DIR
+mkdir build
+cd build
+cmake -DBOOST_ROOT=$BOOST_PATH ..
+make
+```
+where `Boost` is installed under `$BOOST_PATH` and `$MULTI_TENSOR_DIR` is the entry point of the library repository.
+
+
+Python bindings (optional)
+--------------------------
+Building the Python bindings requires `numpy`. Although it is not mandatory, we suggest to also
+use `cython` to regenerate the library source file.
+These packages can be installed using [pip](https://pypi.python.org/pypi/pip):
+
+```
+pip install numpy cython
+```
+
+Then, run your `CMake` with the option `ENABLE_PYTHON_WRAPPER` set to **ON**:
+
+```
+cmake -DBOOST_ROOT=$BOOST_PATH -ENABLE_PYTHON_WRAPPER=ON ..
+```
+
+**Note**: you should use a Python virtual environment, and `CMake` should be run in this virtual environment.
+
+
+Running the tests
+-----------------
+Once the project is built, just type
+
+```
+make test
+```
+
+This will run the unit tests, also for Python if the extension is enabled.
+
+
+Usage
+=====
 
 ## What's included:
 - `cpp` : c++ version of the algorithm. Faster than the Python one.
@@ -45,5 +100,37 @@ The first line outputs the Max Likelihood among the realizations.
 For the membership files, the subsequent lines contain L+1 columns: the first one is the node label, the follwing ones are the (not normalized) membership vectors' entries.
 For the affinity matrix file, the subsequent lines start with the number of the layer and then the matrix for that layer.
 For the restricted assortative version only the diagonal entries of the affinity matrix are printed. The first entry of each row is the layer index.
+
+
+References
+==========
+
+The **MutliTensor** implements the algorithm described in:
+
+De Bacco, C., Power, E. A., Larremore, D. B., & Moore, C. (2017). *Community detection, link prediction, and layer interdependence in multilayer networks.* Physical Review E, 95(4), 042317.
+
+If you use this code please cite this [article](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.95.042317).  
+A _preprint_ version can be found [here](http://cdebacco.com/files/multitensor.pdf) or [here](https://arxiv.org/abs/1701.01369).
+
+
+Authors
+=======
+
+[Caterina De Bacco](caterina.debacco@tuebingen.mpg.de)
+
+
+[Jean-Claude Passy](jean-claude.passy@tuebignen.mpg.de)
+
+
+License
+=======
+
+GNU GPL version 3 (see LICENSE.md)
+
+
+Copyright
+=========
+
+(c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
 
 
