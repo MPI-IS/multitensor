@@ -37,37 +37,6 @@ make
 ```
 where `Boost` is installed under `$BOOST_PATH` and `$MULTI_TENSOR_DIR` is the entry point of the library repository.
 
-
-Python bindings (optional)
---------------------------
-Building the Python bindings requires `numpy`. Although it is not mandatory, we suggest to also
-use `cython` to regenerate the library source file.
-These packages can be installed using [pip](https://pypi.python.org/pypi/pip):
-
-```
-pip install numpy cython
-```
-
-Then, run your `CMake` with the option `ENABLE_PYTHON_WRAPPER` set to **ON**:
-
-```
-cmake -DBOOST_ROOT=$BOOST_PATH -ENABLE_PYTHON_WRAPPER=ON ..
-```
-
-**Note**: you should use a Python virtual environment, and `CMake` should be run in this virtual environment.
-
-
-Running the tests
------------------
-Once the project is built, just type
-
-```
-make test
-```
-
-This will run the unit tests, also for Python if the extension is enabled.
-
-
 Usage
 =====
 
@@ -109,7 +78,7 @@ The **MutliTensor** implements the algorithm described in:
 
 De Bacco, C., Power, E. A., Larremore, D. B., & Moore, C. (2017). *Community detection, link prediction, and layer interdependence in multilayer networks.* Physical Review E, 95(4), 042317.
 
-If you use this code please cite this [article](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.95.042317).  
+If you use this code please cite this [article](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.95.042317).
 A _preprint_ version can be found [here](http://cdebacco.com/files/multitensor.pdf) or [here](https://arxiv.org/abs/1701.01369).
 
 
@@ -117,7 +86,6 @@ Authors
 =======
 
 [Caterina De Bacco](caterina.debacco@tuebingen.mpg.de)
-
 
 [Jean-Claude Passy](jean-claude.passy@tuebignen.mpg.de)
 

@@ -1,3 +1,8 @@
+# Build
+debug
+build
+release
+
 # OSX
 *.DS_Store
 
