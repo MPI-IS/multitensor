@@ -75,7 +75,48 @@ set_target_properties(
     PROPERTIES
     FOLDER "Applications")
 
-# Unit tests
+# Functional tests
+# Helper for command line run
+function(add_test_cmd_line
+    test_name
+    test_program
+    output_check_clusters
+    cluster_or_assignments)
+
+    if("${test_program}" STREQUAL "Multitensor_main")
+        set(output_var
+            -E _main.dat
+            )
+    else()
+        set(output_var
+            -E _undirected.dat
+        )
+    endif()
+
+    add_test(
+        NAME "command-line-${test_name}-run"
+        COMMAND ${test_program}
+            ${ARGN}
+            ${output_var}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
+            )
+endfunction()
+
+add_test_cmd_line(
+    "main"
+    Multitensor_main
+    -k 2
+    -l 3
+    -a adjacency.dat
+    )
+
+add_test_cmd_line(
+    "undirected"
+    Multitensor_undirected
+    -k 2
+    -l 3
+    -a adjacency.dat
+    )
 
 
 #########################
