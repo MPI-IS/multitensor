@@ -96,7 +96,7 @@ int main(int ac, char** av)
   tend = time(0); 
   cout << "It took "<< difftime(tend, tstart) <<" second(s). "<< endl;
 
-return 1;
+return 0;
 }
 
 

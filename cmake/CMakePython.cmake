@@ -15,10 +15,20 @@ if(MULTI_TENSOR_PYTHON_EXTENSIONS)
     add_custom_target(multi_tensor_py ALL)
     foreach(python_file ${PythonFiles})
         add_custom_command(
-            TARGET multi_tensor_py 
+            TARGET multi_tensor_py
             PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy ${python_file} ${CMAKE_CURRENT_BINARY_DIR})
     endforeach()
+
+    # Functional tests
+    add_test(
+        NAME "command-line-python-run"
+        COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_CURRENT_BINARY_DIR}/main.py"
+            -k=2
+            -l=4
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
+            )
 
     #[[
     # Sphinx Documentation for Python extension

@@ -49,6 +49,7 @@ if(ENABLE_PYTHON_WRAPPER)
     message(STATUS "[PYTHON] Configuring Python bindings")
 
     # Find python3
+    set (CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point the the virtualenv
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_FOUND)
         message(STATUS "[PYTHON] python3 interpreter found at following location '${Python3_EXECUTABLE}'")
@@ -67,7 +68,7 @@ if(ENABLE_PYTHON_WRAPPER)
                 set(PYTHON_SHARED_LIBRARY_EXTENSION ${PYTHON_SHARED_LIBRARY_EXTENSION} CACHE STRING "Python shared library extensions" FORCE)
             else()
                 unset(PYTHON_SHARED_LIBRARY_EXTENSION)
-                message(WARNING "Cannot determin python3 extension suffix")
+                message(WARNING "Cannot determine python3 extension suffix")
             endif()
         endif()
 
