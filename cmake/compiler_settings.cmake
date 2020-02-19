@@ -6,8 +6,8 @@
 # This file contains the global compilation settings
 #
 
-# support for C++11
-set(CMAKE_CXX_STANDARD 11)
+# support for C++14
+set(CMAKE_CXX_STANDARD 14)
 
 # build type, by default to release (with optimisations)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)

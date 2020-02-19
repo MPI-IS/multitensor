@@ -23,7 +23,8 @@ set(Boost_NO_BOOST_CMAKE        ON)
 
 set(Boost_ADDITIONAL_VERSIONS
     "1.54" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0"
-    "1.60" "1.60.0" "1.61" "1.61.0" "1.62" "1.62.0" "1.63" "1.63.0" "1.64" "1.64.0" "1.65" "1.65.0" "1.68" "1.68.0" "1.69" "1.69.0")
+    "1.60" "1.60.0" "1.61" "1.61.0" "1.62" "1.62.0" "1.63" "1.63.0" "1.64" "1.64.0" "1.65" "1.65.0" "1.68" "1.68.0"
+    "1.69" "1.69.0" "1.70" "1.70.0")
 
 # if BOOST_ROOT is defined, we look only there, otherwise we also look into the system paths
 if(DEFINED BOOST_ROOT)
@@ -49,8 +50,8 @@ if(ENABLE_PYTHON_WRAPPER)
     message(STATUS "[PYTHON] Configuring Python bindings")
 
     # Find python3
-    set (CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point the the virtualenv
-    find_package(Python3 COMPONENTS Interpreter)
+    set (CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
+    find_package(Python3 COMPONENTS Interpreter Development)
     if(Python3_FOUND)
         message(STATUS "[PYTHON] python3 interpreter found at following location '${Python3_EXECUTABLE}'")
         message(STATUS "[PYTHON] python3 libraries found, include '${Python3_INCLUDE_DIRS}'")
@@ -58,7 +59,7 @@ if(ENABLE_PYTHON_WRAPPER)
         # Determining the Python shared library extensions
         if(NOT DEFINED PYTHON_SHARED_LIBRARY_EXTENSION)
             execute_process(
-                COMMAND ${Python3_EXECUTABLE} -c "import imp; print([i[0] for i in imp.get_suffixes() if i[2] == imp.C_EXTENSION][0])"
+                COMMAND ${Python3_EXECUTABLE} -c "import importlib.machinery as mach; print(mach.EXTENSION_SUFFIXES[0])"
                 OUTPUT_VARIABLE PYTHON_SHARED_LIBRARY_EXTENSION
                 ERROR_VARIABLE  PYTHON_SHARED_LIBRARY_EXTENSION_ERR
                 OUTPUT_STRIP_TRAILING_WHITESPACE
