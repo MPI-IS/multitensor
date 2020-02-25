@@ -12,7 +12,7 @@
 #include <ctime>
 
 #include "multitensor_parameters.hpp"
-#include "multitensor_algebra.hpp"
+#include "multitensor_tensor.hpp"
 
 // Fixture
 struct fixture
@@ -28,7 +28,7 @@ struct fixture
     }
 };
 
-using multitensor::algebra::Tensor;
+using multitensor::tensor::Tensor;
 
 BOOST_FIXTURE_TEST_SUITE(tests_tensor, fixture)
 
@@ -39,10 +39,11 @@ BOOST_AUTO_TEST_CASE(
 {
     dimension_t nrows = dimension_t(rng() % 10) + 1;
     dimension_t ncols = dimension_t(rng() % 10) + 1;
-    dimension_t nlayers = dimension_t(rng() % 10) + 1;
+    dimension_t nlayers = dimension_t(rng() % 10) + 2;
 
     Tensor<double> T1(nrows, ncols, nlayers);
     BOOST_TEST(T1.size() == nrows * ncols * nlayers);
+    BOOST_TEST(T1.order() == 3);
 
     for (dimension_t i = 0; i < nrows; i++)
     {
@@ -65,6 +66,7 @@ BOOST_AUTO_TEST_CASE(
     // Create a tensor with one single layer - basically a matrix
     Tensor<double> T2(nrows, ncols);
     BOOST_TEST(T2.size() == nrows * ncols);
+    BOOST_TEST(T2.order() == 2);
 
     rand_i = dimension_t(rng() % nrows);
     rand_j = dimension_t(rng() % ncols);

@@ -29,9 +29,10 @@ include(cmake/thirdparty.cmake)
 ################################
 # Main libraries and executables
 set(multitensor_src
-    ${CMAKE_SOURCE_DIR}/include/multitensor_algebra.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor_graph.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor_parameters.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor_solver.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor_tensor.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor.hpp)
 set(multitensor_legacy_src
     ${CMAKE_SOURCE_DIR}/legacy/include/main.hpp
@@ -105,13 +106,16 @@ set_target_properties(
 
 # Unit tests
 add_executable(test_multitensor
-  tests/test_tensor.cpp)
+    tests/test_graph.cpp
+    tests/test_multitensor.cpp
+    tests/test_solver.cpp
+    tests/test_tensor.cpp)
 target_link_libraries(test_multitensor multitensor
       Boost::unit_test_framework
       Boost::system
       Boost::filesystem)
 add_test(
-      NAME multitensor_test-1
+      NAME multitensor_unit_tests
       COMMAND test_multitensor)
 
 # Functional tests

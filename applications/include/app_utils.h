@@ -58,6 +58,8 @@ void read_adjacency_data(std::vector<size_t> &edges_in,
             std::string("In read_adjacency_data, failed to open ") + filename);
     }
 
+    std::cout << "Reading adjacency file " << filename << std::endl;
+
     std::string line;
     nof_layers = 0;
     while (!in.eof())
@@ -119,21 +121,4 @@ void read_adjacency_data(std::vector<size_t> &edges_in,
                 std::min(edges_in[std::distance(edges_in.begin(), min_node_in)],
                          edges_out[std::distance(edges_out.begin(), min_node_out)]) +
                 1;
-
-    // Last checks
-    if (!nof_layers)
-    {
-        throw std::runtime_error(
-            std::string("In read_adjacency_data, no layers read from file ") + filename);
-    }
-    if (nof_nodes < 2)
-    {
-        throw std::runtime_error(
-            std::string("In read_adjacency_data, not enough nodes (") + std::to_string(nof_nodes) +
-            std::string(") read from file ") + filename);
-    }
-
-    // Some print-outs
-    printf("Number of nodes: %d\n", static_cast<int>(nof_nodes));
-    printf("Number of layers: %d\n", static_cast<int>(nof_layers));
 }

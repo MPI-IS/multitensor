@@ -30,5 +30,10 @@ int main(int argc, char *argv[])
                         vm["a"].as<std::string>());
 
     // Call algorithm
-    multitensor_factorization(edges_in, edges_out, edges_weight, nof_nodes, nof_layers);
+    multitensor_algo(edges_in, edges_out, edges_weight,
+                     nof_nodes, nof_layers,
+                     static_cast<size_t>(vm["k"].as<int>()),
+                     static_cast<unsigned int>(vm["r"].as<int>()),
+                     static_cast<unsigned int>(vm["maxit"].as<int>()),
+                     static_cast<unsigned int>(vm["y"].as<int>()));
 }
