@@ -83,7 +83,7 @@ target_sources(multitensor
 add_library(multitensor_utils
     ${CMAKE_SOURCE_DIR}/applications/include/app_utils.h
     ${CMAKE_SOURCE_DIR}/applications/src/app_utils.cpp)
-target_link_libraries(multitensor_utils PUBLIC multitensor Boost::program_options)
+target_link_libraries(multitensor_utils PUBLIC multitensor)
 target_include_directories(multitensor_utils
     PUBLIC
     ${CMAKE_SOURCE_DIR}/applications/include/
@@ -97,7 +97,7 @@ add_executable(Multitensor_undirected legacy/applications/src/MultiTensor_undire
 target_link_libraries(Multitensor_undirected multitensor_undirected Boost::system Boost::filesystem Boost::program_options)
 
 add_executable(Multitensor applications/src/MultiTensor.cpp)
-target_link_libraries(Multitensor multitensor multitensor_utils Boost::system Boost::filesystem Boost::program_options)
+target_link_libraries(Multitensor multitensor multitensor_utils Boost::system Boost::filesystem)
 
 set_target_properties(
     Multitensor_main Multitensor_undirected Multitensor

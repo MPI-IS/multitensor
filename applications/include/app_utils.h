@@ -8,25 +8,26 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
 #include <fstream>
-#include <functional>
 #include <iomanip>
 #include <iostream>
-#include <numeric>
 #include <sstream>
+#include <cassert>
+#include <algorithm>
+#include <cstdlib>
+#include <functional>
+#include <numeric>
 #include <string>
 #include <vector>
 
-#include <boost/program_options.hpp>
-
 #include "multitensor_parameters.hpp"
 
-namespace po = boost::program_options;
+//! @brief Interpret a command option given by the user
+char *
+get_cmd_option(char **begin, char **end, const std::string &option);
 
-//! @brief Parsing the command line
-std::tuple<po::variables_map, po::options_description> parse_command_line(int ac, char **av);
+//! @brief Check if a command option has been specified by the user
+bool cmd_option_exists(char **begin, char **end, const std::string &option);
 
 /*!
  * @brief Read adjacency matrix data and put it in vector

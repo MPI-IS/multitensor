@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <random>
+#include <chrono>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/random.hpp>
 
@@ -101,6 +102,10 @@ void multitensor_algo(const std::vector<vertex_t> &edges_in,
     std::cout << "Number of layers: " << nof_layers << std::endl;
     std::cout << "Number of groups: " << nof_groups << std::endl;
 
+    // Start timer
+    using clock_t = std::chrono::high_resolution_clock;
+    clock_t::time_point start_clock = clock_t::now();
+
     // Build multilayer network, i.e. a vector of graphs, one for each layer
     std::vector<graph_t> A(nof_layers);
     graph::build_network(A, edges_in, edges_out, edges_weight);
@@ -124,8 +129,12 @@ void multitensor_algo(const std::vector<vertex_t> &edges_in,
                index_vertices_with_out_edges, index_vertices_with_in_edges,
                A, random_generator);
 
+    // Duration
+    std::chrono::duration<double, std::milli> time_spam_ms = clock_t::now() - start_clock;
+
     // Some last outputs
     graph::print_graph_stats(A);
+    std::cout << "Total duration: " << time_spam_ms.count() / 1000. << " s" << std::endl;
 }
 
 } // namespace multitensor

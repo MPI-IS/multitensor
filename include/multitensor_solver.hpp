@@ -449,7 +449,7 @@ public:
             unsigned int iteration(0), coincide(0);
             double L2 = std::numeric_limits<double>::lowest();
 
-            while (!convergence & iteration < max_nof_iterations)
+            while (!convergence & (iteration < max_nof_iterations))
             {
                 convergence = loop(u_list, v_list, A,
                                    iteration, coincide, L2,
@@ -457,9 +457,11 @@ public:
                                    u, u_old, u_f,
                                    v, v_old, v_f,
                                    random_generator);
+                /*
                 std::cout << std::setprecision(12)
                           << "Iteration " << iteration
                           << ", L2 = " << L2 << std::endl;
+                */
                 iteration++;
             }
 
