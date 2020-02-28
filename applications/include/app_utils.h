@@ -30,23 +30,23 @@ get_cmd_option(char **begin, char **end, const std::string &option);
 bool cmd_option_exists(char **begin, char **end, const std::string &option);
 
 /*!
- * @brief Read adjacency matrix data and put it in vector
+ * @brief Read adjacency matrix data and creates the necessary vectors
  *
- * @param[in, out] edges Vector containing the edges
- * @param[in, out] edge_weights Vector containing the weight og the edges
- * @param[in, out] nof_nodes Number of nodes
- * @param[in, out] nof_layers Number of layers
  * @param[in] filename Name of the file containing the data
- *
+ * @param[in,out] edges_in Labels of in-going vertices for each edge
+ * @param[in,out] edges_out Labels of out-going vertices for each edge
+ * @param[in,out] edges_weight Edge weights
+ * @param[in,out] nof_nodes Number of nodes
+ * @param[in,out] nof_layers Number of layers
  */
 
 template <class scalar_t>
-void read_adjacency_data(std::vector<size_t> &edges_in,
+void read_adjacency_data(const std::string &filename,
+                         std::vector<size_t> &edges_in,
                          std::vector<size_t> &edges_out,
                          std::vector<scalar_t> &edges_weight,
                          size_t &nof_nodes,
-                         size_t &nof_layers,
-                         const std::string &filename)
+                         size_t &nof_layers)
 {
 
     edges_in.clear();

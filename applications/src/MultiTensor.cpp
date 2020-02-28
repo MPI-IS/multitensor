@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     std::string adjacency_filename = "adjacency.dat";
 
     // Number of groups
-    size_t nof_groups = 0;
+    size_t nof_groups;
 
     // Number of realizations
     size_t nof_realizations = 1;
@@ -23,8 +23,7 @@ int main(int argc, char *argv[])
     // Number of positive checks required for reaching convergence
     size_t nof_convergences = 10;
 
-    // Set Program options
-    // Help
+    // Help option
     if (cmd_option_exists(argv, argv + argc, "--help"))
     {
         std::cout
@@ -50,18 +49,33 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    // Version option
+    if (cmd_option_exists(argv, argv + argc, "--version"))
+    {
+        std::cout << MULTITENSOR_VERSION << std::endl;
+        return 0;
+    }
+
     // Read in command line arguments
     if (cmd_option_exists(argv, argv + argc, "--a"))
+    {
         adjacency_filename = get_cmd_option(argv, argv + argc, "--a");
+    }
     if (cmd_option_exists(argv, argv + argc, "--k"))
+    {
         nof_groups = std::stoi(get_cmd_option(argv, argv + argc, "--k"));
+    }
+    else
+    {
+        throw std::runtime_error("Please specify the number of groups (--k option).");
+    }
 
     // Read-in data
     std::vector<size_t> edges_in, edges_out;
     std::vector<unsigned int> edges_weight;
     size_t nof_nodes, nof_layers;
 
-    read_adjacency_data(edges_in, edges_out, edges_weight, nof_nodes, nof_layers, adjacency_filename);
+    read_adjacency_data(adjacency_filename, edges_in, edges_out, edges_weight, nof_nodes, nof_layers);
 
     // Call algorithm
     multitensor_algo(edges_in, edges_out, edges_weight,

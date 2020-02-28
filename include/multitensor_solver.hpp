@@ -18,6 +18,8 @@
 
 namespace multitensor
 {
+
+//! Solver implementation
 namespace solver
 {
 
@@ -29,20 +31,19 @@ private:
     unsigned int max_nof_iterations;
     unsigned int nof_convergences; // number of times the convergence criterium is satisfied before stopping the simulation
 
-public:
     /*!
-     * @brief Constructor of a solver
+     * @brief Update the u component
      *
-     * @param[in] nof_realizations_ number of realizations
+     * @tparam graph_t Graph type
+     *
+     * @param[in] u_list Indices of vertices with at least one outgoing edge
+     * @param[in] v_list Indices of vertices with at least one incoming edge
+     * @param[in] A Network
+     * @param[in, out] u Membership tensor for outgoing links
+     * @param[in, out] w_old Some variable that will be removed
+     * @param[in, out] u_old Some variable that will be removed
+     * @param[in, out] v_old Some variable that will be removed
      */
-    Solver(unsigned int nof_realizations_, unsigned int max_nof_iterations_, unsigned int nof_convergences_)
-        : nof_realizations(nof_realizations_),
-          max_nof_iterations(max_nof_iterations_),
-          nof_convergences(nof_convergences_)
-    {
-    }
-
-    //! @brief Update u
     template <class graph_t>
     double update_u(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
@@ -132,7 +133,19 @@ public:
         return dist_u;
     }
 
-    //! @brief Update v
+    /*!
+     * @brief Update the v component
+     *
+     * @tparam graph_t Graph type
+     *
+     * @param[in] u_list Indices of vertices with at least one outgoing edge
+     * @param[in] v_list Indices of vertices with at least one incoming edge
+     * @param[in] A Network
+     * @param[in, out] v Membership tensor for incoming links
+     * @param[in, out] u Membership tensor for outgoing links
+     * @param[in, out] w_old Some variable that will be removed
+     * @param[in, out] v_old Some variable that will be removed
+     */
     template <class graph_t>
     double update_v(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
@@ -140,7 +153,6 @@ public:
                     tensor::Tensor<double> &v,
                     tensor::Tensor<double> &u,
                     tensor::Tensor<double> &w_old,
-                    tensor::Tensor<double> &u_old,
                     tensor::Tensor<double> &v_old)
     {
         unsigned int nof_groups(std::get<0>(w_old.dims()));
@@ -225,7 +237,19 @@ public:
         return dist_v;
     }
 
-    //! @brief Update w
+    /*!
+     * @brief Update the affinity matrix
+     *
+     * @tparam graph_t Graph type
+     *
+     * @param[in] u_list Indices of vertices with at least one outgoing edge
+     * @param[in] v_list Indices of vertices with at least one incoming edge
+     * @param[in] A Network
+     * @param[in, out] W Affinity matrix
+     * @param[in, out] v Membership tensor for incoming links
+     * @param[in, out] u Membership tensor for outgoing links
+     * @param[in, out] w_old Some variable that will be removed
+     */
     template <class graph_t>
     double update_w(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
@@ -240,7 +264,7 @@ public:
         unsigned int nof_layers(A.size());
 
         graph::out_edge_iterator<graph_t> eit, eend;
-        double Z_kq, Du, Dv, w_k, dist_w, w_kqa, rho_w, Zij_a;
+        double Z_kq, Du, Dv, dist_w, w_kqa, rho_w, Zij_a;
         dist_w = 0;
 
         for (size_t k = 0; k < nof_groups; k++)
@@ -312,7 +336,18 @@ public:
         return dist_w;
     }
 
-    //! Calculate likelyhood
+    /*!
+     * @brief Calculates the likelyhood
+     *
+     * @tparam graph_t Graph type
+     *
+     * @param[in] u Membership tensor for outgoing links
+     * @param[in] v Membership tensor for incoming links
+     * @param[in] W Affinity matrix
+     * @param[in] A Network
+     *
+     * @returns Likelyhood
+     */
     template <class graph_t>
     double calculate_likelyhood(const tensor::Tensor<double> &u,
                                 const tensor::Tensor<double> &v,
@@ -324,7 +359,7 @@ public:
         size_t nof_nodes(std::get<0>(u.dims()));
         size_t nof_layers(A.size());
 
-        double L2(0), l, log_arg, uvw;
+        double l(0), log_arg, uvw;
         unsigned int nof_parallel_edges;
         graph::out_edge_iterator<graph_t> eit, eend;
 
@@ -371,25 +406,34 @@ public:
         return l;
     }
 
-    //! @brief A solver loop
-    template <class random_t,
-              class graph_t>
+    /*!
+     * @brief Executes one loop of the solver
+     *
+     * @tparam graph_t Graph type
+     *
+     * @param[in] u_list ndices of vertices with at least one outgoing edge
+     * @param[in] v_list ndices of vertices with at least one incoming edge
+     * @param[in] A Network
+     * @paran[in] iteration Current iteration
+     * @paran[in,out] coincide Number of successful checks
+     * @paran[in,out] L2 Likelyhoods
+     */
+    template <class graph_t>
     bool loop(const std::vector<size_t> &u_list,
               const std::vector<size_t> &v_list,
               const std::vector<graph_t> &A,
               const unsigned int iteration,
               unsigned int &coincide,
               double &L2,
-              tensor::Tensor<double> &w, tensor::Tensor<double> &w_old, tensor::Tensor<double> &w_f,
-              tensor::Tensor<double> &u, tensor::Tensor<double> &u_old, tensor::Tensor<double> &u_f,
-              tensor::Tensor<double> &v, tensor::Tensor<double> &v_old, tensor::Tensor<double> &v_f,
-              random_t &random_generator)
+              tensor::Tensor<double> &w, tensor::Tensor<double> &w_old,
+              tensor::Tensor<double> &u, tensor::Tensor<double> &u_old,
+              tensor::Tensor<double> &v, tensor::Tensor<double> &v_old)
     {
 
         // Split updates
-        double dist_u = update_u(u_list, v_list, A, u, w_old, u_old, v_old);
-        double dist_v = update_v(u_list, v_list, A, v, u, w_old, u_old, v_old);
-        double dist_w = update_w(u_list, v_list, A, w, v, u, w_old);
+        update_u(u_list, v_list, A, u, w_old, u_old, v_old);
+        update_v(u_list, v_list, A, v, u, w_old, v_old);
+        update_w(u_list, v_list, A, w, v, u, w_old);
 
         // Check for convergence
         if (iteration % 10 == 0)
@@ -408,7 +452,42 @@ public:
         return (coincide == nof_convergences);
     }
 
-    //! @brief Run the solver
+public:
+    /*!
+     * @brief Constructor of a solver
+     *
+     * @param[in] nof_realizations_ Number of realizations
+     * @param[in] max_nof_iterations_ Maximum number of iterations in each realization
+     * @param[in] nof_convergences_ Number of successive passed convergence criteria for declaring the results converged
+     */
+    Solver(unsigned int nof_realizations_, unsigned int max_nof_iterations_, unsigned int nof_convergences_)
+        : nof_realizations(nof_realizations_),
+          max_nof_iterations(max_nof_iterations_),
+          nof_convergences(nof_convergences_)
+    {
+    }
+
+    /*!
+     * @brief Run the solver
+     *
+     * @tparam random_t Random generator type
+     * @tparam graph_t Graph type
+     *
+     * @param[in] nof_nodes Number of vertices
+     * @param[in] nof_groups Number of groups
+     * @param[in] nof_layers Number of layers
+     * @param[in] u_list ndices of vertices with at least one outgoing edge
+     * @param[in] v_list ndices of vertices with at least one incoming edge
+     * @param[in] A Network
+     * @param[in,out] random_generator Random generator
+     *
+     * The solver is an explicit split-operator. At each iteration \f$t\f$, it does the following:
+     *   - computes \f$u(t+1) = u^+ = f(u,v,w)\f$
+     *   - computes \f$v(t+1) = v^+ = f(u^+,v,w)\f$
+     *   - computes \f$w(t+1) = w^+ = f(u^+,v^+,w)\f$
+     *
+     * Additionally, the check for convergence is performed every 10 iterations
+     */
     template <class random_t,
               class graph_t>
     void run(const size_t &nof_nodes, const size_t &nof_groups, const size_t &nof_layers,
@@ -420,24 +499,22 @@ public:
         // Affinity tensors for the groups
         tensor::Tensor<double> w(nof_groups, nof_groups, nof_layers);
         tensor::Tensor<double> w_old(nof_groups, nof_groups, nof_layers);
-        tensor::Tensor<double> w_f(nof_groups, nof_groups, nof_layers);
 
         // Matrices linking vertices in groups
         tensor::Tensor<double> u(nof_nodes, nof_groups), v(nof_nodes, nof_groups);
         tensor::Tensor<double> u_old(nof_nodes, nof_groups), v_old(nof_nodes, nof_groups);
-        tensor::Tensor<double> u_f(nof_nodes, nof_groups), v_f(nof_nodes, nof_groups);
 
         for (unsigned int i = 0; i < nof_realizations; i++)
         {
-            std::cout << "Running realization " << i << std::endl;
+            std::cout << "Running realization # " << i << std::endl;
 
             // Initialize tensors
             w.randomize_symmetric(random_generator);
 
             // TO CHECK: there is a difference here in case some nodes in the files dont have in/out edges
             // i.e. remove node 299 in the data file.
-            v.randomize_partial(random_generator, v_list);
-            u.randomize_partial(random_generator, u_list);
+            v.randomize_partial(v_list, random_generator);
+            u.randomize_partial(u_list, random_generator);
 
             // Update old variables
             u_old = u;
@@ -453,10 +530,7 @@ public:
             {
                 convergence = loop(u_list, v_list, A,
                                    iteration, coincide, L2,
-                                   w, w_old, w_f,
-                                   u, u_old, u_f,
-                                   v, v_old, v_f,
-                                   random_generator);
+                                   w, w_old, u, u_old, v, v_old);
                 /*
                 std::cout << std::setprecision(12)
                           << "Iteration " << iteration
@@ -498,6 +572,7 @@ public:
     {
         return max_nof_iterations;
     }
-}; // namespace solver
+};
+
 } // namespace solver
 } // namespace multitensor

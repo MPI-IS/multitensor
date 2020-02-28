@@ -24,11 +24,21 @@ namespace multitensor
 {
 
 /*!
- * @brief Multitensor factorization call.
+ * @brief Multitensor factorization algorithm call.
  *
- * Generic algorithm function.
+ * @tparam graph_t Graph type
+ * @tparam vertex_t Edges label type
+ * @tparam weight_t The type of an edge weight
  *
- * @tparam weight_t edges weight type
+ * @param[in] edges_in Labels of in-going vertices for each edge
+ * @param[in] edges_out Labels of out-going vertices for each edge
+ * @param[in] edges_weight Edge weights
+ * @param[in] nof_nodes Number of nodes
+ * @param[in] nof_layers Number of layers
+ * @param[in] nof_groups Number of groups
+ * @param[in] nof_realizations Number of realizations
+ * @param[in] max_nof_iterations Maximum number of iterations in each realization
+ * @param[in] nof_convergences Number of successive passed convergence criteria for declaring the results converged
  *
  */
 template <
@@ -108,13 +118,13 @@ void multitensor_algo(const std::vector<vertex_t> &edges_in,
 
     // Build multilayer network, i.e. a vector of graphs, one for each layer
     std::vector<graph_t> A(nof_layers);
-    graph::build_network(A, edges_in, edges_out, edges_weight);
+    graph::build_network(edges_in, edges_out, edges_weight, A);
     graph::print_graph_stats(A);
 
     // Extract indices of vertices that have at least one out/in-going edges
     std::vector<size_t> index_vertices_with_out_edges;
     std::vector<size_t> index_vertices_with_in_edges;
-    graph::extract_vertices_with_edges(index_vertices_with_out_edges, index_vertices_with_in_edges, A);
+    graph::extract_vertices_with_edges(A, index_vertices_with_out_edges, index_vertices_with_in_edges);
 
     // Random generator
     // TO DO: improve, no real seed!

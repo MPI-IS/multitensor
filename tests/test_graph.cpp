@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_add_vertex)
     // Label
     std::string label = "id " + std::to_string(size_t(rng() % 10));
 
-    size_t x = add_vertex(label, A);
+    add_vertex(label, A);
     for (size_t alpha = 0; alpha < A.size(); alpha++)
     {
         BOOST_TEST(num_vertices(A[alpha]) == 1);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_build_network)
 {
 
     // Build network
-    build_network(A, edges_in, edges_out, edges_weight);
+    build_network(edges_in, edges_out, edges_weight, A);
 
     size_t n_edges(0);
     for (size_t alpha = 0; alpha < nof_layers; alpha++)
@@ -119,11 +119,11 @@ BOOST_AUTO_TEST_CASE(test_build_network)
 BOOST_AUTO_TEST_CASE(test_extract_vertices_with_edges)
 {
     // Build network
-    build_network(A, edges_in, edges_out, edges_weight);
+    build_network(edges_in, edges_out, edges_weight, A);
 
     // Extract vertices of interest
     std::vector<size_t> u, v;
-    extract_vertices_with_edges(u, v, A);
+    extract_vertices_with_edges(A, u, v);
 
     // Build edges sets to compare
     std::vector<unsigned int> u_compare, v_compare;

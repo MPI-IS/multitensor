@@ -11,7 +11,15 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-project(MultiTensor)
+
+# Extract version number
+file(READ ${CMAKE_SOURCE_DIR}/version.txt ver)
+project(MultiTensor VERSION ${ver})
+message(STATUS "Project ${CMAKE_PROJECT_NAME} v${CMAKE_PROJECT_VERSION}")
+
+file(STRINGS ${CMAKE_SOURCE_DIR}/version.txt ver2)
+message(STATUS "ver2  = ${ver2}")
+message(STATUS "ver2  = ${ver2.1}")
 
 enable_testing()
 
@@ -164,4 +172,9 @@ add_test_cmd_line(
 
 #########################
 # Python Bindings + Tests
-include(cmake/CMakePython.cmake)
+include(cmake/python.cmake)
+
+
+#########################
+# Documentation (Doxygen)
+include(cmake/documentation.cmake)

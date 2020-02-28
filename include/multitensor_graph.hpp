@@ -1,9 +1,12 @@
 /*!
  * @file
  *
- * @brief Implementation of a Graph and its capabilities
+ * @brief Implementation of graphs and related functions
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ *
+ * This file contains the implementation for creating and manipulating
+ * graphs, and building a multilayer network of graphs.
  */
 
 #pragma once
@@ -14,6 +17,8 @@
 
 namespace multitensor
 {
+
+//! Graph and network manipulation
 namespace graph
 {
 
@@ -24,7 +29,8 @@ namespace graph
  */
 struct VertexProperty
 {
-    const std::string label; // node label, to be distinguished from the node id
+    //! Node label
+    const std::string label;
 };
 
 template <class list_t = boost::vecS>
@@ -39,7 +45,16 @@ using out_edge_iterator = typename boost::graph_traits<graph_t>::out_edge_iterat
 template <class graph_t = Graph<>>
 using in_edge_iterator = typename boost::graph_traits<graph_t>::in_edge_iterator;
 
-//! @brief Utility function to add vertex
+/*!
+ * @brief Adding a vertex to a network
+ *
+ * @tparam graph_t Graph type
+ *
+ * @param[in] label Node label
+ * @param[in,out] A Network
+ *
+ * @return The node id
+ */
 template <class graph_t = Graph<>>
 size_t add_vertex(const std::string &label, std::vector<graph_t> &A)
 {
@@ -60,7 +75,13 @@ size_t add_vertex(const std::string &label, std::vector<graph_t> &A)
     return it->second;
 }
 
-//! @brief Printing some information about the graph
+/*!
+ * @brief Printing information about the network
+ *
+ * @tparam graph_t Graph type
+ *
+ * @param[in] A Network
+ */
 template <class graph_t>
 void print_graph_stats(std::vector<graph_t> &A)
 {
@@ -80,19 +101,24 @@ void print_graph_stats(std::vector<graph_t> &A)
 }
 
 /*!
- * @brief Building network.
+ * @brief Building a multilayer network.
  *
- * @tparam graph_t graph type
- * @tparam weight_t edges weight type
+ * @tparam graph_t Graph type
+ * @tparam vertex_t Edges label type
+ * @tparam weight_t The type of an edge weight
  *
+ * @param[in] edges_in Labels of in-going vertices for each edge
+ * @param[in] edges_out Labels of out-going vertices for each edge
+ * @param[in] edges_weight Edge weights
+ * @param[in,out] A Network
  */
 template <class graph_t,
           class vertex_t,
           class weight_t>
-void build_network(std::vector<graph_t> &A,
-                   const std::vector<vertex_t> &edges_in,
+void build_network(const std::vector<vertex_t> &edges_in,
                    const std::vector<vertex_t> &edges_out,
-                   const std::vector<weight_t> &edges_weight)
+                   const std::vector<weight_t> &edges_weight,
+                   std::vector<graph_t> &A)
 {
     const size_t nof_layers = A.size();
 
@@ -124,13 +150,15 @@ void build_network(std::vector<graph_t> &A,
  * @brief Extracting vertices with out/in going edges.
  *
  * @tparam graph_t graph type
- * @tparam weight_t edges weight type
  *
+ * @param[in] A Netowrk
+ * @param[in, out] index_vertices_with_out_edges Indices of the vertices with at least one outgoing edege
+ * @param[in, out] index_vertices_with_in_edges Indices of the vertices with at least one incoming edege
  */
 template <class graph_t>
-void extract_vertices_with_edges(std::vector<size_t> &index_vertices_with_out_edges,
-                                 std::vector<size_t> &index_vertices_with_in_edges,
-                                 const std::vector<graph_t> &A)
+void extract_vertices_with_edges(const std::vector<graph_t> &A,
+                                 std::vector<size_t> &index_vertices_with_out_edges,
+                                 std::vector<size_t> &index_vertices_with_in_edges)
 {
     unsigned int nof_edges_out, nof_edges_in;
     out_edge_iterator<graph_t> eit_out, eend_out;
