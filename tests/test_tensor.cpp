@@ -11,8 +11,8 @@
 #include <random>
 #include <ctime>
 
-#include "multitensor_parameters.hpp"
-#include "multitensor_tensor.hpp"
+#include "multitensor/parameters.hpp"
+#include "multitensor/tensor.hpp"
 
 // Fixture
 struct fixture

@@ -11,9 +11,10 @@
 #include <random>
 #include <ctime>
 #include <vector>
+#include <string>
 
-#include "multitensor_parameters.hpp"
-#include "multitensor.hpp"
+#include "multitensor/parameters.hpp"
+#include "multitensor/main.hpp"
 
 // Fixture
 struct fixture_multitensor
@@ -21,12 +22,16 @@ struct fixture_multitensor
     std::mt19937_64 rng;
     std::time_t seed;
 
+    std::string w_output_filename, u_output_filename, v_output_filename;
     std::vector<unsigned int> edges_in, edges_out, edges_weight;
     size_t nof_nodes, nof_layers, nof_edges, nof_groups;
     unsigned int nof_realizations, max_nof_iterations, nof_convergences;
 
     fixture_multitensor()
-        : seed(std::time(nullptr))
+        : seed(std::time(nullptr)),
+          w_output_filename("w_out.dat"),
+          u_output_filename("u_out.dat"),
+          v_output_filename("v_out.dat")
     {
         BOOST_TEST_MESSAGE("In fixture, the seed is " << seed);
         rng.seed(seed);
@@ -63,56 +68,72 @@ BOOST_AUTO_TEST_CASE(test_errors)
 {
     // Not enough nodes
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, edges_weight,
-                         1, nof_layers, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  1, nof_layers, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
 
     // Not enough layers
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, edges_weight,
-                         nof_nodes, 0, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, 0, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
 
     // Inconsistent edges
     // Less edges
     std::vector<unsigned int> edges_out_small(edges_out.begin(), edges_out.end() - 1);
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out_small, edges_weight,
-                         nof_nodes, nof_layers, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out_small, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
     // More edges
     edges_out_small.push_back(0);
     edges_out_small.push_back(0);
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out_small, edges_weight,
-                         nof_nodes, nof_layers, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out_small, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
 
     // Inconsistent weights
     // Less weights
     std::vector<unsigned int> weights_small(edges_weight.begin(), edges_weight.end() - 1);
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, weights_small,
-                         nof_nodes, nof_layers, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, weights_small,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
     // More weights
     weights_small.push_back(0);
     weights_small.push_back(0);
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, weights_small,
-                         nof_nodes, nof_layers, nof_groups, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, weights_small,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, nof_groups,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
 
     // Not enough groups
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, edges_weight,
-                         nof_nodes, nof_layers, 1, nof_realizations, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, 1,
+                                  nof_realizations, max_nof_iterations, nof_convergences),
         std::runtime_error);
 
     // Not enough realizations
     BOOST_CHECK_THROW(
-        multitensor_algo(edges_in, edges_out, edges_weight,
-                         nof_nodes, nof_layers, nof_groups, 0, max_nof_iterations, nof_convergences),
+        multitensor_factorization(edges_in, edges_out, edges_weight,
+                                  w_output_filename, u_output_filename, v_output_filename,
+                                  nof_nodes, nof_layers, nof_groups,
+                                  0, max_nof_iterations, nof_convergences),
         std::runtime_error);
 }
 

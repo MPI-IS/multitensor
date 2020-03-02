@@ -11,13 +11,13 @@
 #include <vector>
 #include <random>
 #include <chrono>
-#include <boost/graph/adjacency_list.hpp>
+#include <string>
 #include <boost/random.hpp>
 
-#include "multitensor_parameters.hpp"
-#include "multitensor_graph.hpp"
-#include "multitensor_solver.hpp"
-#include "multitensor_tensor.hpp"
+#include "multitensor/parameters.hpp"
+#include "multitensor/graph.hpp"
+#include "multitensor/solver.hpp"
+#include "multitensor/tensor.hpp"
 
 //! Multitensor namespace
 namespace multitensor
@@ -45,15 +45,18 @@ template <
     class graph_t = graph::Graph<>,
     class vertex_t,
     class weight_t>
-void multitensor_algo(const std::vector<vertex_t> &edges_in,
-                      const std::vector<vertex_t> &edges_out,
-                      const std::vector<weight_t> &edges_weight,
-                      const size_t &nof_nodes,
-                      const size_t &nof_layers,
-                      const size_t &nof_groups,
-                      const size_t &nof_realizations,
-                      const size_t &max_nof_iterations,
-                      const size_t &nof_convergences)
+void multitensor_factorization(const std::vector<vertex_t> &edges_in,
+                               const std::vector<vertex_t> &edges_out,
+                               const std::vector<weight_t> &edges_weight,
+                               const std::string &w_output_filename,
+                               const std::string &u_output_filename,
+                               const std::string &v_output_filename,
+                               const size_t &nof_nodes,
+                               const size_t &nof_layers,
+                               const size_t &nof_groups,
+                               const size_t &nof_realizations,
+                               const size_t &max_nof_iterations,
+                               const size_t &nof_convergences)
 {
     // Check number of nodes
     if (nof_nodes < 2)
@@ -117,14 +120,13 @@ void multitensor_algo(const std::vector<vertex_t> &edges_in,
     clock_t::time_point start_clock = clock_t::now();
 
     // Build multilayer network, i.e. a vector of graphs, one for each layer
-    std::vector<graph_t> A(nof_layers);
-    graph::build_network(edges_in, edges_out, edges_weight, A);
-    graph::print_graph_stats(A);
+    graph::Network<graph_t> B(edges_in, edges_out, edges_weight);
+    B.print_graph_stats();
 
     // Extract indices of vertices that have at least one out/in-going edges
     std::vector<size_t> index_vertices_with_out_edges;
     std::vector<size_t> index_vertices_with_in_edges;
-    graph::extract_vertices_with_edges(A, index_vertices_with_out_edges, index_vertices_with_in_edges);
+    B.extract_vertices_with_edges(index_vertices_with_out_edges, index_vertices_with_in_edges);
 
     // Random generator
     // TO DO: improve, no real seed!
@@ -133,17 +135,24 @@ void multitensor_algo(const std::vector<vertex_t> &edges_in,
     // picks a random real number in (0,1)
     boost::variate_generator<boost::mt19937 &, boost::uniform_real<>> random_generator(gen, uni_dist);
 
-    // Build solver and run
+    // Build tensors, solver, and run
+    // Affinity tensor for the groups
+    tensor::Tensor<double> w(nof_groups, nof_groups, nof_layers);
+    // Matrices linking vertices in groups
+    tensor::Tensor<double> u(nof_nodes, nof_groups), v(nof_nodes, nof_groups);
+    // Solver
     solver::Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
-    solver.run(nof_nodes, nof_groups, nof_layers,
-               index_vertices_with_out_edges, index_vertices_with_in_edges,
-               A, random_generator);
+    double L2 = solver.run(index_vertices_with_out_edges, index_vertices_with_in_edges,
+                           B, w, u, v, random_generator);
 
     // Duration
     std::chrono::duration<double, std::milli> time_spam_ms = clock_t::now() - start_clock;
 
     // Some last outputs
-    graph::print_graph_stats(A);
+    w.write_affinity_file(w_output_filename, L2, nof_realizations);
+    u.write_membership_file(u_output_filename, B, L2, nof_realizations);
+    v.write_membership_file(v_output_filename, B, L2, nof_realizations);
+    B.print_graph_stats();
     std::cout << "Total duration: " << time_spam_ms.count() / 1000. << " s" << std::endl;
 }
 

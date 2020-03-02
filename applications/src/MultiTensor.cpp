@@ -2,7 +2,7 @@
 #include <string>
 
 #include "app_utils.h"
-#include "multitensor.hpp"
+#include "multitensor/main.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +10,15 @@ int main(int argc, char *argv[])
 
     // Input adjacency file
     std::string adjacency_filename = "adjacency.dat";
+
+    // Output U file
+    std::string u_output_filename = "u_out.dat";
+
+    // Output V file
+    std::string v_output_filename = "v_out.dat";
+
+    // Output affinity file
+    std::string affinity_output_filename = "w_out.dat";
 
     // Number of groups
     size_t nof_groups;
@@ -45,6 +54,12 @@ int main(int argc, char *argv[])
             << "\t--y <nof_convergences>\n"
             << "\t\t Number of positive checks required for reaching convergence (default : "
             << nof_convergences << ")\n\n"
+            << "\t--wo <affinity-output-file>\n"
+            << "\t\t Affinity output file (default: " << affinity_output_filename << ")\n\n"
+            << "\t--uo <u-output-file>\n"
+            << "\t\t Output file for outgoing vertices (default: " << u_output_filename << ")\n\n"
+            << "\t--vo <v-output-file>\n"
+            << "\t\t Output file for incoming vertices (default: " << v_output_filename << ")\n\n"
             << std::endl;
         return 0;
     }
@@ -60,6 +75,10 @@ int main(int argc, char *argv[])
     if (cmd_option_exists(argv, argv + argc, "--a"))
     {
         adjacency_filename = get_cmd_option(argv, argv + argc, "--a");
+    }
+    if (cmd_option_exists(argv, argv + argc, "--o"))
+    {
+        affinity_output_filename = get_cmd_option(argv, argv + argc, "--o");
     }
     if (cmd_option_exists(argv, argv + argc, "--k"))
     {
@@ -78,7 +97,8 @@ int main(int argc, char *argv[])
     read_adjacency_data(adjacency_filename, edges_in, edges_out, edges_weight, nof_nodes, nof_layers);
 
     // Call algorithm
-    multitensor_algo(edges_in, edges_out, edges_weight,
-                     nof_nodes, nof_layers, nof_groups,
-                     nof_realizations, max_nof_iterations, nof_convergences);
+    multitensor_factorization(edges_in, edges_out, edges_weight,
+                              affinity_output_filename, u_output_filename, v_output_filename,
+                              nof_nodes, nof_layers, nof_groups,
+                              nof_realizations, max_nof_iterations, nof_convergences);
 }

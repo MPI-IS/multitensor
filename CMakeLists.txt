@@ -17,10 +17,6 @@ file(READ ${CMAKE_SOURCE_DIR}/version.txt ver)
 project(MultiTensor VERSION ${ver})
 message(STATUS "Project ${CMAKE_PROJECT_NAME} v${CMAKE_PROJECT_VERSION}")
 
-file(STRINGS ${CMAKE_SOURCE_DIR}/version.txt ver2)
-message(STATUS "ver2  = ${ver2}")
-message(STATUS "ver2  = ${ver2.1}")
-
 enable_testing()
 
 option(ENABLE_PYTHON_WRAPPER "Enable the python extensions" ON)
@@ -37,11 +33,11 @@ include(cmake/thirdparty.cmake)
 ################################
 # Main libraries and executables
 set(multitensor_src
-    ${CMAKE_SOURCE_DIR}/include/multitensor_graph.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor_parameters.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor_solver.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor_tensor.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor.hpp)
+    ${CMAKE_SOURCE_DIR}/include/multitensor/graph.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/parameters.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/solver.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/tensor.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/main.hpp)
 set(multitensor_legacy_src
     ${CMAKE_SOURCE_DIR}/legacy/include/main.hpp
     ${CMAKE_SOURCE_DIR}/legacy/include/mlg.hpp
@@ -130,44 +126,49 @@ add_test(
 # Helper for command line run
 function(add_test_cmd_line
     test_name
-    test_program
-    output_check_clusters
-    cluster_or_assignments)
+    test_program)
 
-    if("${test_program}" STREQUAL "Multitensor_main")
-        set(output_var
-            -E _main.dat
-            )
-    else()
-        set(output_var
-            -E _undirected.dat
-        )
-    endif()
-
+    # Run
     add_test(
         NAME "command-line-${test_name}-run"
-        COMMAND ${test_program}
-            ${ARGN}
-            ${output_var}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
-            )
+        COMMAND ${test_program} ${ARGN}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data)
+
+    if("${test_program}" STREQUAL "Multitensor")
+        set(compare_script ${CMAKE_SOURCE_DIR}/tests/data/compare.sh)
+        set(data_folder ${CMAKE_SOURCE_DIR}/tests/data)
+        add_test(
+            NAME "command-line-${test_name}-verify-content"
+            COMMAND bash "-c" "${compare_script} ${data_folder}"
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data)
+
+        set_tests_properties(
+            "command-line-${test_name}-verify-content"
+            PROPERTIES
+            DEPENDS "command-line-${test_name}-run")
+    endif()
+
 endfunction()
 
 add_test_cmd_line(
     "main"
-    Multitensor_main
-    -k 2
-    -l 3
-    -a adjacency.dat
-    )
+    Multitensor
+    --a adjacency.dat
+    --k 2)
 
 add_test_cmd_line(
-    "undirected"
-    Multitensor_undirected
-    -k 2
-    -l 3
+    "legacy_main"
+    Multitensor_main
     -a adjacency.dat
-    )
+    -k 2
+    -l 3)
+
+add_test_cmd_line(
+    "legacy_undirected"
+    Multitensor_undirected
+    -a adjacency.dat
+    -k 2
+    -l 3)
 
 
 #########################

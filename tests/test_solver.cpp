@@ -12,8 +12,8 @@
 #include <ctime>
 #include <vector>
 
-#include "multitensor_parameters.hpp"
-#include "multitensor_solver.hpp"
+#include "multitensor/parameters.hpp"
+#include "multitensor/solver.hpp"
 
 using namespace multitensor::solver;
 

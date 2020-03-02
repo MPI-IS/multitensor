@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "multitensor_parameters.hpp"
+#include "multitensor/parameters.hpp"
 
 //! @brief Interpret a command option given by the user
 char *

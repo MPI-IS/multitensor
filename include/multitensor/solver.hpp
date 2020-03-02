@@ -12,9 +12,9 @@
 #include <iomanip>
 #include <vector>
 
-#include "multitensor_graph.hpp"
-#include "multitensor_parameters.hpp"
-#include "multitensor_tensor.hpp"
+#include "multitensor/graph.hpp"
+#include "multitensor/parameters.hpp"
+#include "multitensor/tensor.hpp"
 
 namespace multitensor
 {
@@ -44,15 +44,17 @@ private:
      * @param[in, out] u_old Some variable that will be removed
      * @param[in, out] v_old Some variable that will be removed
      */
-    template <class graph_t>
+    template <class network_t>
     double update_u(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
-                    const std::vector<graph_t> &A,
+                    const network_t &A,
                     tensor::Tensor<double> &u,
                     tensor::Tensor<double> &w_old,
                     tensor::Tensor<double> &u_old,
                     tensor::Tensor<double> &v_old)
     {
+        using graph_t = std::decay_t<decltype(A(0))>;
+
         unsigned int nof_groups(std::get<0>(w_old.dims()));
         unsigned int nof_layers(A.size());
 
@@ -77,7 +79,7 @@ private:
                 }
                 Z_u += w_k * Du;
             }
-            //std::cout << "k = " << k << " Z_u = " << Z_u << std::endl;
+
             if (Z_u > EPS_PRECISION)
             {
                 for (auto i : u_list)
@@ -89,9 +91,9 @@ private:
                         u_ik = 0;
                         for (size_t a = 0; a < nof_layers; a++)
                         {
-                            for (tie(eit, eend) = boost::out_edges(i, A[a]); eit != eend; ++eit)
+                            for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
                             {
-                                graph::Vertex<graph_t> j = target(*eit, A[a]); // OUT-EDGE
+                                graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
 
                                 // Calculate rho_ijkq
                                 rho_ijkq = Zij_a = 0;
@@ -146,15 +148,17 @@ private:
      * @param[in, out] w_old Some variable that will be removed
      * @param[in, out] v_old Some variable that will be removed
      */
-    template <class graph_t>
+    template <class network_t>
     double update_v(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
-                    const std::vector<graph_t> &A,
+                    const network_t &A,
                     tensor::Tensor<double> &v,
                     tensor::Tensor<double> &u,
                     tensor::Tensor<double> &w_old,
                     tensor::Tensor<double> &v_old)
     {
+        using graph_t = std::decay_t<decltype(A(0))>;
+
         unsigned int nof_groups(std::get<0>(w_old.dims()));
         unsigned int nof_layers(A.size());
 
@@ -180,7 +184,6 @@ private:
                 Z_v += w_k * Dv;
             }
 
-            //std::cout << "k = " << k << " Z_v = " << Z_v << std::endl;
             if (Z_v > EPS_PRECISION)
             {
                 for (auto i : v_list)
@@ -192,9 +195,9 @@ private:
                         v_ik = 0;
                         for (size_t a = 0; a < nof_layers; a++)
                         {
-                            for (tie(eit, eend) = boost::out_edges(i, A[a]); eit != eend; ++eit)
+                            for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
                             {
-                                graph::Vertex<graph_t> j = target(*eit, A[a]); // OUT-EDGE
+                                graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
 
                                 // Calculate rho_ijkq
                                 rho_ijkq = Zij_a = 0;
@@ -225,7 +228,6 @@ private:
                         v(i, k) = v_ik;
 
                         // Calculate max difference
-                        //dist_v = std::max(std::abs(v(i, k) - v_old(i, k)), dist_v);
                         dist_v += std::abs(v(i, k) - v_old(i, k));
                     }
                 }
@@ -250,15 +252,17 @@ private:
      * @param[in, out] u Membership tensor for outgoing links
      * @param[in, out] w_old Some variable that will be removed
      */
-    template <class graph_t>
+    template <class network_t>
     double update_w(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
-                    const std::vector<graph_t> &A,
+                    const network_t &A,
                     tensor::Tensor<double> &w,
                     tensor::Tensor<double> &v,
                     tensor::Tensor<double> &u,
                     tensor::Tensor<double> &w_old)
     {
+        using graph_t = std::decay_t<decltype(A(0))>;
+
         unsigned int nof_groups(std::get<0>(w_old.dims()));
         unsigned int nof_nodes(std::get<0>(u.dims()));
         unsigned int nof_layers(A.size());
@@ -296,9 +300,9 @@ private:
                             {
                                 // Calculate rho_w
                                 rho_w = 0;
-                                for (tie(eit, eend) = boost::out_edges(i, A[a]); eit != eend; ++eit)
+                                for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
                                 {
-                                    graph::Vertex<graph_t> j = target(*eit, A[a]); // OUT-EDGE
+                                    graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
                                     Zij_a = 0;
                                     for (size_t m = 0; m < nof_groups; m++)
                                     {
@@ -348,12 +352,14 @@ private:
      *
      * @returns Likelyhood
      */
-    template <class graph_t>
+    template <class network_t>
     double calculate_likelyhood(const tensor::Tensor<double> &u,
                                 const tensor::Tensor<double> &v,
                                 const tensor::Tensor<double> &w,
-                                const std::vector<graph_t> &A)
+                                const network_t &A)
     {
+        //using graph_t = std::remove_cv<decltype(A(0))>;
+        using graph_t = std::decay_t<decltype(A(0))>;
 
         size_t nof_groups(std::get<0>(w.dims()));
         size_t nof_nodes(std::get<0>(u.dims()));
@@ -378,7 +384,7 @@ private:
                             // Add this term regardeles of the value of A_ijk
                             l -= uvw;
                             // if edge exists, consider this term inside the log argument
-                            if (boost::edge(i, j, A[alpha]).second)
+                            if (boost::edge(i, j, A(alpha)).second)
                             {
                                 log_arg += uvw;
                             }
@@ -390,9 +396,9 @@ private:
                         nof_parallel_edges = 0;
 
                         // Cycle over out-neighbors of i in layer a,  --> count parallel edges
-                        for (std::tie(eit, eend) = boost::out_edges(i, A[alpha]); eit != eend; ++eit)
+                        for (std::tie(eit, eend) = boost::out_edges(i, A(alpha)); eit != eend; ++eit)
                         {
-                            if (boost::target(*eit, A[alpha]) == j)
+                            if (boost::target(*eit, A(alpha)) == j)
                             {
                                 nof_parallel_edges++;
                             }
@@ -418,10 +424,10 @@ private:
      * @paran[in,out] coincide Number of successful checks
      * @paran[in,out] L2 Likelyhoods
      */
-    template <class graph_t>
+    template <class network_t>
     bool loop(const std::vector<size_t> &u_list,
               const std::vector<size_t> &v_list,
-              const std::vector<graph_t> &A,
+              const network_t &A,
               const unsigned int iteration,
               unsigned int &coincide,
               double &L2,
@@ -489,20 +495,25 @@ public:
      * Additionally, the check for convergence is performed every 10 iterations
      */
     template <class random_t,
-              class graph_t>
-    void run(const size_t &nof_nodes, const size_t &nof_groups, const size_t &nof_layers,
-             const std::vector<size_t> &u_list,
-             const std::vector<size_t> &v_list,
-             const std::vector<graph_t> &A,
-             random_t &random_generator)
+              class network_t>
+    double run(const std::vector<size_t> &u_list, const std::vector<size_t> &v_list,
+               const network_t &A,
+               tensor::Tensor<double> &w, tensor::Tensor<double> &u, tensor::Tensor<double> &v,
+               random_t &random_generator)
     {
-        // Affinity tensors for the groups
-        tensor::Tensor<double> w(nof_groups, nof_groups, nof_layers);
+        // Dimensions
+        const size_t nof_groups(std::get<0>(w.dims()));
+        const size_t nof_nodes(std::get<0>(u.dims()));
+        const size_t nof_layers(A.size());
+
+        // Affinity tensors for the groups (old)
         tensor::Tensor<double> w_old(nof_groups, nof_groups, nof_layers);
 
-        // Matrices linking vertices in groups
-        tensor::Tensor<double> u(nof_nodes, nof_groups), v(nof_nodes, nof_groups);
+        // Matrices linking vertices in groups (old)
         tensor::Tensor<double> u_old(nof_nodes, nof_groups), v_old(nof_nodes, nof_groups);
+
+        // Likelihood
+        double L2 = std::numeric_limits<double>::lowest();
 
         for (unsigned int i = 0; i < nof_realizations; i++)
         {
@@ -524,7 +535,6 @@ public:
             // Convergence criteria and iterations
             bool convergence = false;
             unsigned int iteration(0), coincide(0);
-            double L2 = std::numeric_limits<double>::lowest();
 
             while (!convergence & (iteration < max_nof_iterations))
             {
@@ -559,6 +569,9 @@ public:
                 std::cout << std::endl;
             }
         }
+
+        // return likelihood
+        return L2;
     }
 
     //! @brief Returns the number of realizations.

@@ -9,8 +9,10 @@
 #pragma once
 
 #include <vector>
+#include <fstream>
+#include <iomanip>
 
-#include "multitensor_parameters.hpp"
+#include "multitensor/parameters.hpp"
 
 namespace multitensor
 {
@@ -153,6 +155,81 @@ public:
         return data[get_index(i, j, alpha)];
     }
 
+    /*!
+     * @brief Write tensor into a file
+     *
+     * @param[in] filename Name of the output file
+     */
+    void write_affinity_file(const std::string &output_filename,
+                             const double &L2,
+                             const unsigned int &nof_realizations)
+    {
+        std::ofstream stream_out(output_filename.c_str());
+        if (stream_out.fail())
+        {
+            throw(std::runtime_error(
+                std::string("In write_tensor_file, failed to open ") + output_filename));
+        }
+
+        // Likelihood and number of realizations
+        stream_out << "# Max likelihood= " << static_cast<int>(L2)
+                   << " N_real=" << nof_realizations << std::endl;
+
+        stream_out << std::setprecision(6);
+        for (size_t alpha = 0; alpha < ntubes; alpha++)
+        {
+            stream_out << "a= " << alpha << std::endl;
+            for (size_t k = 0; k < nrows; k++)
+            {
+                for (size_t q = 0; q < ncols; q++)
+                {
+                    stream_out << operator()(k, q, alpha) << " ";
+                }
+                stream_out << std::endl;
+            }
+            stream_out << std::endl;
+        }
+    }
+
+    /*!
+     * @brief Write tensor into a file
+     *
+     * @param[in] filename Name of the output file
+     *
+     * @todo: Improved using report
+     */
+    template <class network_t>
+    void write_membership_file(const std::string &output_filename,
+                               const network_t &A,
+                               const double &L2,
+                               const unsigned int &nof_realizations)
+    {
+        std::ofstream stream_out(output_filename.c_str());
+        if (stream_out.fail())
+        {
+            throw(std::runtime_error(
+                std::string("In write_tensor_file, failed to open ") + output_filename));
+        }
+
+        // Likelihood and number of realizations
+        stream_out << "# Max likelihood= " << static_cast<int>(L2)
+                   << " N_real=" << nof_realizations << std::endl;
+
+        stream_out << std::setprecision(6);
+        for (size_t alpha = 0; alpha < ntubes; alpha++)
+        {
+            for (size_t k = 0; k < nrows; k++)
+            {
+                stream_out << A(0)[k].label << " ";
+                for (size_t q = 0; q < ncols; q++)
+                {
+                    stream_out << operator()(k, q, alpha) << " ";
+                }
+                stream_out << std::endl;
+            }
+        }
+    }
+
     //! @brief Returns the size of the tensor
     size_t size() const noexcept
     {
@@ -176,8 +253,7 @@ public:
      */
     size_t order() const noexcept
     {
-        return (ntubes > 1) ? 3
-                            : 2;
+        return (ntubes > 1) ? 3 : 2;
     }
 };
 
