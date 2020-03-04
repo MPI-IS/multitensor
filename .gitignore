@@ -1,20 +1,12 @@
-# Build
-debug
 build
-release
-
-# OSX
 *.DS_Store
-
-# Compiled Object files
 *.o
-
-# Executables
 *.exe
-
-# VS code
 *.vs*
+__pycache__
 
-# python
-*pyc
-python/doc/build
+# data from tests
+u_*.dat
+v_*.dat
+w_*.dat
+out*.dat
