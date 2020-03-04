@@ -358,7 +358,6 @@ private:
                                 const tensor::Tensor<double> &w,
                                 const network_t &A)
     {
-        //using graph_t = std::remove_cv<decltype(A(0))>;
         using graph_t = std::decay_t<decltype(A(0))>;
 
         size_t nof_groups(std::get<0>(w.dims()));
