@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "app_utils.h"
+#include "app_utils.hpp"
 #include "multitensor/main.hpp"
 
 int main(int argc, char *argv[])
@@ -11,14 +11,8 @@ int main(int argc, char *argv[])
     // Input adjacency file
     std::string adjacency_filename = "adjacency.dat";
 
-    // Output U file
-    std::string u_output_filename = "u_out.dat";
-
-    // Output V file
-    std::string v_output_filename = "v_out.dat";
-
-    // Output affinity file
-    std::string affinity_output_filename = "w_out.dat";
+    // Output directory
+    std::string output_directory = "results";
 
     // Number of groups
     size_t nof_groups;
@@ -54,12 +48,8 @@ int main(int argc, char *argv[])
             << "\t--y <nof_convergences>\n"
             << "\t\t Number of positive checks required for reaching convergence (default : "
             << nof_convergences << ")\n\n"
-            << "\t--wo <affinity-output-file>\n"
-            << "\t\t Affinity output file (default: " << affinity_output_filename << ")\n\n"
-            << "\t--uo <u-output-file>\n"
-            << "\t\t Output file for outgoing vertices (default: " << u_output_filename << ")\n\n"
-            << "\t--vo <v-output-file>\n"
-            << "\t\t Output file for incoming vertices (default: " << v_output_filename << ")\n\n"
+            << "\t--o <output-dir>\n"
+            << "\t\t Output directory (default: " << output_directory << ")\n\n"
             << std::endl;
         return 0;
     }
@@ -75,30 +65,30 @@ int main(int argc, char *argv[])
     if (cmd_option_exists(argv, argv + argc, "--a"))
     {
         adjacency_filename = get_cmd_option(argv, argv + argc, "--a");
+        if (cmd_option_exists(argv, argv + argc, "--k"))
+        {
+            nof_groups = std::stoi(get_cmd_option(argv, argv + argc, "--k"));
+        }
+        else
+        {
+            throw std::runtime_error("Please specify the number of groups (--k option).");
+        }
     }
     if (cmd_option_exists(argv, argv + argc, "--o"))
     {
-        affinity_output_filename = get_cmd_option(argv, argv + argc, "--o");
+        output_directory = get_cmd_option(argv, argv + argc, "--o");
     }
-    if (cmd_option_exists(argv, argv + argc, "--k"))
+    if (cmd_option_exists(argv, argv + argc, "--r"))
     {
-        nof_groups = std::stoi(get_cmd_option(argv, argv + argc, "--k"));
-    }
-    else
-    {
-        throw std::runtime_error("Please specify the number of groups (--k option).");
+        nof_realizations = std::stoi(get_cmd_option(argv, argv + argc, "--r"));
     }
 
     // Read-in data
-    std::vector<size_t> edges_in, edges_out;
-    std::vector<unsigned int> edges_weight;
-    size_t nof_nodes, nof_layers;
-
-    read_adjacency_data(adjacency_filename, edges_in, edges_out, edges_weight, nof_nodes, nof_layers);
+    std::vector<size_t> edges_start, edges_end, edges_weight;
+    read_adjacency_data(adjacency_filename, edges_start, edges_end, edges_weight);
 
     // Call algorithm
-    multitensor_factorization(edges_in, edges_out, edges_weight,
-                              affinity_output_filename, u_output_filename, v_output_filename,
-                              nof_nodes, nof_layers, nof_groups,
-                              nof_realizations, max_nof_iterations, nof_convergences);
+    multitensor_factorization(edges_start, edges_end, edges_weight, output_directory,
+                              nof_groups, nof_realizations, max_nof_iterations, nof_convergences);
+    return 0;
 }

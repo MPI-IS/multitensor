@@ -34,9 +34,11 @@ include(cmake/thirdparty.cmake)
 # Main libraries and executables
 set(multitensor_src
     ${CMAKE_SOURCE_DIR}/include/multitensor/graph.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/initialization.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/parameters.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/solver.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/tensor.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/utils.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/main.hpp)
 set(multitensor_legacy_src
     ${CMAKE_SOURCE_DIR}/legacy/include/main.hpp
@@ -85,7 +87,7 @@ target_sources(multitensor
 
 
 add_library(multitensor_utils
-    ${CMAKE_SOURCE_DIR}/applications/include/app_utils.h
+    ${CMAKE_SOURCE_DIR}/applications/include/app_utils.hpp
     ${CMAKE_SOURCE_DIR}/applications/src/app_utils.cpp)
 target_link_libraries(multitensor_utils PUBLIC multitensor)
 target_include_directories(multitensor_utils
@@ -110,10 +112,12 @@ set_target_properties(
 
 # Unit tests
 add_executable(test_multitensor
+    tests/fixtures.hpp
     tests/test_graph.cpp
     tests/test_multitensor.cpp
     tests/test_solver.cpp
-    tests/test_tensor.cpp)
+    tests/test_tensor.cpp
+    tests/test_utils.cpp)
 target_link_libraries(test_multitensor multitensor
       Boost::unit_test_framework
       Boost::system
@@ -128,19 +132,21 @@ function(add_test_cmd_line
     test_name
     test_program)
 
+    # Set test folder and copy adjacency file
+    set(test_folder ${CMAKE_BINARY_DIR}/tests/${test_name})
+    file(COPY ${CMAKE_SOURCE_DIR}/data/adjacency.dat DESTINATION ${test_folder}/)
+
     # Run
     add_test(
         NAME "command-line-${test_name}-run"
         COMMAND ${test_program} ${ARGN}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data)
+        WORKING_DIRECTORY ${test_folder})
 
     if("${test_program}" STREQUAL "Multitensor")
-        set(compare_script ${CMAKE_SOURCE_DIR}/tests/data/compare.sh)
-        set(data_folder ${CMAKE_SOURCE_DIR}/tests/data)
         add_test(
             NAME "command-line-${test_name}-verify-content"
-            COMMAND bash "-c" "${compare_script} ${data_folder}"
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data)
+            COMMAND bash "-c" "./compare.sh ${test_folder}/results"
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/data)
 
         set_tests_properties(
             "command-line-${test_name}-verify-content"

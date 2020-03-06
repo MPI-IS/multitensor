@@ -11,10 +11,12 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <cstddef>
 
 #include "multitensor/graph.hpp"
 #include "multitensor/parameters.hpp"
 #include "multitensor/tensor.hpp"
+#include "multitensor/utils.hpp"
 
 namespace multitensor
 {
@@ -39,10 +41,10 @@ private:
      * @param[in] u_list Indices of vertices with at least one outgoing edge
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in, out] u Membership tensor for outgoing links
-     * @param[in, out] w_old Some variable that will be removed
-     * @param[in, out] u_old Some variable that will be removed
-     * @param[in, out] v_old Some variable that will be removed
+     * @param[in, out] u Tensor linking vertices in groups for outgoing edges
+     * @param[in, out] w_old Affinity tensor (previous step)
+     * @param[in, out] u_old Tensor linking vertices in groups for outgoing edges (previous step)
+     * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
      */
     template <class network_t>
     double update_u(const std::vector<size_t> &u_list,
@@ -56,7 +58,7 @@ private:
         using graph_t = std::decay_t<decltype(A(0))>;
 
         unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_layers(A.size());
+        unsigned int nof_layers(A.num_layers());
 
         graph::out_edge_iterator<graph_t> eit, eend;
         double Z_u, Du, w_k, dist_u, u_ik, rho_ijkq, Zij_a;
@@ -143,10 +145,10 @@ private:
      * @param[in] u_list Indices of vertices with at least one outgoing edge
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in, out] v Membership tensor for incoming links
-     * @param[in, out] u Membership tensor for outgoing links
-     * @param[in, out] w_old Some variable that will be removed
-     * @param[in, out] v_old Some variable that will be removed
+     * @param[in, out] v Tensor linking vertices in groups for incoming edges
+     * @param[in, out] u Tensor linking vertices in groups for outgoing edges
+     * @param[in, out] w_old Affinity tensor (previous step)
+     * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
      */
     template <class network_t>
     double update_v(const std::vector<size_t> &u_list,
@@ -160,7 +162,7 @@ private:
         using graph_t = std::decay_t<decltype(A(0))>;
 
         unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_layers(A.size());
+        unsigned int nof_layers(A.num_layers());
 
         graph::out_edge_iterator<graph_t> eit, eend;
         double Z_v, Dv, w_k, dist_v, v_ik, rho_ijkq, Zij_a;
@@ -247,10 +249,10 @@ private:
      * @param[in] u_list Indices of vertices with at least one outgoing edge
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in, out] W Affinity matrix
-     * @param[in, out] v Membership tensor for incoming links
-     * @param[in, out] u Membership tensor for outgoing links
-     * @param[in, out] w_old Some variable that will be removed
+     * @param[in,out] w Affinity tensor
+     * @param[in,out] v Tensor linking vertices in groups for incoming edges
+     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
+     * @param[in,out] w_old Affinity tensor (previous step)
      */
     template <class network_t>
     double update_w(const std::vector<size_t> &u_list,
@@ -265,7 +267,7 @@ private:
 
         unsigned int nof_groups(std::get<0>(w_old.dims()));
         unsigned int nof_nodes(std::get<0>(u.dims()));
-        unsigned int nof_layers(A.size());
+        unsigned int nof_layers(A.num_layers());
 
         graph::out_edge_iterator<graph_t> eit, eend;
         double Z_kq, Du, Dv, dist_w, w_kqa, rho_w, Zij_a;
@@ -345,9 +347,9 @@ private:
      *
      * @tparam graph_t Graph type
      *
-     * @param[in] u Membership tensor for outgoing links
-     * @param[in] v Membership tensor for incoming links
-     * @param[in] W Affinity matrix
+     * @param[in] u Tensor linking vertices in groups for outgoing edges
+     * @param[in] v Tensor linking vertices in groups for incoming edges
+     * @param[in] w Affinity tensor
      * @param[in] A Network
      *
      * @returns Likelyhood
@@ -362,7 +364,7 @@ private:
 
         size_t nof_groups(std::get<0>(w.dims()));
         size_t nof_nodes(std::get<0>(u.dims()));
-        size_t nof_layers(A.size());
+        size_t nof_layers(A.num_layers());
 
         double l(0), log_arg, uvw;
         unsigned int nof_parallel_edges;
@@ -422,18 +424,25 @@ private:
      * @paran[in] iteration Current iteration
      * @paran[in,out] coincide Number of successful checks
      * @paran[in,out] L2 Likelyhoods
+     * @param[in,out] w Affinity tensor
+     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
+     * @param[in,out] v Tensor linking vertices in groups for incoming edges
+     *
+     * @returns Whether the algorithm has converged
      */
     template <class network_t>
-    bool loop(const std::vector<size_t> &u_list,
-              const std::vector<size_t> &v_list,
-              const network_t &A,
-              const unsigned int iteration,
-              unsigned int &coincide,
-              double &L2,
-              tensor::Tensor<double> &w, tensor::Tensor<double> &w_old,
-              tensor::Tensor<double> &u, tensor::Tensor<double> &u_old,
-              tensor::Tensor<double> &v, tensor::Tensor<double> &v_old)
+    termination_reason loop(const std::vector<size_t> &u_list,
+                            const std::vector<size_t> &v_list,
+                            const network_t &A,
+                            unsigned int &iteration,
+                            unsigned int &coincide,
+                            double &L2,
+                            tensor::Tensor<double> &w,
+                            tensor::Tensor<double> &u,
+                            tensor::Tensor<double> &v)
     {
+        // Variables used for copy
+        tensor::Tensor<double> w_old(w), u_old(u), v_old(v);
 
         // Split updates
         update_u(u_list, v_list, A, u, w_old, u_old, v_old);
@@ -454,7 +463,21 @@ private:
                 coincide = 0;
             }
         }
-        return (coincide == nof_convergences);
+        iteration++;
+
+        // Return reason for terminating the loop
+        if (coincide == num_conv()) // convergence
+        {
+            return CONVERGED;
+        }
+        else if (iteration == max_iter()) // maximum iteration reached
+        {
+            return MAX_ITER;
+        }
+        else // otherwise we continue
+        {
+            return NO_TERMINATION;
+        }
     }
 
 public:
@@ -475,15 +498,17 @@ public:
     /*!
      * @brief Run the solver
      *
+     * @tparam w_init_t Class type for the initialization of w
+     * @tparam uv_init_t Class type for the initialization of u and v
      * @tparam random_t Random generator type
      * @tparam graph_t Graph type
      *
-     * @param[in] nof_nodes Number of vertices
-     * @param[in] nof_groups Number of groups
-     * @param[in] nof_layers Number of layers
      * @param[in] u_list ndices of vertices with at least one outgoing edge
      * @param[in] v_list ndices of vertices with at least one incoming edge
      * @param[in] A Network
+     * @param[in,out] w Affinity tensor
+     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
+     * @param[in,out] v Tensor linking vertices in groups for incoming edges
      * @param[in,out] random_generator Random generator
      *
      * The solver is an explicit split-operator. At each iteration \f$t\f$, it does the following:
@@ -493,84 +518,73 @@ public:
      *
      * Additionally, the check for convergence is performed every 10 iterations
      */
-    template <class random_t,
+    template <class w_init_t = initialization::init_tensor_symmetric_random,
+              class uv_init_t = initialization::init_tensor_partial_random,
+              class random_t,
               class network_t>
-    double run(const std::vector<size_t> &u_list, const std::vector<size_t> &v_list,
-               const network_t &A,
-               tensor::Tensor<double> &w, tensor::Tensor<double> &u, tensor::Tensor<double> &v,
-               random_t &random_generator)
+    utils::Report run(const std::vector<size_t> &u_list, const std::vector<size_t> &v_list,
+                      const network_t &A,
+                      tensor::Tensor<double> &w, tensor::Tensor<double> &u, tensor::Tensor<double> &v,
+                      random_t &random_generator,
+                      w_init_t w_init_obj = w_init_t{},
+                      uv_init_t uv_init_obj = uv_init_t{})
     {
         // Dimensions
         const size_t nof_groups(std::get<0>(w.dims()));
         const size_t nof_nodes(std::get<0>(u.dims()));
-        const size_t nof_layers(A.size());
+        const size_t nof_layers(A.num_layers());
 
-        // Affinity tensors for the groups (old)
-        tensor::Tensor<double> w_old(nof_groups, nof_groups, nof_layers);
+        // Results
+        utils::Report results{};
+        results.nof_realizations = num_real();
 
-        // Matrices linking vertices in groups (old)
-        tensor::Tensor<double> u_old(nof_nodes, nof_groups), v_old(nof_nodes, nof_groups);
-
-        // Likelihood
-        double L2 = std::numeric_limits<double>::lowest();
-
-        for (unsigned int i = 0; i < nof_realizations; i++)
+        for (unsigned int i = 0; i < num_real(); i++)
         {
             std::cout << "Running realization # " << i << std::endl;
 
-            // Initialize tensors
-            w.randomize_symmetric(random_generator);
+            // Tensors used for this realization
+            // u,v,w are used to store the best configuration
+            tensor::Tensor<double> w_temp(nof_groups, nof_groups, nof_layers);
+            tensor::Tensor<double> u_temp(nof_nodes, nof_groups), v_temp(nof_nodes, nof_groups);
 
+            // Initialize tensors
+            w_init_obj(w_temp, random_generator);
             // TO CHECK: there is a difference here in case some nodes in the files dont have in/out edges
             // i.e. remove node 299 in the data file.
-            v.randomize_partial(v_list, random_generator);
-            u.randomize_partial(u_list, random_generator);
+            uv_init_obj(v_list, v_temp, random_generator);
+            uv_init_obj(u_list, u_temp, random_generator);
 
-            // Update old variables
-            u_old = u;
-            v_old = v;
-            w_old = w;
-
-            // Convergence criteria and iterations
-            bool convergence = false;
+            // Likelihood,convergence criteria and iterations
+            double L2(std::numeric_limits<double>::max());
             unsigned int iteration(0), coincide(0);
+            assert(max_iter() > 0);
 
-            while (!convergence & (iteration < max_nof_iterations))
+            // Termination reason
+            termination_reason term_reason = NO_TERMINATION;
+            while (term_reason == NO_TERMINATION)
             {
-                convergence = loop(u_list, v_list, A,
+                term_reason = loop(u_list, v_list, A,
                                    iteration, coincide, L2,
-                                   w, w_old, u, u_old, v, v_old);
-                /*
-                std::cout << std::setprecision(12)
-                          << "Iteration " << iteration
-                          << ", L2 = " << L2 << std::endl;
-                */
-                iteration++;
+                                   w_temp, u_temp, v_temp);
             }
 
-            std::cout << std::setprecision(12)
-                      << "Final Likelihood = " << L2
-                      << ", number of  iterations:" << iteration << std::endl;
+            std::cout << "\t... finished after " << iteration << " iterations. "
+                      << "Reason: " << get_termination_reason_name(term_reason) << std::endl;
 
-            // Output results
-            // w
-            std::cout << "Final affinity matrix:" << std::endl;
-            for (size_t alpha = 0; alpha < nof_layers; alpha++)
+            // Update report and best configuration
+            results.vec_iter.emplace_back(iteration);
+            results.vec_term_reason.emplace_back(get_termination_reason_name(term_reason));
+            if (results.max_L2() < L2)
             {
-                for (size_t k = 0; k < nof_groups; k++)
-                {
-                    for (size_t q = 0; q < nof_groups; q++)
-                    {
-                        std::cout << w(k, q, alpha) << " ";
-                    }
-                    std::cout << std::endl;
-                }
-                std::cout << std::endl;
+                std::swap(w, w_temp);
+                std::swap(u, u_temp);
+                std::swap(v, v_temp);
             }
+            results.vec_L2.emplace_back(L2);
         }
 
-        // return likelihood
-        return L2;
+        // return report
+        return results;
     }
 
     //! @brief Returns the number of realizations.
@@ -580,9 +594,15 @@ public:
     }
 
     //! @brief Returns the number of realizations.
-    unsigned int max_iterations() const noexcept
+    unsigned int max_iter() const noexcept
     {
         return max_nof_iterations;
+    }
+
+    //! @brief Returns the number convergence checks to declare convergence.
+    unsigned int num_conv() const noexcept
+    {
+        return nof_convergences;
     }
 };
 

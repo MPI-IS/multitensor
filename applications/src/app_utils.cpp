@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "app_utils.h"
+#include "app_utils.hpp"
 
 char *
 get_cmd_option(char **begin, char **end, const std::string &option)

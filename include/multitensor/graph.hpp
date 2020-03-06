@@ -13,6 +13,8 @@
 
 #include <iostream>
 #include <vector>
+#include <cstddef>
+
 #include <boost/graph/adjacency_list.hpp>
 
 namespace multitensor
@@ -25,16 +27,18 @@ namespace graph
 /*!
  * @brief Class for the Vertex properties.
  *
- * It allows to distinguish between node id and node label.
+ * @tparam vertex_t Vertex label type
+ *
  */
+template <class vertex_t = std::string>
 struct VertexProperty
 {
     //! Node label
-    std::string label;
+    vertex_t label;
 };
 
 template <class list_t = boost::vecS>
-using Graph = boost::adjacency_list<list_t, list_t, boost::bidirectionalS, VertexProperty>;
+using Graph = boost::adjacency_list<list_t, list_t, boost::bidirectionalS, VertexProperty<>>;
 
 template <class graph_t = Graph<>>
 using Vertex = typename boost::graph_traits<graph_t>::vertex_descriptor;
@@ -47,22 +51,35 @@ using in_edge_iterator = typename boost::graph_traits<graph_t>::in_edge_iterator
 
 /*!
  * @brief Class representing a multilayer network
+ *
+ * @tparam vertex_t Vertex label type
+ * @tparam direction_t Graph type (directed or undirected)
  */
-template <class graph_t = Graph<>>
+template <class vertex_t,
+          class direction_t = boost::bidirectionalS>
 class Network
 {
+    using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, direction_t, VertexProperty<vertex_t>>;
+
 private:
     dimension_t nlayers;
     unsigned int nvertices, nedges;
     std::vector<graph_t> layers;
 
+    //! @brief Mapping vertex label <-> index
+    std::map<vertex_t, size_t> idx_map;
+
     /*!
      * @brief Adding a vertex to a network
+     *
+     * @param[in] label Vertex label
+     *
+     * @returns Vertex index
+     *
+     * @note Vertices are not duplicated
      */
-    template <class vertex_t>
     size_t add_vertex(const vertex_t &label)
     {
-        static std::map<vertex_t, size_t> idx_map;
         typename std::map<vertex_t, size_t>::iterator it = idx_map.find(label);
         size_t idx(0);
 
@@ -70,7 +87,7 @@ private:
         {
             for (size_t alpha = 0; alpha < nlayers; alpha++)
             {
-                idx = boost::add_vertex(VertexProperty{label}, operator()(alpha));
+                idx = boost::add_vertex(VertexProperty<vertex_t>{label}, operator()(alpha));
             }
             idx_map[label] = idx;
             return idx_map[label];
@@ -81,25 +98,31 @@ private:
 public:
     /*!
      * @brief Network constructor
+     *
+     * param[in] edges_start Labels of vertices where an edge starts
+     * param[in] edges_end Labels of vertices where an edge ends
+     * param[in] edges_weight Edges weights
+     *
+     * @pre @c edges_start.size() == edges_end.size()
+     * @pre @c edges_weight.size() == num_layers * edges_end.size()
      */
-    template <class vertex_t,
-              class weight_t>
-    Network(const std::vector<vertex_t> &edges_in,
-            const std::vector<vertex_t> &edges_out,
+    template <class weight_t>
+    Network(const std::vector<vertex_t> &edges_start,
+            const std::vector<vertex_t> &edges_end,
             const std::vector<weight_t> &edges_weight)
-        : nlayers((edges_in.size() == 0) ? 0 : edges_weight.size() / edges_in.size()),
+        : nlayers((edges_start.size() == 0) ? 0 : edges_weight.size() / edges_start.size()),
           nvertices(0),
           nedges(0),
           layers(nlayers, graph_t(0))
     {
 
-        assert(edges_in.size() == edges_out.size());
-        assert((nlayers * edges_in.size()) == edges_weight.size());
-        for (size_t i = 0; i < edges_in.size(); i++)
+        assert(edges_start.size() == edges_end.size());
+        assert((nlayers * edges_start.size()) == edges_weight.size());
+        for (size_t i = 0; i < edges_start.size(); i++)
         {
             // Adding vertices
-            size_t node_in = add_vertex(std::to_string(edges_in[i]));
-            size_t node_out = add_vertex(std::to_string(edges_out[i]));
+            size_t node_in = add_vertex(edges_start[i]);
+            size_t node_out = add_vertex(edges_end[i]);
 
             // Adding edges if needed
             for (size_t alpha = 0; alpha < nlayers; alpha++)
@@ -118,7 +141,7 @@ public:
             }
         }
         // Store number of vertices
-        if (nedges > 0)
+        if (nlayers > 0)
         {
             nvertices = boost::num_vertices(operator()(0));
         }
@@ -133,7 +156,7 @@ public:
     void extract_vertices_with_edges(std::vector<size_t> &index_vertices_with_out_edges,
                                      std::vector<size_t> &index_vertices_with_in_edges)
     {
-        unsigned int nof_edges_out, nof_edges_in;
+        size_t nof_edges_out, nof_edges_in;
         out_edge_iterator<graph_t> eit_out, eend_out;
         in_edge_iterator<graph_t> eit_in, eend_in;
 
@@ -142,7 +165,7 @@ public:
         {
             nof_edges_out = nof_edges_in = 0;
 
-            for (size_t alpha = 0; alpha < size(); alpha++)
+            for (size_t alpha = 0; alpha < num_layers(); alpha++)
             {
                 // Number of edges out
                 for (std::tie(eit_out, eend_out) = boost::out_edges(i, operator()(alpha)); eit_out != eend_out; ++eit_out)
@@ -167,30 +190,22 @@ public:
                 index_vertices_with_in_edges.emplace_back(i);
             }
         }
-
-        // Diagnostics
-        std::cout << "Number of vertices with outgoing edges: " << index_vertices_with_out_edges.size() << std::endl;
-        std::cout << "Number of vertices with ingoing edges: " << index_vertices_with_in_edges.size() << std::endl;
     }
 
-    /*!
-     * @brief Returns a reference to a layer in the network
-     */
+    //! @brief Returns a reference to a layer in the network
     graph_t &operator()(const size_t alpha)
     {
         return layers[alpha];
     }
 
-    /*!
-     * @brief Returns a const reference to a layer in the network
-     */
+    //! @brief Returns a const reference to a layer in the network
     const graph_t &operator()(const size_t alpha) const
     {
         return layers[alpha];
     }
 
     //! @brief Returns the number of layers in the network
-    size_t size() const noexcept
+    size_t num_layers() const noexcept
     {
         return nlayers;
     }
@@ -210,16 +225,16 @@ public:
     //! @brief Printing information about the network
     void print_graph_stats()
     {
-        size_t num_edges_in_layer;
+        size_t num_edges_start_layer;
         size_t N = num_vertices();
         double density;
         std::cout << "N = " << N << std::endl;
 
-        for (size_t alpha = 0; alpha < size(); alpha++)
+        for (size_t alpha = 0; alpha < num_layers(); alpha++)
         {
-            num_edges_in_layer = boost::num_edges(operator()(alpha));
-            density = 100. * (double)num_edges_in_layer / (double)(N * (N - 1.));
-            std::cout << "E[" << alpha << "] = " << num_edges_in_layer
+            num_edges_start_layer = boost::num_edges(operator()(alpha));
+            density = 100. * (double)num_edges_start_layer / (double)(N * (N - 1.));
+            std::cout << "E[" << alpha << "] = " << num_edges_start_layer
                       << "  density= " << density
                       << std::endl;
         }

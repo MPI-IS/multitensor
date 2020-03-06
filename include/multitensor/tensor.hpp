@@ -11,6 +11,8 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
+#include <cstddef>
+#include <boost/filesystem.hpp>
 
 #include "multitensor/parameters.hpp"
 
@@ -24,7 +26,7 @@ namespace tensor
 /*!
  * @brief Class for a tensor of order 3.
  *
- * @tparam scalar_t the type of the tensor values
+ * @tparam scalar_t Type of the tensor values
  */
 template <class scalar_t>
 class Tensor
@@ -59,14 +61,14 @@ public:
     /*!
      * @brief Tensor constructor
      *
-     * @param[in] nrows_ Number of rows
-     * @param[in] ncols_ Number of columns
-     * @param[in] ntubes_ Number of tubes/layers
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     * @param[in] ntubes Number of tubes/layers
      */
-    Tensor(dimension_t nrows_, dimension_t ncols_, dimension_t ntubes_ = 1)
-        : nrows(nrows_),
-          ncols(ncols_),
-          ntubes(ntubes_),
+    Tensor(dimension_t nrows, dimension_t ncols, dimension_t ntubes = 1)
+        : nrows(nrows),
+          ncols(ncols),
+          ntubes(ntubes),
           data(nrows * ncols * ntubes, scalar_t(0))
     {
     }
@@ -155,81 +157,6 @@ public:
         return data[get_index(i, j, alpha)];
     }
 
-    /*!
-     * @brief Write tensor into a file
-     *
-     * @param[in] filename Name of the output file
-     */
-    void write_affinity_file(const std::string &output_filename,
-                             const double &L2,
-                             const unsigned int &nof_realizations)
-    {
-        std::ofstream stream_out(output_filename.c_str());
-        if (stream_out.fail())
-        {
-            throw(std::runtime_error(
-                std::string("In write_tensor_file, failed to open ") + output_filename));
-        }
-
-        // Likelihood and number of realizations
-        stream_out << "# Max likelihood= " << static_cast<int>(L2)
-                   << " N_real=" << nof_realizations << std::endl;
-
-        stream_out << std::setprecision(6);
-        for (size_t alpha = 0; alpha < ntubes; alpha++)
-        {
-            stream_out << "a= " << alpha << std::endl;
-            for (size_t k = 0; k < nrows; k++)
-            {
-                for (size_t q = 0; q < ncols; q++)
-                {
-                    stream_out << operator()(k, q, alpha) << " ";
-                }
-                stream_out << std::endl;
-            }
-            stream_out << std::endl;
-        }
-    }
-
-    /*!
-     * @brief Write tensor into a file
-     *
-     * @param[in] filename Name of the output file
-     *
-     * @todo: Improved using report
-     */
-    template <class network_t>
-    void write_membership_file(const std::string &output_filename,
-                               const network_t &A,
-                               const double &L2,
-                               const unsigned int &nof_realizations)
-    {
-        std::ofstream stream_out(output_filename.c_str());
-        if (stream_out.fail())
-        {
-            throw(std::runtime_error(
-                std::string("In write_tensor_file, failed to open ") + output_filename));
-        }
-
-        // Likelihood and number of realizations
-        stream_out << "# Max likelihood= " << static_cast<int>(L2)
-                   << " N_real=" << nof_realizations << std::endl;
-
-        stream_out << std::setprecision(6);
-        for (size_t alpha = 0; alpha < ntubes; alpha++)
-        {
-            for (size_t k = 0; k < nrows; k++)
-            {
-                stream_out << A(0)[k].label << " ";
-                for (size_t q = 0; q < ncols; q++)
-                {
-                    stream_out << operator()(k, q, alpha) << " ";
-                }
-                stream_out << std::endl;
-            }
-        }
-    }
-
     //! @brief Returns the size of the tensor
     size_t size() const noexcept
     {
@@ -244,16 +171,6 @@ public:
     auto dims() const noexcept
     {
         return std::make_tuple(nrows, ncols, ntubes);
-    }
-
-    /*!
-     * @brief The order of the tensor
-     *
-     * @returns 2 if the number of layers == 1, otherwise 3
-     */
-    size_t order() const noexcept
-    {
-        return (ntubes > 1) ? 3 : 2;
     }
 };
 

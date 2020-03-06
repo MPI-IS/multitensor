@@ -7,43 +7,30 @@
  */
 
 #define BOOST_TEST_MODULE tests_multitensor
-#include <boost/test/unit_test.hpp>
 #include <random>
 #include <ctime>
+#include <cstddef>
+#include <boost/test/unit_test.hpp>
 
 #include "multitensor/parameters.hpp"
 #include "multitensor/tensor.hpp"
-
-// Fixture
-struct fixture
-{
-    std::mt19937_64 rng;
-    std::time_t seed;
-
-    fixture()
-        : seed(std::time(nullptr))
-    {
-        BOOST_TEST_MESSAGE("In fixture, the seed is " << seed);
-        rng.seed(seed);
-    }
-};
+#include "fixtures.hpp"
 
 using multitensor::tensor::Tensor;
 
-BOOST_FIXTURE_TEST_SUITE(tests_tensor, fixture)
+BOOST_FIXTURE_TEST_SUITE(tests_tensor, fixture_rng)
 
 // Checks the Tensor Class
 BOOST_AUTO_TEST_CASE(
     test_tensor,
     *boost::unit_test::tolerance(EPS_PRECISION))
 {
-    dimension_t nrows = dimension_t(rng() % 10) + 1;
-    dimension_t ncols = dimension_t(rng() % 10) + 1;
-    dimension_t nlayers = dimension_t(rng() % 10) + 2;
+    dimension_t nrows = rng() % 10 + 1;
+    dimension_t ncols = rng() % 10 + 1;
+    dimension_t nlayers = rng() % 10 + 2;
 
     Tensor<double> T1(nrows, ncols, nlayers);
     BOOST_TEST(T1.size() == nrows * ncols * nlayers);
-    BOOST_TEST(T1.order() == 3);
 
     for (dimension_t i = 0; i < nrows; i++)
     {
@@ -56,21 +43,20 @@ BOOST_AUTO_TEST_CASE(
         }
     }
 
-    dimension_t rand_i = dimension_t(rng() % nrows);
-    dimension_t rand_j = dimension_t(rng() % ncols);
-    dimension_t rand_alpha = dimension_t(rng() % nlayers);
-    double rand_value = double(rng() % 100) - 50;
+    dimension_t rand_i = rng() % nrows;
+    dimension_t rand_j = rng() % ncols;
+    dimension_t rand_alpha = rng() % nlayers;
+    double rand_value = rng() % 100 - 50;
     T1(rand_i, rand_j, rand_alpha) = rand_value;
     BOOST_TEST(T1(rand_i, rand_j, rand_alpha) == rand_value);
 
     // Create a tensor with one single layer - basically a matrix
     Tensor<double> T2(nrows, ncols);
     BOOST_TEST(T2.size() == nrows * ncols);
-    BOOST_TEST(T2.order() == 2);
 
-    rand_i = dimension_t(rng() % nrows);
-    rand_j = dimension_t(rng() % ncols);
-    rand_value = double(rng() % 100) - 50;
+    rand_i = rng() % nrows;
+    rand_j = rng() % ncols;
+    rand_value = rng() % 100 - 50;
     T2(rand_i, rand_j) = rand_value;
     BOOST_TEST(T2(rand_i, rand_j) == rand_value);
 }
