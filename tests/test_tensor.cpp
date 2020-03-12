@@ -18,17 +18,30 @@
 
 using multitensor::tensor::Tensor;
 
-BOOST_FIXTURE_TEST_SUITE(tests_tensor, fixture_rng)
+// Global fixture preparing data
+struct fixture_tensor : fixture_rng
+{
+    dimension_t nrows, ncols, nlayers;
+    fixture_tensor()
+        : nrows(rng() % 10 + 1),
+          ncols(rng() % 10 + 1),
+          nlayers(rng() % 10 + 2)
+    {
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(tests_tensor, fixture_tensor)
 
 // Checks the Tensor Class
 BOOST_AUTO_TEST_CASE(
     test_tensor,
     *boost::unit_test::tolerance(EPS_PRECISION))
 {
-    dimension_t nrows = rng() % 10 + 1;
-    dimension_t ncols = rng() % 10 + 1;
-    dimension_t nlayers = rng() % 10 + 2;
+    // Default tensor with no data
+    Tensor<double> T0{};
+    BOOST_TEST(T0.size() == 0);
 
+    // Normal tensor
     Tensor<double> T1(nrows, ncols, nlayers);
     BOOST_TEST(T1.size() == nrows * ncols * nlayers);
 
@@ -59,6 +72,37 @@ BOOST_AUTO_TEST_CASE(
     rand_value = rng() % 100 - 50;
     T2(rand_i, rand_j) = rand_value;
     BOOST_TEST(T2(rand_i, rand_j) == rand_value);
+}
+
+// Checks the resizing of a tensor
+BOOST_AUTO_TEST_CASE(
+    test_resize,
+    *boost::unit_test::tolerance(EPS_PRECISION))
+{
+    // Default tensor with no data
+    Tensor<double> T0{};
+    BOOST_TEST(T0.size() == 0);
+
+    // Resize
+    T0.resize(nrows, ncols, nlayers);
+    BOOST_TEST(T0.size() == nrows * ncols * nlayers);
+
+    for (dimension_t i = 0; i < nrows; i++)
+    {
+        for (dimension_t j = 0; j < ncols; j++)
+        {
+            for (dimension_t alpha = 0; alpha < nlayers; alpha++)
+            {
+                BOOST_TEST(T0(i, j, alpha) == 0);
+            }
+        }
+    }
+
+    // Resize again
+    dimension_t nrows2 = rng() % 10 + 1;
+    dimension_t ncols2 = rng() % 10 + 1;
+    T0.resize(nrows2, ncols2);
+    BOOST_TEST(T0.size() == nrows2 * ncols2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

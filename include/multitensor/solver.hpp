@@ -266,7 +266,7 @@ private:
         using graph_t = std::decay_t<decltype(A(0))>;
 
         unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_nodes(std::get<0>(u.dims()));
+        unsigned int nof_vertices(std::get<0>(u.dims()));
         unsigned int nof_layers(A.num_layers());
 
         graph::out_edge_iterator<graph_t> eit, eend;
@@ -298,7 +298,7 @@ private:
                         {
 
                             w_kqa = 0;
-                            for (size_t i = 0; i < nof_nodes; i++)
+                            for (size_t i = 0; i < nof_vertices; i++)
                             {
                                 // Calculate rho_w
                                 rho_w = 0;
@@ -363,7 +363,7 @@ private:
         using graph_t = std::decay_t<decltype(A(0))>;
 
         size_t nof_groups(std::get<0>(w.dims()));
-        size_t nof_nodes(std::get<0>(u.dims()));
+        size_t nof_vertices(std::get<0>(u.dims()));
         size_t nof_layers(A.num_layers());
 
         double l(0), log_arg, uvw;
@@ -372,9 +372,9 @@ private:
 
         for (size_t alpha = 0; alpha < nof_layers; alpha++)
         {
-            for (size_t i = 0; i < nof_nodes; i++)
+            for (size_t i = 0; i < nof_vertices; i++)
             {
-                for (size_t j = 0; j < nof_nodes; j++)
+                for (size_t j = 0; j < nof_vertices; j++)
                 {
                     log_arg = 0;
                     for (size_t k = 0; k < nof_groups; k++)
@@ -441,12 +441,17 @@ private:
                             tensor::Tensor<double> &u,
                             tensor::Tensor<double> &v)
     {
+        using direction_t = typename std::decay_t<decltype(A)>::direction_type;
+
         // Variables used for copy
         tensor::Tensor<double> w_old(w), u_old(u), v_old(v);
 
         // Split updates
         update_u(u_list, v_list, A, u, w_old, u_old, v_old);
-        update_v(u_list, v_list, A, v, u, w_old, v_old);
+        if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+        {
+            update_v(u_list, v_list, A, v, u, w_old, v_old);
+        }
         update_w(u_list, v_list, A, w, v, u, w_old);
 
         // Check for convergence
@@ -488,10 +493,10 @@ public:
      * @param[in] max_nof_iterations_ Maximum number of iterations in each realization
      * @param[in] nof_convergences_ Number of successive passed convergence criteria for declaring the results converged
      */
-    Solver(unsigned int nof_realizations_, unsigned int max_nof_iterations_, unsigned int nof_convergences_)
-        : nof_realizations(nof_realizations_),
-          max_nof_iterations(max_nof_iterations_),
-          nof_convergences(nof_convergences_)
+    Solver(unsigned int nof_realizations, unsigned int max_nof_iterations, unsigned int nof_convergences)
+        : nof_realizations(nof_realizations),
+          max_nof_iterations(max_nof_iterations),
+          nof_convergences(nof_convergences)
     {
     }
 
@@ -529,9 +534,11 @@ public:
                       w_init_t w_init_obj = w_init_t{},
                       uv_init_t uv_init_obj = uv_init_t{})
     {
+        using direction_t = typename std::decay_t<decltype(A)>::direction_type;
+
         // Dimensions
         const size_t nof_groups(std::get<0>(w.dims()));
-        const size_t nof_nodes(std::get<0>(u.dims()));
+        const size_t nof_vertices(std::get<0>(u.dims()));
         const size_t nof_layers(A.num_layers());
 
         // Results
@@ -544,14 +551,20 @@ public:
 
             // Tensors used for this realization
             // u,v,w are used to store the best configuration
-            tensor::Tensor<double> w_temp(nof_groups, nof_groups, nof_layers);
-            tensor::Tensor<double> u_temp(nof_nodes, nof_groups), v_temp(nof_nodes, nof_groups);
+            tensor::Tensor<double>
+                w_temp(nof_groups, nof_groups, nof_layers),
+                u_temp(nof_vertices, nof_groups),
+                v_temp;
 
             // Initialize tensors
             w_init_obj(w_temp, random_generator);
             // TO CHECK: there is a difference here in case some nodes in the files dont have in/out edges
             // i.e. remove node 299 in the data file.
-            uv_init_obj(v_list, v_temp, random_generator);
+            if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+            {
+                v_temp.resize(nof_vertices, nof_groups);
+                uv_init_obj(v_list, v_temp, random_generator);
+            }
             uv_init_obj(u_list, u_temp, random_generator);
 
             // Likelihood,convergence criteria and iterations
@@ -563,9 +576,18 @@ public:
             termination_reason term_reason = NO_TERMINATION;
             while (term_reason == NO_TERMINATION)
             {
-                term_reason = loop(u_list, v_list, A,
-                                   iteration, coincide, L2,
-                                   w_temp, u_temp, v_temp);
+                if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+                {
+                    term_reason = loop(u_list, v_list, A,
+                                       iteration, coincide, L2,
+                                       w_temp, u_temp, v_temp);
+                }
+                else
+                {
+                    term_reason = loop(u_list, u_list, A,
+                                       iteration, coincide, L2,
+                                       w_temp, u_temp, v_temp);
+                }
             }
 
             std::cout << "\t... finished after " << iteration << " iterations. "

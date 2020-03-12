@@ -33,6 +33,7 @@ BOOST_AUTO_TEST_CASE(test_report_init)
     BOOST_TEST(results.vec_iter.size() == 0);
     BOOST_TEST(results.vec_term_reason.size() == 0);
     BOOST_TEST(results.duration == 0);
+    BOOST_TEST(results.seed == 0);
 }
 
 // Checks the Report function returning the best likelihood
@@ -46,7 +47,21 @@ BOOST_AUTO_TEST_CASE(test_report_max_L2)
         results.vec_L2.emplace_back(rand_L2);
         max_L2 = std::max(max_L2, rand_L2);
     }
-    BOOST_TEST(max_L2, results.max_L2());
+    BOOST_TEST(max_L2 == results.max_L2());
+}
+
+// Checks the default random generator
+BOOST_AUTO_TEST_CASE(test_rng)
+{
+    RandomGenerator double_rng{};
+    std::vector<double> vals;
+    size_t nof_random_vals = (rng() % 100 + 1);
+    for (size_t i = 0; i < nof_random_vals; i++)
+    {
+        vals.emplace_back(double_rng());
+    }
+    std::set<double> set_vals(vals.begin(), vals.end());
+    BOOST_TEST(set_vals.size() == nof_random_vals);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -12,7 +12,6 @@
 #include <fstream>
 #include <iomanip>
 #include <cstddef>
-#include <boost/filesystem.hpp>
 
 #include "multitensor/parameters.hpp"
 
@@ -58,6 +57,26 @@ private:
     }
 
 public:
+    //! @brief Default constructor
+    Tensor() = default;
+
+    /*!
+     * @brief Function setting up the tensor
+     *
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     * @param[in] ntubes Number of tubes/layers
+     */
+    void resize(dimension_t nrows_, dimension_t ncols_, dimension_t ntubes_ = 1)
+    {
+        nrows = nrows_;
+        ncols = ncols_;
+        ntubes = ntubes_;
+
+        data.clear();
+        data.assign(nrows * ncols * ntubes, scalar_t(0));
+    }
+
     /*!
      * @brief Tensor constructor
      *
@@ -66,11 +85,9 @@ public:
      * @param[in] ntubes Number of tubes/layers
      */
     Tensor(dimension_t nrows, dimension_t ncols, dimension_t ntubes = 1)
-        : nrows(nrows),
-          ncols(ncols),
-          ntubes(ntubes),
-          data(nrows * ncols * ntubes, scalar_t(0))
     {
+        Tensor();
+        resize(nrows, ncols, ntubes);
     }
 
     /*!

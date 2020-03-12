@@ -14,7 +14,6 @@
 #include <iostream>
 #include <vector>
 #include <cstddef>
-
 #include <boost/graph/adjacency_list.hpp>
 
 namespace multitensor
@@ -52,14 +51,16 @@ using in_edge_iterator = typename boost::graph_traits<graph_t>::in_edge_iterator
 /*!
  * @brief Class representing a multilayer network
  *
- * @tparam vertex_t Vertex label type
  * @tparam direction_t Graph type (directed or undirected)
+ * @tparam vertex_t Vertex label type
  */
 template <class vertex_t,
           class direction_t = boost::bidirectionalS>
 class Network
 {
     using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, direction_t, VertexProperty<vertex_t>>;
+    using out_edge_iterator_t = typename boost::graph_traits<graph_t>::out_edge_iterator;
+    using in_edge_iterator_t = typename boost::graph_traits<graph_t>::in_edge_iterator;
 
 private:
     dimension_t nlayers;
@@ -96,6 +97,8 @@ private:
     }
 
 public:
+    using direction_type = direction_t;
+
     /*!
      * @brief Network constructor
      *
@@ -156,39 +159,52 @@ public:
     void extract_vertices_with_edges(std::vector<size_t> &index_vertices_with_out_edges,
                                      std::vector<size_t> &index_vertices_with_in_edges)
     {
-        size_t nof_edges_out, nof_edges_in;
-        out_edge_iterator<graph_t> eit_out, eend_out;
-        in_edge_iterator<graph_t> eit_in, eend_in;
+        // Iterators
+        std::pair<out_edge_iterator_t, out_edge_iterator_t> its_out;
+        std::pair<in_edge_iterator_t, in_edge_iterator_t> its_in;
 
         // Loop through all the vertices in the first layer
         for (size_t i = 0; i < num_vertices(); i++)
         {
-            nof_edges_out = nof_edges_in = 0;
-
+            // Outgoing edges
             for (size_t alpha = 0; alpha < num_layers(); alpha++)
             {
-                // Number of edges out
-                for (std::tie(eit_out, eend_out) = boost::out_edges(i, operator()(alpha)); eit_out != eend_out; ++eit_out)
+                its_out = boost::out_edges(i, operator()(alpha));
+                if (std::get<0>(its_out) != std::get<1>(its_out))
                 {
-                    nof_edges_out++;
-                }
-
-                // Number of edges in
-                for (std::tie(eit_in, eend_in) = boost::in_edges(i, operator()(alpha)); eit_in != eend_in; ++eit_in)
-                {
-                    nof_edges_in++;
+                    index_vertices_with_out_edges.emplace_back(i);
+                    break;
                 }
             }
 
-            // Record edges if necessary
-            if (nof_edges_out)
+            // Only if we are using directed graphs
+            if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
             {
-                index_vertices_with_out_edges.emplace_back(i);
-            }
-            if (nof_edges_in)
-            {
-                index_vertices_with_in_edges.emplace_back(i);
-            }
+                // Incoming edges
+                for (size_t alpha = 0; alpha < num_layers(); alpha++)
+                {
+                    its_in = boost::in_edges(i, operator()(alpha));
+                    if (std::get<0>(its_in) != std::get<1>(its_in))
+                    {
+                        index_vertices_with_in_edges.emplace_back(i);
+                        break;
+                    }
+                }
+            } // end if consexpr
+        }     // end loop vertices
+    }
+
+    /*!
+     * @brief Extracting vertices labels.
+     *
+     * @param[in, out] labels Vertices labels
+     */
+    void extract_vertices_labels(std::vector<size_t> &labels)
+    {
+        labels.clear();
+        for (size_t i = 0; i < num_vertices(); i++)
+        {
+            labels.emplace_back(operator()(0)[i].label);
         }
     }
 
