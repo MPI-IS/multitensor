@@ -3,33 +3,50 @@
 ###########################
 
 if(MULTI_TENSOR_PYTHON_EXTENSIONS)
-
     message(STATUS "[PYTHON] Configuring Python bindings")
 
     # Paths
     set(MULTI_TENSOR_PYTHON_ROOT ${CMAKE_SOURCE_DIR}/python)
 
-    # Gather python files
-    file(GLOB PythonFiles ${MULTI_TENSOR_PYTHON_ROOT}/*.py)
+    # We need the boost library path for building the wheel
+    set(BOOST_LIB_DIR $<$<CONFIG:Debug>:${Boost_LIBRARY_DIR_DEBUG}>$<$<CONFIG:RelWithDebInfo>:${Boost_LIBRARY_DIR_RELEASE}>$<$<CONFIG:Release>:${Boost_LIBRARY_DIR_RELEASE}>$<$<CONFIG:MinSizeRel>:${Boost_LIBRARY_DIR_RELEASE}>)
 
-    add_custom_target(multi_tensor_py ALL)
-    foreach(python_file ${PythonFiles})
-        add_custom_command(
-            TARGET multi_tensor_py
-            PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${python_file} ${CMAKE_CURRENT_BINARY_DIR})
-    endforeach()
+    # Build a wheel
+    add_custom_target(multitensor_py ALL)
+    add_custom_command(
+      TARGET multitensor_py
+      POST_BUILD
+      WORKING_DIRECTORY ${MULTI_TENSOR_PYTHON_ROOT}
+      COMMAND ${Python3_EXECUTABLE} -m pip install wheel
+      COMMAND ${Python3_EXECUTABLE} -m pip install cython
+      COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
+              BOOST_INCLUDE_DIR=${Boost_INCLUDE_DIR} BOOST_LIBRARY_DIR=${BOOST_LIB_DIR}
+              ${Python3_EXECUTABLE} setup.py bdist_wheel)
+    add_custom_command(
+      TARGET multitensor_py
+      POST_BUILD
+      WORKING_DIRECTORY ${MULTI_TENSOR_PYTHON_ROOT}
+      COMMAND ${Python3_EXECUTABLE} setup.py clean --all)
 
-    # Functional tests
-    add_test(
-        NAME "command-line-python-run"
-        COMMAND ${Python3_EXECUTABLE}
-            "${CMAKE_CURRENT_BINARY_DIR}/main.py"
-            -a=main/adjacency.dat
-            -k=2
-            -l=4
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data
-            )
+    # Copy the wheel into a binary directory
+    file(GLOB python_wheel ${MULTI_TENSOR_PYTHON_ROOT}/dist/*.whl)
+    file(COPY ${python_wheel} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+    # This is a target that simply installs nose and the package
+    # itself just before the tests.
+    add_custom_target(multitensor_py_unittest_prepare ALL)
+    add_custom_command(
+      TARGET multitensor_py_unittest_prepare
+      POST_BUILD
+      WORKING_DIRECTORY ${MULTI_TENSOR_PYTHON_ROOT}
+      COMMAND ${Python3_EXECUTABLE} -m pip install nose)
+    add_custom_command(
+      TARGET multitensor_py_unittest_prepare
+      POST_BUILD
+      WORKING_DIRECTORY ${MULTI_TENSOR_PYTHON_ROOT}
+      COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}
+              BOOST_INCLUDE_DIR=${Boost_INCLUDE_DIR} BOOST_LIBRARY_DIR=${BOOST_LIB_DIR}
+              ${Python3_EXECUTABLE} setup.py install)
 
     #[[
     # Sphinx Documentation for Python extension
@@ -38,8 +55,15 @@ if(MULTI_TENSOR_PYTHON_EXTENSIONS)
         COMMAND make html
         COMMENT "Generating Sphinx documentation"
         DEPENDS ${mpi_kmeans_py}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python_doc
-        )
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python_doc)
     add_dependencies(Sphinx mpi_kmeans_py)
     ]]
+
+    # Functional tests.
+    add_test(
+      NAME multitensor_py_unittest
+      # We work from the outside directory so that `multitensor` (the
+      # original source directory) is not in `PYTHONPATH`. Otherwise it
+      # shadows the package installed in virtual environment.
+      COMMAND ${Python3_EXECUTABLE} -m nose --no-path-adjustment --with-xunit --verbose ${MULTI_TENSOR_PYTHON_ROOT}/tests.py)
 endif()

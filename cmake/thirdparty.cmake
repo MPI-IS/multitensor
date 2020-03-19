@@ -51,7 +51,7 @@ if(ENABLE_PYTHON_WRAPPER)
 
     # Find python3
     set (CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
-    find_package(Python3 COMPONENTS Interpreter Development)
+    find_package (Python3 COMPONENTS Interpreter Development)
     if(Python3_FOUND)
         message(STATUS "[PYTHON] python3 interpreter found at following location '${Python3_EXECUTABLE}'")
         message(STATUS "[PYTHON] python3 libraries found, include '${Python3_INCLUDE_DIRS}'")
@@ -99,7 +99,8 @@ if(ENABLE_PYTHON_WRAPPER)
             message(STATUS "[PYTHON] Cython wrapper not found - will use the .cpp file provided")
         endif()
         ]]
-
+    else()
+      message(STATUS "[PYTHON] Python not found!")
     endif()
 
 endif()

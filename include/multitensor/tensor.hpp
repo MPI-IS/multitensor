@@ -159,6 +159,36 @@ public:
         return std::make_tuple(nrows, ncols, ntubes);
     }
 
+    /*!
+     * @brief nrows getter
+     *
+     * @returns Number of rows
+     */
+    dimension_t get_nrows() const noexcept
+    {
+        return nrows;
+    }
+
+    /*!
+     * @brief ncols getter
+     *
+     * @returns Number of columns
+     */
+    dimension_t get_ncols() const noexcept
+    {
+        return ncols;
+    }
+
+    /*!
+     * @brief ntubes getter
+     *
+     * @returns Number of tubes
+     */
+    dimension_t get_ntubes() const noexcept
+    {
+        return ntubes;
+    }
+
     //! @brief Access the data vector
     const std::vector<scalar_t> &get_data() const noexcept
     {
