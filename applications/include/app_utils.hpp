@@ -44,19 +44,19 @@ bool cmd_option_exists(char **begin, char **end, const std::string &option);
  * @param[in,out] edges_weight Edge weights
  */
 template <class scalar_t>
-void read_adjacency_data(const std::string &filename,
+void read_adjacency_data(const boost::filesystem::path &filename,
                          std::vector<size_t> &edges_start,
                          std::vector<size_t> &edges_end,
                          std::vector<scalar_t> &edges_weight)
 {
-    edges_start.clear();
-    edges_end.clear();
-    edges_weight.clear();
-    std::ifstream in(filename.c_str());
+    assert(edges_start.size() == 0);
+    assert(edges_end.size() == 0);
+    assert(edges_weight.size() == 0);
+    std::ifstream in(filename.string());
     if (in.fail())
     {
         throw std::runtime_error(
-            std::string("In read_adjacency_data, failed to open ") + filename);
+            std::string("In read_adjacency_data, failed to open ") + filename.string());
     }
 
     std::cout << "Reading adjacency file " << filename << std::endl;
@@ -65,8 +65,11 @@ void read_adjacency_data(const std::string &filename,
     while (!in.eof())
     {
         std::getline(in, line);
+        // skip over empty lines
         if (line.size() == 0)
-            continue; // skip over empty lines
+        {
+            continue;
+        }
 
         // Remove trailing whitespaces
         line.erase(line.find_last_not_of(" ") + 1);
@@ -102,6 +105,15 @@ void read_adjacency_data(const std::string &filename,
     // Close file
     in.close();
 }
+
+/*!
+ * @brief Read affinity file matrix data and creates the necessary tensor
+ *
+ * @param[in] filename Name of the file containing the data
+ * @param[in,out] w Affinity tensor
+ */
+void read_affinity_data(const boost::filesystem::path &filename,
+                        tensor::Tensor<double> &w);
 
 /*!
  * @brief Write affinity file
@@ -169,6 +181,12 @@ void write_membership_file(const boost::filesystem::path &output_filename,
                            const tensor::Tensor<scalar_t> &t,
                            const utils::Report &results)
 {
+    // If there is no data (e.g. for v with undirected graphs), exit
+    if (t.size() == 0)
+    {
+        return;
+    }
+
     std::ofstream stream_out(output_filename.string());
     if (stream_out.fail())
     {

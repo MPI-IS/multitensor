@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_solver_run_empty_network)
     Tensor<double> u(nof_vertices, nof_groups), v(nof_vertices, nof_groups);
     Network A(vec_empty, vec_empty, vec_empty);
 
-    BOOST_CHECK_NO_THROW(solver.run(u_list, v_list, A, w, u, v, rng));
+    BOOST_CHECK_NO_THROW(solver.run(*u_list, *v_list, A, false, u, v, w, rng));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

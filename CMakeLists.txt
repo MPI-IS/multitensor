@@ -134,7 +134,9 @@ function(add_test_cmd_line
 
     # Set test folder and copy adjacency file
     set(test_folder ${CMAKE_BINARY_DIR}/tests/${test_name})
-    file(COPY ${CMAKE_SOURCE_DIR}/data/adjacency.dat DESTINATION ${test_folder}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/data/${test_name}/ DESTINATION ${test_folder}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/tests/data/compare.sh DESTINATION ${test_folder}/)
+    file(COPY ${CMAKE_SOURCE_DIR}/tests/data/${test_name}/ DESTINATION ${test_folder}/)
 
     # Run
     add_test(
@@ -145,8 +147,8 @@ function(add_test_cmd_line
     if("${test_program}" STREQUAL "Multitensor")
         add_test(
             NAME "command-line-${test_name}-verify-content"
-            COMMAND bash "-c" "./compare.sh ${test_folder}/results"
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/data)
+            COMMAND bash "-c" "${test_folder}/compare.sh ${test_folder}/results"
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/data/${test_name})
 
         set_tests_properties(
             "command-line-${test_name}-verify-content"
@@ -164,18 +166,34 @@ add_test_cmd_line(
     --s 5489)
 
 add_test_cmd_line(
+    "undirected"
+    Multitensor
+    --a adjacency.dat
+    --k 2
+    --s 5489
+    --undirected)
+
+add_test_cmd_line(
+    "w_input"
+    Multitensor
+    --a adjacency_k2L4.dat
+    --k 2
+    --s 5489
+    --w w_k2_k2L4_A.dat)
+
+add_test_cmd_line(
     "legacy_main"
     Multitensor_main
     -a adjacency.dat
     -k 2
-    -l 3)
+    -l 4)
 
 add_test_cmd_line(
     "legacy_undirected"
     Multitensor_undirected
     -a adjacency.dat
     -k 2
-    -l 3)
+    -l 4)
 
 
 #########################

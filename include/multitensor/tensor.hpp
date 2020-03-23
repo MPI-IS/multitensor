@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cstddef>
+#include <cassert>
 
 #include "multitensor/parameters.hpp"
 

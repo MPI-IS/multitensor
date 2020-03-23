@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstddef>
+#include <memory>
 
 #include "multitensor/graph.hpp"
 #include "multitensor/parameters.hpp"
@@ -42,18 +43,18 @@ private:
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
      * @param[in, out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in, out] w_old Affinity tensor (previous step)
      * @param[in, out] u_old Tensor linking vertices in groups for outgoing edges (previous step)
      * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
+     * @param[in, out] w_old Affinity tensor (previous step)
      */
     template <class network_t>
     double update_u(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
                     const network_t &A,
                     tensor::Tensor<double> &u,
-                    tensor::Tensor<double> &w_old,
                     tensor::Tensor<double> &u_old,
-                    tensor::Tensor<double> &v_old)
+                    tensor::Tensor<double> &v_old,
+                    tensor::Tensor<double> &w_old)
     {
         using graph_t = std::decay_t<decltype(A(0))>;
 
@@ -145,27 +146,27 @@ private:
      * @param[in] u_list Indices of vertices with at least one outgoing edge
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in, out] v Tensor linking vertices in groups for incoming edges
      * @param[in, out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in, out] w_old Affinity tensor (previous step)
+     * @param[in, out] v Tensor linking vertices in groups for incoming edges
      * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
+     * @param[in, out] w_old Affinity tensor (previous step)
      */
     template <class network_t>
     double update_v(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
                     const network_t &A,
-                    tensor::Tensor<double> &v,
                     tensor::Tensor<double> &u,
-                    tensor::Tensor<double> &w_old,
-                    tensor::Tensor<double> &v_old)
+                    tensor::Tensor<double> &v,
+                    tensor::Tensor<double> &v_old,
+                    tensor::Tensor<double> &w_old)
     {
         using graph_t = std::decay_t<decltype(A(0))>;
 
         unsigned int nof_groups(std::get<0>(w_old.dims()));
         unsigned int nof_layers(A.num_layers());
 
-        graph::out_edge_iterator<graph_t> eit, eend;
-        double Z_v, Dv, w_k, dist_v, v_ik, rho_ijkq, Zij_a;
+        graph::in_edge_iterator<graph_t> eit, eend;
+        double Z_v, Dv, w_k, dist_v, v_ik, rho_jiqk, Zij_a;
         dist_v = 0;
 
         for (size_t k = 0; k < nof_groups; k++)
@@ -197,12 +198,12 @@ private:
                         v_ik = 0;
                         for (size_t a = 0; a < nof_layers; a++)
                         {
-                            for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
+                            for (tie(eit, eend) = boost::in_edges(i, A(a)); eit != eend; ++eit)
                             {
-                                graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
+                                graph::Vertex<graph_t> j = source(*eit, A(a)); // IN-EDGE
 
                                 // Calculate rho_ijkq
-                                rho_ijkq = Zij_a = 0;
+                                rho_jiqk = Zij_a = 0;
                                 for (size_t m = 0; m < nof_groups; m++)
                                 {
                                     for (size_t l = 0; l < nof_groups; l++)
@@ -214,11 +215,11 @@ private:
                                 {
                                     for (size_t q = 0; q < nof_groups; q++)
                                     {
-                                        rho_ijkq += u(j, q) * w_old(q, k, a);
+                                        rho_jiqk += u(j, q) * w_old(q, k, a);
                                     }
-                                    rho_ijkq /= Zij_a;
+                                    rho_jiqk /= Zij_a;
                                 }
-                                v_ik += rho_ijkq;
+                                v_ik += rho_jiqk;
                             }
                         } // return u_ik
 
@@ -230,7 +231,7 @@ private:
                         v(i, k) = v_ik;
 
                         // Calculate max difference
-                        dist_v += std::abs(v(i, k) - v_old(i, k));
+                        dist_v = std::abs(v(i, k) - v_old(i, k));
                     }
                 }
             }
@@ -258,9 +259,9 @@ private:
     double update_w(const std::vector<size_t> &u_list,
                     const std::vector<size_t> &v_list,
                     const network_t &A,
-                    tensor::Tensor<double> &w,
-                    tensor::Tensor<double> &v,
                     tensor::Tensor<double> &u,
+                    tensor::Tensor<double> &v,
+                    tensor::Tensor<double> &w,
                     tensor::Tensor<double> &w_old)
     {
         using graph_t = std::decay_t<decltype(A(0))>;
@@ -424,9 +425,9 @@ private:
      * @paran[in] iteration Current iteration
      * @paran[in,out] coincide Number of successful checks
      * @paran[in,out] L2 Likelyhoods
-     * @param[in,out] w Affinity tensor
      * @param[in,out] u Tensor linking vertices in groups for outgoing edges
      * @param[in,out] v Tensor linking vertices in groups for incoming edges
+     * @param[in,out] w Affinity tensor
      *
      * @returns Whether the algorithm has converged
      */
@@ -437,22 +438,44 @@ private:
                             unsigned int &iteration,
                             unsigned int &coincide,
                             double &L2,
-                            tensor::Tensor<double> &w,
                             tensor::Tensor<double> &u,
-                            tensor::Tensor<double> &v)
+                            tensor::Tensor<double> &v,
+                            tensor::Tensor<double> &w)
     {
         using direction_t = typename std::decay_t<decltype(A)>::direction_type;
 
         // Variables used for copy
-        tensor::Tensor<double> w_old(w), u_old(u), v_old(v);
+        // We use pointers for u and v because their initialization
+        // will depend on the type of network used
+        tensor::Tensor<double> w_old(w);
+        auto u_old = std::make_shared<tensor::Tensor<double>>(u);
+        std::shared_ptr<tensor::Tensor<double>> v_old = nullptr;
 
-        // Split updates
-        update_u(u_list, v_list, A, u, w_old, u_old, v_old);
+        // Compile-time if statement
+        // Here we choose between directed and undirected network
         if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
         {
-            update_v(u_list, v_list, A, v, u, w_old, v_old);
+            // We need to copy v
+            v_old.reset(new tensor::Tensor<double>(v));
+            assert(v_old.use_count() == 1);
+            assert(u_old.use_count() == 1);
         }
-        update_w(u_list, v_list, A, w, v, u, w_old);
+        else
+        {
+            // We can just point at u
+            v_old = u_old;
+            assert(v_old.use_count() == 2);
+            assert(u_old.use_count() == 2);
+        }
+
+        // Split updates
+        // v is updated only for directed network
+        update_u(u_list, v_list, A, u, *u_old, *v_old, w_old);
+        if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+        {
+            update_v(u_list, v_list, A, u, v, *v_old, w_old);
+        }
+        update_w(u_list, v_list, A, u, v, w, w_old);
 
         // Check for convergence
         if (iteration % 10 == 0)
@@ -511,9 +534,11 @@ public:
      * @param[in] u_list ndices of vertices with at least one outgoing edge
      * @param[in] v_list ndices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in,out] w Affinity tensor
+     * @param[in] w_init_defined If @c true, w has been initialized
+     *            and should not be modified for the first realization
      * @param[in,out] u Tensor linking vertices in groups for outgoing edges
      * @param[in,out] v Tensor linking vertices in groups for incoming edges
+     * @param[in,out] w Affinity tensor
      * @param[in,out] random_generator Random generator
      *
      * The solver is an explicit split-operator. At each iteration \f$t\f$, it does the following:
@@ -529,7 +554,10 @@ public:
               class network_t>
     utils::Report run(const std::vector<size_t> &u_list, const std::vector<size_t> &v_list,
                       const network_t &A,
-                      tensor::Tensor<double> &w, tensor::Tensor<double> &u, tensor::Tensor<double> &v,
+                      const bool &w_init_defined,
+                      tensor::Tensor<double> &u,
+                      tensor::Tensor<double> &v,
+                      tensor::Tensor<double> &w,
                       random_t &random_generator,
                       w_init_t w_init_obj = w_init_t{},
                       uv_init_t uv_init_obj = uv_init_t{})
@@ -545,21 +573,42 @@ public:
         utils::Report results{};
         results.nof_realizations = num_real();
 
+        // Tensors used within a realization
+        tensor::Tensor<double>
+            u_temp(nof_vertices, nof_groups),
+            v_temp,
+            w_temp(nof_groups, nof_groups, nof_layers);
+
         for (unsigned int i = 0; i < num_real(); i++)
         {
             std::cout << "Running realization # " << i << std::endl;
 
-            // Tensors used for this realization
-            // u,v,w are used to store the best configuration
-            tensor::Tensor<double>
-                w_temp(nof_groups, nof_groups, nof_layers),
-                u_temp(nof_vertices, nof_groups),
-                v_temp;
+            // w initialization
+            // DO NOT randomly initialize w if:
+            //  - w has been pre-initialized
+            //  - this is the first realization
+            if (w_init_defined && i == 0)
+            {
+                w_temp = w;
 
-            // Initialize tensors
-            w_init_obj(w_temp, random_generator);
+                // add some noise so to have non-zero entries out of the diagonal
+                for (size_t alpha = 0; alpha < nof_layers; alpha++)
+                    for (size_t k = 0; k < nof_groups; k++)
+                        for (size_t q = 0; q < nof_groups; q++)
+                        {
+                            w_temp(k, q, alpha) += 0.1 * random_generator();
+                        }
+            }
+            else
+            {
+                w_init_obj(w_temp, random_generator);
+            }
+
+            // u and v initialization
             // TO CHECK: there is a difference here in case some nodes in the files dont have in/out edges
             // i.e. remove node 299 in the data file.
+            // Compile-time if statement
+            // We need to initialize v only if the network is directed
             if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
             {
                 v_temp.resize(nof_vertices, nof_groups);
@@ -567,7 +616,7 @@ public:
             }
             uv_init_obj(u_list, u_temp, random_generator);
 
-            // Likelihood,convergence criteria and iterations
+            // Likelihood, convergence criteria and iterations
             double L2(std::numeric_limits<double>::max());
             unsigned int iteration(0), coincide(0);
             assert(max_iter() > 0);
@@ -576,20 +625,22 @@ public:
             termination_reason term_reason = NO_TERMINATION;
             while (term_reason == NO_TERMINATION)
             {
+                // Compile-time if statement
+                // Here we choose between directed and undirected network
                 if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
                 {
                     term_reason = loop(u_list, v_list, A,
                                        iteration, coincide, L2,
-                                       w_temp, u_temp, v_temp);
+                                       u_temp, v_temp, w_temp);
                 }
                 else
                 {
+                    // Undirected network
                     term_reason = loop(u_list, u_list, A,
                                        iteration, coincide, L2,
-                                       w_temp, u_temp, v_temp);
+                                       u_temp, u_temp, w_temp);
                 }
             }
-
             std::cout << "\t... finished after " << iteration << " iterations. "
                       << "Reason: " << get_termination_reason_name(term_reason) << std::endl;
 

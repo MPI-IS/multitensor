@@ -34,6 +34,8 @@ struct init_tensor_symmetric_random
      *
      * This function intializes randomly a tensor using the provided random number generator.
      * To facilitate convergence, it is initialized in a symmetric fashion.
+     *
+     * @pre Tensor haz been resized appropriately.
      */
     template <class scalar_t,
               class random_t>
@@ -80,6 +82,8 @@ struct init_tensor_partial_random
      * @param[in,out] random_generator Random generator used for the initialization
      *
      * This function intializes the given rows randomly.
+     *
+     * @pre Tensor haz been resized appropriately.
      */
     template <class scalar_t,
               class random_t>

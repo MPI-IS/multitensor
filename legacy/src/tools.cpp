@@ -793,8 +793,8 @@ void output_results_undirected(std::vector<Graph_undirected> A, string file, str
     int N = (int)num_vertices(A[0]);
 
     std::ofstream out1, out2, out3;
-    out1.open((file + "u_K" + to_string(K) + end_file).c_str());
-    out3.open((file + "w_K" + to_string(K) + end_file).c_str());
+    out1.open((file + "u_undirected_K" + to_string(K) + end_file).c_str());
+    out3.open((file + "w_undirected_K" + to_string(K) + end_file).c_str());
     out1 << "# Max likelihood= " << maxL << " N_real=" << N_real << endl;
     out3 << "# Max likelihood= " << maxL << " N_real=" << N_real << endl;
 

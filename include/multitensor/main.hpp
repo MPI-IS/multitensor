@@ -15,8 +15,6 @@
 #include <cstddef>
 #include <set>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/random.hpp>
-#include <boost/filesystem.hpp>
 
 #include "multitensor/parameters.hpp"
 #include "multitensor/graph.hpp"
@@ -41,6 +39,8 @@ namespace multitensor
  * @param[in] edges_start Labels of vertices where an edge starts
  * @param[in] edges_end Labels of vertices where an edge ends
  * @param[in] edges_weight Edges weights
+ * @param[in] w_init_defined If @c true, w has been initialized
+ *            and should not be modified for the first realization
  * @param[in] nof_realizations Number of realizations
  * @param[in] max_nof_iterations Maximum number of iterations in each realization
  * @param[in] nof_convergences Number of successive passed convergence criteria for declaring the results converged
@@ -60,6 +60,7 @@ template <class direction_t = boost::bidirectionalS,
 utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start,
                                         const std::vector<vertex_t> &edges_end,
                                         const std::vector<weight_t> &edges_weight,
+                                        const bool &w_init_defined,
                                         const size_t &nof_realizations,
                                         const size_t &max_nof_iterations,
                                         const size_t &nof_convergences,
@@ -170,32 +171,22 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     A.print_graph_stats();
 
     // Extract indices of vertices that have at least one out/in-going edges
-    std::vector<size_t> index_vertices_with_out_edges, index_vertices_with_in_edges;
+    auto index_vertices_with_out_edges = std::make_shared<std::vector<size_t>>();
+    auto index_vertices_with_in_edges = std::make_shared<std::vector<size_t>>();
     A.extract_vertices_with_edges(index_vertices_with_out_edges, index_vertices_with_in_edges);
-    assert(index_vertices_with_out_edges.size() <= nof_vertices);
-    // In case of undirected graph, index_vertices_with_in_edges is not used.
-    if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
-    {
-        assert(index_vertices_with_in_edges.size() <= nof_vertices);
-    }
-    else
-    {
-        assert(index_vertices_with_in_edges.size() == 0);
-    }
 
     // Run solver
     // Diagnostics
     std::cout << "Starting algorithm...\n"
-              << "\t- Number of vertices: " << nof_vertices << " ("
-              << index_vertices_with_out_edges.size() << " with outgoing edges, "
-              << index_vertices_with_in_edges.size() << " with incoming edges)\n"
+              << "\t- Number of vertices: " << nof_vertices << "\n"
               << "\t- Number of layers: " << nof_layers << "\n"
               << "\t- Number of groups: " << nof_groups << "\n"
               << "\t- Number of realizations: " << nof_realizations << "\n"
               << std::endl;
     solver::Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
     utils::Report results = solver.run<w_init_t, uv_init_t>(
-        index_vertices_with_out_edges, index_vertices_with_in_edges, A, w, u, v, random_generator);
+        *index_vertices_with_out_edges, *index_vertices_with_in_edges, A,
+        w_init_defined, u, v, w, random_generator);
 
     // Copy Network labels for outputs
     // TO DO: improve, too much data copy

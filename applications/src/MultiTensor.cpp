@@ -14,6 +14,9 @@ int main(int argc, char *argv[])
     // Input adjacency file
     std::string adjacency_filename = "adjacency.dat";
 
+    // Input affinity file
+    std::string affinity_filename = "";
+
     // Output directory
     std::string output_directory = "results";
 
@@ -50,6 +53,8 @@ int main(int argc, char *argv[])
             << "\t\t Number of groups (required)\n\n"
             << "\t--a <input-adjacency-file>\n"
             << "\t\t Adjacency file (default: " << adjacency_filename << ")\n\n"
+            << "\t--w <input-affinity-file>\n"
+            << "\t\t Affinity file for initialization (optional)\n\n"
             << "\t--undirected\n"
             << "\t\t Use undirected graphs (instead of the default directed graphs)\n\n"
             << "\t--r <nof_realizations>\n"
@@ -87,6 +92,10 @@ int main(int argc, char *argv[])
     {
         adjacency_filename = get_cmd_option(argv, argv + argc, "--a");
     }
+    if (cmd_option_exists(argv, argv + argc, "--w"))
+    {
+        affinity_filename = get_cmd_option(argv, argv + argc, "--w");
+    }
     if (cmd_option_exists(argv, argv + argc, "--undirected"))
     {
         graph_type = "undirected";
@@ -105,13 +114,29 @@ int main(int argc, char *argv[])
     }
 
     // Read-in data
+    // Adjacency data
     std::vector<size_t> edges_start, edges_end, edges_weight;
     read_adjacency_data(adjacency_filename, edges_start, edges_end, edges_weight);
     const size_t nof_vertices = utils::get_num_vertices(edges_start, edges_end);
     const size_t nof_layers = edges_weight.size() / edges_start.size();
 
+    // Affinity tensor
+    tensor::Tensor<double> w;
+    const bool w_init_defined = (affinity_filename != "");
+    if (w_init_defined)
+    {
+        read_affinity_data(affinity_filename, w);
+        assert(std::get<0>(w.dims()) == nof_groups);
+        assert(std::get<1>(w.dims()) == nof_groups);
+        assert(std::get<2>(w.dims()) == nof_layers);
+    }
+    else
+    {
+        w.resize(nof_groups, nof_groups, nof_layers);
+    }
+
     // Prepare output data
-    tensor::Tensor<double> w(nof_groups, nof_groups, nof_layers), u(nof_vertices, nof_groups), v;
+    tensor::Tensor<double> u(nof_vertices, nof_groups), v;
     std::vector<size_t> labels;
 
     // Create random generator
@@ -133,26 +158,29 @@ int main(int argc, char *argv[])
         // We need v
         v.resize(nof_vertices, nof_groups);
         results = multitensor_factorization(
-            edges_start, edges_end, edges_weight,
+            edges_start, edges_end, edges_weight, w_init_defined,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, w, random_generator);
     }
     else
     {
         results = multitensor_factorization<boost::undirectedS>(
-            edges_start, edges_end, edges_weight,
+            edges_start, edges_end, edges_weight, w_init_defined,
             nof_realizations, max_nof_iterations, nof_convergences,
-            labels, u, v, w, random_generator);
+            labels, u, u, w, random_generator);
     }
 
     // Write output files
     boost::filesystem::create_directory(output_directory);
-    auto dpath = boost::filesystem::canonical(output_directory);
+    const auto dpath = boost::filesystem::canonical(output_directory);
     std::cout << "Writing output files in directory " << dpath << std::endl;
+    write_info_file(dpath / INFO_FILENAME, results);
     write_affinity_file(dpath / WOUT_FILENAME, w, results);
     write_membership_file(dpath / UOUT_FILENAME, labels, u, results);
-    write_membership_file(dpath / VOUT_FILENAME, labels, v, results);
-    write_info_file(dpath / INFO_FILENAME, results);
+    if (graph_type == "directed")
+    {
+        write_membership_file(dpath / VOUT_FILENAME, labels, v, results);
+    }
 
     return 0;
 }

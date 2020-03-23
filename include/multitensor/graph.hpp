@@ -156,8 +156,8 @@ public:
      * @param[in, out] index_vertices_with_out_edges Indices of the vertices with at least one outgoing edege
      * @param[in, out] index_vertices_with_in_edges Indices of the vertices with at least one incoming edege
      */
-    void extract_vertices_with_edges(std::vector<size_t> &index_vertices_with_out_edges,
-                                     std::vector<size_t> &index_vertices_with_in_edges)
+    void extract_vertices_with_edges(std::shared_ptr<std::vector<size_t>> &index_vertices_with_out_edges,
+                                     std::shared_ptr<std::vector<size_t>> &index_vertices_with_in_edges)
     {
         // Iterators
         std::pair<out_edge_iterator_t, out_edge_iterator_t> its_out;
@@ -172,12 +172,13 @@ public:
                 its_out = boost::out_edges(i, operator()(alpha));
                 if (std::get<0>(its_out) != std::get<1>(its_out))
                 {
-                    index_vertices_with_out_edges.emplace_back(i);
+                    (*index_vertices_with_out_edges).emplace_back(i);
                     break;
                 }
             }
 
-            // Only if we are using directed graphs
+            // Compile-time if statement
+            // We count incoming edges only if we are using a directed network
             if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
             {
                 // Incoming edges
@@ -186,12 +187,31 @@ public:
                     its_in = boost::in_edges(i, operator()(alpha));
                     if (std::get<0>(its_in) != std::get<1>(its_in))
                     {
-                        index_vertices_with_in_edges.emplace_back(i);
+                        (*index_vertices_with_in_edges).emplace_back(i);
                         break;
                     }
                 }
             } // end if consexpr
         }     // end loop vertices
+
+        // Reset pointer if graphs are undirected
+        // and check number of shared instances
+        if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+        {
+            assert(!index_vertices_with_out_edges ||
+                   index_vertices_with_out_edges.use_count() == 1);
+            assert(!index_vertices_with_out_edges ||
+                   index_vertices_with_in_edges.use_count() == 1);
+        }
+        else
+        {
+            index_vertices_with_in_edges.reset();
+            index_vertices_with_in_edges = index_vertices_with_out_edges;
+            assert(!index_vertices_with_out_edges ||
+                   index_vertices_with_out_edges.use_count() == 2);
+            assert(!index_vertices_with_out_edges ||
+                   index_vertices_with_in_edges.use_count() == 2);
+        }
     }
 
     /*!

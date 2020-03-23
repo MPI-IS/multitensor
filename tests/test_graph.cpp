@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(test_empty_network)
 
     // Extracting vertices with edges
     A.extract_vertices_with_edges(u_list, v_list);
-    BOOST_TEST(u_list.size() == 0);
-    BOOST_TEST(v_list.size() == 0);
+    BOOST_TEST((*u_list).size() == 0);
+    BOOST_TEST((*v_list).size() == 0);
 }
 
 // Checks implementation for a network w/o any edge
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(test_network_wo_edges)
 
     // Extracting vertices with edges
     A.extract_vertices_with_edges(u_list, v_list);
-    BOOST_TEST(u_list.size() == 0);
-    BOOST_TEST(v_list.size() == 0);
+    BOOST_TEST((*u_list).size() == 0);
+    BOOST_TEST((*v_list).size() == 0);
 }
 
 // Checks implementation for a full network
@@ -158,18 +158,18 @@ BOOST_AUTO_TEST_CASE(test_full_network)
 
     // Extracting vertices with edges
     A.extract_vertices_with_edges(u_list, v_list);
-    BOOST_TEST(u_list.size() == u_labels_theo.size());
-    BOOST_TEST(v_list.size() == v_labels_theo.size());
+    BOOST_TEST((*u_list).size() == u_labels_theo.size());
+    BOOST_TEST((*v_list).size() == v_labels_theo.size());
 
     // Compare lists
     // NB: u_labels_theo contains labels, u_list contains indices
     std::vector<unsigned int> u_labels, v_labels;
-    for (auto i : u_list)
+    for (auto i : *u_list)
     {
         u_labels.emplace_back(A(0)[i].label);
     }
     std::sort(u_labels.begin(), u_labels.end());
-    for (auto i : v_list)
+    for (auto i : *v_list)
     {
         v_labels.emplace_back(A(0)[i].label);
     }

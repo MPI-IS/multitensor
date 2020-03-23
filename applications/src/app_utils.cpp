@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 
+#include "multitensor/tensor.hpp"
 #include "app_utils.hpp"
 
 char *
@@ -21,6 +22,91 @@ get_cmd_option(char **begin, char **end, const std::string &option)
 bool cmd_option_exists(char **begin, char **end, const std::string &option)
 {
     return std::find(begin, end, option) != end;
+}
+
+void read_affinity_data(const boost::filesystem::path &filename,
+                        tensor::Tensor<double> &w)
+{
+    assert(w.size() == 0);
+    std::ifstream in(filename.string());
+    if (in.fail())
+    {
+        throw std::runtime_error(
+            std::string("In read_affinity_data, failed to open ") + filename.string());
+    }
+
+    std::cout << "Reading affinity file " << filename << std::endl;
+
+    std::string line;
+
+    // First parse the file to get dimensions
+    size_t nof_groups(0), nof_layers(0);
+    std::string tok;
+    double value;
+    while (!in.eof())
+    {
+        std::getline(in, line);
+        // skip over empty lines
+        if (line.size() == 0)
+        {
+            continue;
+        }
+
+        // Remove trailing whitespaces
+        line.erase(line.find_last_not_of(" ") + 1);
+
+        // Count number of groups and layers
+        std::istringstream is(line);
+        size_t current_nof_groups(0);
+
+        // First character - could be # or layer id
+        is >> tok;
+        if (tok == "#")
+        {
+            continue;
+        }
+
+        // Groups values
+        while (is >> value)
+        {
+            current_nof_groups++;
+        }
+        if (nof_groups == 0)
+        {
+            nof_groups = current_nof_groups;
+        }
+        assert(current_nof_groups = nof_groups);
+        nof_layers++;
+    }
+
+    // Now build tensor... to continue
+    in.clear();
+    in.seekg(0);
+    w.resize(nof_groups, nof_groups, nof_layers);
+
+    while (!in.eof())
+    {
+        std::getline(in, line);
+        if (line.size() == 0)
+            continue; // skip over empty lines and comments
+
+        // Remove trailing whitespaces
+        line.erase(line.find_last_not_of(" ") + 1);
+
+        std::istringstream is(line);
+
+        // Layer ID
+        size_t layer;
+        is >> layer;
+
+        // Groups values
+        size_t group(0);
+        while (is >> value)
+        {
+            w(group, group, layer) = value;
+            group++;
+        }
+    }
 }
 
 void write_info_file(const boost::filesystem::path &output_filename,

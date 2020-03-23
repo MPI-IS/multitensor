@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_errors)
 
     // Not enough edges
     BOOST_CHECK_THROW(
-        multitensor_factorization(std::vector<unsigned int>{}, edges_end, edges_weight,
+        multitensor_factorization(std::vector<unsigned int>{}, edges_end, edges_weight, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_errors)
     // Inconsistent edges (less)
     std::vector<unsigned int> edges_end_small(edges_end.begin(), edges_end.end() - 1);
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end_small, edges_weight,
+        multitensor_factorization(edges_start, edges_end_small, edges_weight, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_errors)
     edges_end_small.push_back(0);
     edges_end_small.push_back(0);
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end_small, edges_weight,
+        multitensor_factorization(edges_start, edges_end_small, edges_weight, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
@@ -72,42 +72,42 @@ BOOST_AUTO_TEST_CASE(test_errors)
     std::vector<unsigned int> one_vertex{0};
     BOOST_TEST(one_vertex.size() == 1);
     BOOST_CHECK_THROW(
-        multitensor_factorization(one_vertex, one_vertex, one_vertex,
+        multitensor_factorization(one_vertex, one_vertex, one_vertex, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
 
     // Not enough layers
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end, std::vector<unsigned int>{},
+        multitensor_factorization(edges_start, edges_end, std::vector<unsigned int>{}, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
 
     // Not enough realizations
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end, edges_weight,
+        multitensor_factorization(edges_start, edges_end, edges_weight, false,
                                   0, max_nof_iterations, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
 
     // Not enough iterations
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end, edges_weight,
+        multitensor_factorization(edges_start, edges_end, edges_weight, false,
                                   nof_realizations, 0, nof_convergences,
                                   labels, u, v, w),
         std::runtime_error);
 
     // Not enough convergences needed
     BOOST_CHECK_THROW(
-        multitensor_factorization(edges_start, edges_end, edges_weight,
+        multitensor_factorization(edges_start, edges_end, edges_weight, false,
                                   nof_realizations, max_nof_iterations, 0,
                                   labels, u, v, w),
         std::runtime_error);
 
     // OK
     BOOST_CHECK_NO_THROW(
-        multitensor_factorization(edges_start, edges_end, edges_weight,
+        multitensor_factorization(edges_start, edges_end, edges_weight, false,
                                   nof_realizations, max_nof_iterations, nof_convergences,
                                   labels, u, v, w));
 }

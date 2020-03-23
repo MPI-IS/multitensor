@@ -37,16 +37,14 @@ struct fixture_global : fixture_rng
         edges_start, edges_end, edges_weight,
         u_labels_theo, v_labels_theo;
     std::set<unsigned int> v;
-    std::vector<size_t> u_list, v_list;
+    std::shared_ptr<std::vector<size_t>> u_list = std::make_shared<std::vector<size_t>>();
+    std::shared_ptr<std::vector<size_t>> v_list = std::make_shared<std::vector<size_t>>();
 
     fixture_global()
         : nof_layers(rng() % 10 + 1),
           nof_data_entries(rng() % 100 + 2),
           nof_edges(0)
     {
-        edges_start.reserve(nof_data_entries);
-        edges_end.reserve(nof_data_entries);
-        edges_weight.reserve(nof_data_entries * nof_layers);
         unsigned int estart, eend, tmp_weight;
         std::vector<unsigned int> u_labels_tmp, v_labels_tmp;
 
