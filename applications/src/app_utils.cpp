@@ -5,7 +5,6 @@
 #include <sstream>
 #include <string>
 
-#include "multitensor/tensor.hpp"
 #include "app_utils.hpp"
 
 char *
@@ -25,9 +24,9 @@ bool cmd_option_exists(char **begin, char **end, const std::string &option)
 }
 
 void read_affinity_data(const boost::filesystem::path &filename,
-                        tensor::Tensor<double> &w)
+                        const bool &assortative,
+                        std::vector<double> &w)
 {
-    assert(w.size() == 0);
     std::ifstream in(filename.string());
     if (in.fail())
     {
@@ -79,10 +78,9 @@ void read_affinity_data(const boost::filesystem::path &filename,
         nof_layers++;
     }
 
-    // Now build tensor... to continue
+    // Now build vecor... to continue
     in.clear();
     in.seekg(0);
-    w.resize(nof_groups, nof_groups, nof_layers);
 
     while (!in.eof())
     {
@@ -99,11 +97,13 @@ void read_affinity_data(const boost::filesystem::path &filename,
         size_t layer;
         is >> layer;
 
-        // Groups values
-        size_t group(0);
+        // Groups values - only diagnoal terms
+        size_t group(1), index(0);
         while (is >> value)
         {
-            w(group, group, layer) = value;
+            index = assortative ? group
+                                : group * group - 1 + layer * nof_groups * nof_groups;
+            w[index] = value;
             group++;
         }
     }

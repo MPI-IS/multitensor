@@ -32,39 +32,31 @@ namespace graph
 template <class vertex_t = std::string>
 struct VertexProperty
 {
-    //! Node label
+    //! Vertex label
     vertex_t label;
 };
 
-template <class list_t = boost::vecS>
-using Graph = boost::adjacency_list<list_t, list_t, boost::bidirectionalS, VertexProperty<>>;
+template <class graph_t>
+using out_edge_iterator_t = typename boost::graph_traits<graph_t>::out_edge_iterator;
 
-template <class graph_t = Graph<>>
-using Vertex = typename boost::graph_traits<graph_t>::vertex_descriptor;
-
-template <class graph_t = Graph<>>
-using out_edge_iterator = typename boost::graph_traits<graph_t>::out_edge_iterator;
-
-template <class graph_t = Graph<>>
-using in_edge_iterator = typename boost::graph_traits<graph_t>::in_edge_iterator;
+template <class graph_t>
+using in_edge_iterator_t = typename boost::graph_traits<graph_t>::in_edge_iterator;
 
 /*!
  * @brief Class representing a multilayer network
  *
- * @tparam direction_t Graph type (directed or undirected)
  * @tparam vertex_t Vertex label type
+ * @tparam direction_t Graph type (directed or undirected)
  */
 template <class vertex_t,
           class direction_t = boost::bidirectionalS>
 class Network
 {
     using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, direction_t, VertexProperty<vertex_t>>;
-    using out_edge_iterator_t = typename boost::graph_traits<graph_t>::out_edge_iterator;
-    using in_edge_iterator_t = typename boost::graph_traits<graph_t>::in_edge_iterator;
 
 private:
     dimension_t nlayers;
-    unsigned int nvertices, nedges;
+    size_t nvertices, nedges;
     std::vector<graph_t> layers;
 
     //! @brief Mapping vertex label <-> index
@@ -133,7 +125,7 @@ public:
                 weight_t weight = edges_weight[i * nlayers + alpha];
                 if (weight > EPS_PRECISION)
                 {
-                    for (size_t w = 0; w < weight; w++) // seems dangerous...
+                    for (weight_t w = 0; w < weight; w++) // seems dangerous...
                     {
                         boost::add_edge(boost::vertex(node_in, operator()(alpha)),
                                         boost::vertex(node_out, operator()(alpha)),
@@ -153,15 +145,15 @@ public:
     /*!
      * @brief Extracting vertices with out/in going edges.
      *
-     * @param[in, out] index_vertices_with_out_edges Indices of the vertices with at least one outgoing edege
-     * @param[in, out] index_vertices_with_in_edges Indices of the vertices with at least one incoming edege
+     * @param[in, out] u_list Indices of the vertices with at least one outgoing edege
+     * @param[in, out] v_list Indices of the vertices with at least one incoming edege
      */
-    void extract_vertices_with_edges(std::shared_ptr<std::vector<size_t>> &index_vertices_with_out_edges,
-                                     std::shared_ptr<std::vector<size_t>> &index_vertices_with_in_edges)
+    void extract_vertices_with_edges(std::shared_ptr<std::vector<size_t>> &u_list,
+                                     std::shared_ptr<std::vector<size_t>> &v_list)
     {
         // Iterators
-        std::pair<out_edge_iterator_t, out_edge_iterator_t> its_out;
-        std::pair<in_edge_iterator_t, in_edge_iterator_t> its_in;
+        std::pair<out_edge_iterator_t<graph_t>, out_edge_iterator_t<graph_t>> its_out;
+        std::pair<in_edge_iterator_t<graph_t>, in_edge_iterator_t<graph_t>> its_in;
 
         // Loop through all the vertices in the first layer
         for (size_t i = 0; i < num_vertices(); i++)
@@ -172,7 +164,7 @@ public:
                 its_out = boost::out_edges(i, operator()(alpha));
                 if (std::get<0>(its_out) != std::get<1>(its_out))
                 {
-                    (*index_vertices_with_out_edges).emplace_back(i);
+                    (*u_list).emplace_back(i);
                     break;
                 }
             }
@@ -187,7 +179,7 @@ public:
                     its_in = boost::in_edges(i, operator()(alpha));
                     if (std::get<0>(its_in) != std::get<1>(its_in))
                     {
-                        (*index_vertices_with_in_edges).emplace_back(i);
+                        (*v_list).emplace_back(i);
                         break;
                     }
                 }
@@ -198,19 +190,14 @@ public:
         // and check number of shared instances
         if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
         {
-            assert(!index_vertices_with_out_edges ||
-                   index_vertices_with_out_edges.use_count() == 1);
-            assert(!index_vertices_with_out_edges ||
-                   index_vertices_with_in_edges.use_count() == 1);
+            assert(!u_list || u_list.use_count() == 1);
+            assert(!v_list || v_list.use_count() == 1);
         }
         else
         {
-            index_vertices_with_in_edges.reset();
-            index_vertices_with_in_edges = index_vertices_with_out_edges;
-            assert(!index_vertices_with_out_edges ||
-                   index_vertices_with_out_edges.use_count() == 2);
-            assert(!index_vertices_with_out_edges ||
-                   index_vertices_with_in_edges.use_count() == 2);
+            v_list = u_list;
+            assert(!u_list || u_list.use_count() == 2);
+            assert(!v_list || v_list.use_count() == 2);
         }
     }
 
@@ -219,7 +206,7 @@ public:
      *
      * @param[in, out] labels Vertices labels
      */
-    void extract_vertices_labels(std::vector<size_t> &labels)
+    void extract_vertices_labels(std::vector<vertex_t> &labels)
     {
         labels.clear();
         for (size_t i = 0; i < num_vertices(); i++)
@@ -264,16 +251,81 @@ public:
         size_t num_edges_start_layer;
         size_t N = num_vertices();
         double density;
-        std::cout << "N = " << N << std::endl;
+
+        std::cout << "Network statistics:" << std::endl;
 
         for (size_t alpha = 0; alpha < num_layers(); alpha++)
         {
             num_edges_start_layer = boost::num_edges(operator()(alpha));
             density = 100. * (double)num_edges_start_layer / (double)(N * (N - 1.));
-            std::cout << "E[" << alpha << "] = " << num_edges_start_layer
+            std::cout << "\tE[" << alpha << "] = " << num_edges_start_layer
                       << "  density= " << density
                       << std::endl;
         }
+    }
+};
+
+//! @brief Class for extractin outgoing edges and target vertices from a graph
+struct out_edges_target_vertices
+{
+    /*
+     * @brief Extracting outgoing edges from graph
+     *
+     * param[in] i Vertex number
+     * param[in] g Graph
+     *
+     * @returns Outgoing edges starting from the vertex
+     */
+    template <class graph_t>
+    auto get_edges(const size_t &i, const graph_t &g)
+    {
+        return boost::out_edges(i, g);
+    }
+
+    /*
+     * @brief Extracting target vertex from an edge
+     *
+     * param[in] eit Outgoing edge iterator
+     * param[in] g Graph
+     *
+     * @returns Target vertex
+     */
+    template <class graph_t>
+    auto get_vertex(const graph::out_edge_iterator_t<graph_t> &eit, const graph_t &g)
+    {
+        return boost::target(*eit, g);
+    }
+};
+
+//! @brief Class for extractin incoming edges and source vertices from a graph
+struct in_edges_source_vertices
+{
+    /*
+     * @brief Extracting incoming edges from graph
+     *
+     * param[in] i Vertex number
+     * param[in] g Graph
+     *
+     * @returns Incmoing edges arriving at the vertex
+     */
+    template <class graph_t>
+    auto get_edges(const size_t &i, const graph_t &g)
+    {
+        return boost::in_edges(i, g);
+    }
+
+    /*
+     * @brief Extracting source vertex from an edge
+     *
+     * param[in] eit Incoming edge iterator
+     * param[in] g Graph
+     *
+     * @returns Source vertex
+     */
+    template <class graph_t>
+    auto get_vertex(const graph::in_edge_iterator_t<graph_t> &eit, const graph_t &g)
+    {
+        return boost::source(*eit, g);
     }
 };
 

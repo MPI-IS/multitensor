@@ -114,6 +114,7 @@ set_target_properties(
 add_executable(test_multitensor
     tests/fixtures.hpp
     tests/test_graph.cpp
+    tests/test_initialization.cpp
     tests/test_multitensor.cpp
     tests/test_solver.cpp
     tests/test_tensor.cpp
@@ -180,6 +181,24 @@ add_test_cmd_line(
     --k 2
     --s 5489
     --w w_k2_k2L4_A.dat)
+
+add_test_cmd_line(
+    "multi_real"
+    Multitensor
+    --a adjacency_k2L4.dat
+    --k 2
+    --s 5489
+    --w w_k2_k2L4_r2.dat
+    --r 2)
+
+add_test_cmd_line(
+    "assortative"
+    Multitensor
+    --a adjacency_assortative_k3L4.dat
+    --k 3
+    --s 5489
+    --r 1
+    --assortative)
 
 add_test_cmd_line(
     "legacy_main"

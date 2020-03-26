@@ -18,15 +18,10 @@
 #include "multitensor/solver.hpp"
 #include "fixtures.hpp"
 
-using namespace multitensor::graph;
-using namespace multitensor::initialization;
-using namespace multitensor::solver;
-using namespace multitensor::tensor;
-
 // Fixture
 struct fixture_solver : fixture_global
 {
-    unsigned int nof_realizations, max_nof_iterations, nof_convergences, nof_groups;
+    size_t nof_realizations, max_nof_iterations, nof_convergences, nof_groups;
 
     fixture_solver()
         : nof_realizations(rng() % 10 + 1),
@@ -37,7 +32,10 @@ struct fixture_solver : fixture_global
     }
 };
 
-using namespace multitensor;
+using namespace multitensor::graph;
+using namespace multitensor::initialization;
+using namespace multitensor::solver;
+using namespace multitensor::tensor;
 
 BOOST_FIXTURE_TEST_SUITE(tests_solver, fixture_solver)
 
@@ -54,12 +52,16 @@ BOOST_AUTO_TEST_CASE(test_solver_init)
 BOOST_AUTO_TEST_CASE(test_solver_run_empty_network)
 {
     Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
-    std::vector<unsigned int> vec_empty{};
-    Tensor<double> w(nof_groups, nof_groups, nof_layers);
-    Tensor<double> u(nof_vertices, nof_groups), v(nof_vertices, nof_groups);
+    std::vector<size_t> vec_empty{};
+    SymmetricTensor<double> w(nof_groups, nof_layers);
+    Matrix<double> u(nof_vertices, nof_groups), v(nof_vertices, nof_groups);
     Network A(vec_empty, vec_empty, vec_empty);
 
-    BOOST_CHECK_NO_THROW(solver.run(*u_list, *v_list, A, false, u, v, w, rng));
+    BOOST_CHECK_NO_THROW(solver.run<init_symmetric_tensor_random>(
+        *u_list, *v_list, A, u, v, w, rng));
+
+    BOOST_CHECK_NO_THROW(solver.run<init_symmetric_tensor_from_initial<SymmetricTensor<double>>>(
+        *u_list, *v_list, A, u, v, w, rng));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -9,7 +9,9 @@
 
 int main(int argc, char *argv[])
 {
-    using namespace multitensor;
+    using namespace boost;
+    using namespace multitensor::initialization;
+    using namespace multitensor::tensor;
 
     // Input adjacency file
     std::string adjacency_filename = "adjacency.dat";
@@ -21,7 +23,7 @@ int main(int argc, char *argv[])
     std::string output_directory = "results";
 
     // Graph type used
-    std::string graph_type = "directed";
+    bool directed_graph = true;
 
     // Number of groups
     size_t nof_groups = 0;
@@ -38,6 +40,9 @@ int main(int argc, char *argv[])
     // Seed for the random generator
     std::string seed = "random";
 
+    // Option for assortative groups
+    bool assortative = false;
+
     // Help option
     if (cmd_option_exists(argv, argv + argc, "--help"))
     {
@@ -47,7 +52,7 @@ int main(int argc, char *argv[])
             << "DESCRIPTION\n"
             << "\tCommand line interface to run the Multitensor factorization algorithm\n\n"
             << "SYNOPSIS\n"
-            << "\t./Multitensor --k <nof_groups> --a <input-adjacency-file> \n\n"
+            << "\t./Multitensor --k <nof_groups> [options]\n\n"
             << "OPTIONS\n"
             << "\t--k <nof_groups>\n"
             << "\t\t Number of groups (required)\n\n"
@@ -55,14 +60,16 @@ int main(int argc, char *argv[])
             << "\t\t Adjacency file (default: " << adjacency_filename << ")\n\n"
             << "\t--w <input-affinity-file>\n"
             << "\t\t Affinity file for initialization (optional)\n\n"
+            << "\t--assortative\n"
+            << "\t\t Use assortative model\n\n"
             << "\t--undirected\n"
             << "\t\t Use undirected graphs (instead of the default directed graphs)\n\n"
             << "\t--r <nof_realizations>\n"
-            << "\t\t Number of realizations (default : " << nof_realizations << ")\n\n"
+            << "\t\t Number of realizations (default: " << nof_realizations << ")\n\n"
             << "\t--maxit <max_nof_iterations>\n"
-            << "\t\t Maximum number of iterations (default : " << max_nof_iterations << ")\n\n"
+            << "\t\t Maximum number of iterations (default: " << max_nof_iterations << ")\n\n"
             << "\t--y <nof_convergences>\n"
-            << "\t\t Number of positive checks required for reaching convergence (default : "
+            << "\t\t Number of positive checks required for reaching convergence (default: "
             << nof_convergences << ")\n\n"
             << "\t--s <seed>\n"
             << "\t\t Seed for the random generator. Options are 'random' (default) or an integer\n\n"
@@ -98,7 +105,11 @@ int main(int argc, char *argv[])
     }
     if (cmd_option_exists(argv, argv + argc, "--undirected"))
     {
-        graph_type = "undirected";
+        directed_graph = false;
+    }
+    if (cmd_option_exists(argv, argv + argc, "--assortative"))
+    {
+        assortative = true;
     }
     if (cmd_option_exists(argv, argv + argc, "--o"))
     {
@@ -112,6 +123,10 @@ int main(int argc, char *argv[])
     {
         seed = get_cmd_option(argv, argv + argc, "--s");
     }
+    if (cmd_option_exists(argv, argv + argc, "--maxit"))
+    {
+        max_nof_iterations = std::stoi(get_cmd_option(argv, argv + argc, "--maxit"));
+    }
 
     // Read-in data
     // Adjacency data
@@ -121,22 +136,22 @@ int main(int argc, char *argv[])
     const size_t nof_layers = edges_weight.size() / edges_start.size();
 
     // Affinity tensor
-    tensor::Tensor<double> w;
+    std::vector<double> affinity;
+    // Different size expected if assortative or not
+    const size_t affinity_size = assortative ? nof_groups * nof_layers
+                                             : nof_groups * nof_groups * nof_layers;
+    affinity.resize(affinity_size);
+
+    // Read-in file if requested
     const bool w_init_defined = (affinity_filename != "");
     if (w_init_defined)
     {
-        read_affinity_data(affinity_filename, w);
-        assert(std::get<0>(w.dims()) == nof_groups);
-        assert(std::get<1>(w.dims()) == nof_groups);
-        assert(std::get<2>(w.dims()) == nof_layers);
-    }
-    else
-    {
-        w.resize(nof_groups, nof_groups, nof_layers);
+        read_affinity_data(affinity_filename, assortative, affinity);
     }
 
     // Prepare output data
-    tensor::Tensor<double> u(nof_vertices, nof_groups), v;
+    // We do not set the size of v right away - we might not need it if we use an undirected network
+    Matrix<double> u(nof_vertices, nof_groups), v;
     std::vector<size_t> labels;
 
     // Create random generator
@@ -151,33 +166,92 @@ int main(int argc, char *argv[])
     }
     utils::RandomGenerator random_generator{seed_value};
 
+    // Merge the booleans in a single integer
+    const size_t selection = directed_graph + 2 * assortative + 4 * w_init_defined;
+
     // Call algorithm
     utils::Report results;
-    if (graph_type == "directed")
+
+    switch (selection)
     {
-        // We need v
-        v.resize(nof_vertices, nof_groups);
+    case 0:
+        // Undirected + non-assortative + w random
+        results = multitensor_factorization<undirectedS>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 1:
+        // Directed + non-assortative + w random
+        v.resize(nof_vertices, nof_groups); // we need v
         results = multitensor_factorization(
-            edges_start, edges_end, edges_weight, w_init_defined,
+            edges_start, edges_end, edges_weight,
             nof_realizations, max_nof_iterations, nof_convergences,
-            labels, u, v, w, random_generator);
-    }
-    else
-    {
-        results = multitensor_factorization<boost::undirectedS>(
-            edges_start, edges_end, edges_weight, w_init_defined,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 2:
+        // Undirected + assortative + w random
+        results = multitensor_factorization<undirectedS, DiagonalTensor<double>>(
+            edges_start, edges_end, edges_weight,
             nof_realizations, max_nof_iterations, nof_convergences,
-            labels, u, u, w, random_generator);
+            labels, u, v, affinity, random_generator);
+        break;
+    case 3:
+        // Directed + assortative + w random
+        v.resize(nof_vertices, nof_groups); // we need v
+        results = multitensor_factorization<bidirectionalS, DiagonalTensor<double>>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 4:
+        // Undirected + non-assortative + w from file
+        results = multitensor_factorization<undirectedS, SymmetricTensor<double>,
+                                            init_symmetric_tensor_from_initial<SymmetricTensor<double>>>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 5:
+        // Directed + non-assortative + w from file
+        v.resize(nof_vertices, nof_groups); // we need v
+        results = multitensor_factorization<bidirectionalS, SymmetricTensor<double>,
+                                            init_symmetric_tensor_from_initial<SymmetricTensor<double>>>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 6:
+        // Undirected + assortative + w from file
+        results = multitensor_factorization<undirectedS, DiagonalTensor<double>,
+                                            init_symmetric_tensor_from_initial<DiagonalTensor<double>>>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    case 7:
+        // Directed + assortative + w from file
+        v.resize(nof_vertices, nof_groups); // we need v
+        results = multitensor_factorization<bidirectionalS, DiagonalTensor<double>,
+                                            init_symmetric_tensor_from_initial<DiagonalTensor<double>>>(
+            edges_start, edges_end, edges_weight,
+            nof_realizations, max_nof_iterations, nof_convergences,
+            labels, u, v, affinity, random_generator);
+        break;
+    default:
+        throw std::runtime_error(
+            "[multitensor] Something went wrong with the algorithm type. It should be >= 0 and < 8, intead got " +
+            std::to_string(selection) + "\n");
     }
 
     // Write output files
-    boost::filesystem::create_directory(output_directory);
-    const auto dpath = boost::filesystem::canonical(output_directory);
+    filesystem::create_directory(output_directory);
+    const auto dpath = filesystem::canonical(output_directory);
     std::cout << "Writing output files in directory " << dpath << std::endl;
     write_info_file(dpath / INFO_FILENAME, results);
-    write_affinity_file(dpath / WOUT_FILENAME, w, results);
+    write_affinity_file(dpath / WOUT_FILENAME, affinity, results, nof_groups, nof_layers);
     write_membership_file(dpath / UOUT_FILENAME, labels, u, results);
-    if (graph_type == "directed")
+    if (directed_graph)
     {
         write_membership_file(dpath / VOUT_FILENAME, labels, v, results);
     }

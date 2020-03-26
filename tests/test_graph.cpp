@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(test_vertex_properties)
     BOOST_TEST(prop.label == label);
 
     // Unsigned ints
-    unsigned int label2 = static_cast<unsigned int>(rng() % 1000);
-    VertexProperty<unsigned int> prop2{label2};
+    size_t label2 = static_cast<size_t>(rng() % 1000);
+    VertexProperty<size_t> prop2{label2};
     BOOST_TEST(prop2.label == label2);
 
     // Ints
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_vertex_properties)
 BOOST_AUTO_TEST_CASE(test_empty_network)
 {
     // Building
-    std::vector<unsigned int> vec_empty{};
+    std::vector<size_t> vec_empty{};
     BOOST_TEST(vec_empty.size() == 0);
     Network A(vec_empty, vec_empty, vec_empty);
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_empty_network)
 BOOST_AUTO_TEST_CASE(test_network_wo_edges)
 {
     // Building
-    std::vector<unsigned int> empty_weights(edges_weight.size());
+    std::vector<size_t> empty_weights(edges_weight.size());
     Network A(edges_start, edges_end, empty_weights);
 
     BOOST_TEST(A.num_layers() == nof_layers);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_full_network)
 
     // Check vertices
     // Between layers
-    std::vector<std::set<unsigned int>> A_vertices_labels(A.num_layers());
+    std::vector<std::set<size_t>> A_vertices_labels(A.num_layers());
     for (size_t i = 0; i < boost::num_vertices(A(0)); i++)
     {
         for (size_t alpha = 0; alpha < A.num_layers(); alpha++)
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_full_network)
 
     // Check edges
     // First build the mapping from the theoretical data
-    using map_t = std::map<std::tuple<unsigned int, unsigned int>, unsigned int>;
+    using map_t = std::map<std::tuple<size_t, size_t>, size_t>;
     std::vector<map_t> vec_of_maps(A.num_layers());
     for (size_t i = 0; i < edges_start.size(); i++)
     {
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_full_network)
 
     // Compare lists
     // NB: u_labels_theo contains labels, u_list contains indices
-    std::vector<unsigned int> u_labels, v_labels;
+    std::vector<size_t> u_labels, v_labels;
     for (auto i : *u_list)
     {
         u_labels.emplace_back(A(0)[i].label);
@@ -176,6 +176,15 @@ BOOST_AUTO_TEST_CASE(test_full_network)
     std::sort(v_labels.begin(), v_labels.end());
     BOOST_TEST(u_labels == u_labels_theo);
     BOOST_TEST(v_labels == v_labels_theo);
+
+    // Extract labels
+    std::vector<size_t> all_labels, all_labels_theo;
+    for (size_t i = 0; i < A.num_vertices(); i++)
+    {
+        all_labels_theo.emplace_back(A(0)[i].label);
+    }
+    A.extract_vertices_labels(all_labels);
+    BOOST_TEST(all_labels == all_labels_theo);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

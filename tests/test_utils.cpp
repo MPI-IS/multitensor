@@ -1,7 +1,7 @@
 /*!
  * @file
  *
- * @brief Testing some functionalities found in the parameters header..
+ * @brief Testing some functionalities found in the parameters header.
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
  */
@@ -23,8 +23,8 @@ using namespace multitensor::utils;
 
 BOOST_FIXTURE_TEST_SUITE(tests_utils, fixture_rng)
 
-// Checks the initialization of a Report
-BOOST_AUTO_TEST_CASE(test_report_init)
+// Checks the Report class
+BOOST_AUTO_TEST_CASE(test_report)
 {
     Report results{};
     BOOST_TEST(results.nof_realizations == 0);
@@ -34,12 +34,8 @@ BOOST_AUTO_TEST_CASE(test_report_init)
     BOOST_TEST(results.vec_term_reason.size() == 0);
     BOOST_TEST(results.duration == 0);
     BOOST_TEST(results.seed == 0);
-}
 
-// Checks the Report function returning the best likelihood
-BOOST_AUTO_TEST_CASE(test_report_max_L2)
-{
-    Report results{};
+    // Likelihood
     double max_L2 = std::numeric_limits<double>::lowest();
     for (size_t i = 0; i < (rng() % 100); i++)
     {
