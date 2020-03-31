@@ -6,8 +6,8 @@
 # This file contains the global compilation settings
 #
 
-# support for C++14
-set(CMAKE_CXX_STANDARD 14)
+# support for C++17
+set(CMAKE_CXX_STANDARD 17)
 
 # add version
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPROJECT_VERSION='${CMAKE_PROJECT_VERSION}' ")

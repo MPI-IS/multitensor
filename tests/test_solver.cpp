@@ -6,38 +6,38 @@
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
  */
 
-#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <random>
 #include <ctime>
 #include <vector>
+#include <cstddef>
+#include <boost/test/unit_test.hpp>
 
 #include "multitensor/parameters.hpp"
+#include "multitensor/initialization.hpp"
 #include "multitensor/solver.hpp"
+#include "fixtures.hpp"
 
+using namespace multitensor::graph;
+using namespace multitensor::initialization;
 using namespace multitensor::solver;
+using namespace multitensor::tensor;
 
 // Fixture
-struct fixture_solver
+struct fixture_solver : fixture_global
 {
-    std::mt19937_64 rng;
-    std::time_t seed;
-    size_t nof_nodes, nof_groups, nof_layers;
-    unsigned int nof_realizations, max_nof_iterations, nof_convergences;
+    unsigned int nof_realizations, max_nof_iterations, nof_convergences, nof_groups;
 
     fixture_solver()
-        : seed(std::time(nullptr))
+        : nof_realizations(rng() % 10 + 1),
+          max_nof_iterations(rng() % 10 + 1),
+          nof_convergences(rng() % 10 + 1),
+          nof_groups(rng() % 10 + 1)
     {
-        BOOST_TEST_MESSAGE("In fixture, the seed is " << seed);
-        rng.seed(seed);
-        nof_realizations = static_cast<unsigned int>((rng() % 10)) + 1;
-        max_nof_iterations = static_cast<unsigned int>(rng() % 10) + 1;
-        nof_convergences = static_cast<unsigned int>(rng() % 10) + 1;
-        nof_nodes = size_t(rng() % 10) + 2;
-        nof_groups = size_t(rng() % 10) + 2;
-        nof_layers = size_t(rng() % 10) + 1;
     }
 };
+
+using namespace multitensor;
 
 BOOST_FIXTURE_TEST_SUITE(tests_solver, fixture_solver)
 
@@ -46,13 +46,20 @@ BOOST_AUTO_TEST_CASE(test_solver_init)
 {
     Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
     BOOST_TEST(solver.num_real() == nof_realizations);
-    BOOST_TEST(solver.max_iterations() == max_nof_iterations);
+    BOOST_TEST(solver.max_iter() == max_nof_iterations);
+    BOOST_TEST(solver.num_conv() == nof_convergences);
 }
-// Checks running the solver
-BOOST_AUTO_TEST_CASE(test_solver_run)
+
+// Checks running the solver on an empty network (corner case)
+BOOST_AUTO_TEST_CASE(test_solver_run_empty_network)
 {
     Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
-    //BOOST_CHECK_NO_THROW(solver.run(nof_nodes, nof_groups, nof_layers, std::vector<size_t>(0), std::vector<size_t>(0), rng));
+    std::vector<unsigned int> vec_empty{};
+    Tensor<double> w(nof_groups, nof_groups, nof_layers);
+    Tensor<double> u(nof_vertices, nof_groups), v(nof_vertices, nof_groups);
+    Network A(vec_empty, vec_empty, vec_empty);
+
+    BOOST_CHECK_NO_THROW(solver.run(u_list, v_list, A, w, u, v, rng));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
