@@ -14,8 +14,7 @@
 #include <string>
 #include <cstddef>
 #include <set>
-#include <boost/random.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "multitensor/parameters.hpp"
 #include "multitensor/graph.hpp"
@@ -31,32 +30,42 @@ namespace multitensor
 /*!
  * @brief Multitensor factorization algorithm call.
  *
+ * @tparam direction_t The type of graph (directed or undirected)
+ * @tparam affinity_t The type of tensor for the affinity
+ * @tparam affinity_init_t The type of the initialization for the affinity
  * @tparam vertex_t Edges label type
  * @tparam weight_t The type of an edge weight
  *
  * @param[in] edges_start Labels of vertices where an edge starts
  * @param[in] edges_end Labels of vertices where an edge ends
  * @param[in] edges_weight Edges weights
- * @param[in] output_directory Name of the output directory
- * @param[in] nof_groups Number of groups
  * @param[in] nof_realizations Number of realizations
  * @param[in] max_nof_iterations Maximum number of iterations in each realization
  * @param[in] nof_convergences Number of successive passed convergence criteria for declaring the results converged
+ * @param[in,out] labels Vertices labels
+ * @param[in,out] u Tensors linking outgoing vertices
+ * @param[in,out] v Tensors linking incoming vertices
+ * @param[in,out] affinity Affinity values
  *
  * @returns Detailed results of the algorithm.
  */
-template <class vertex_t,
+template <class direction_t = boost::bidirectionalS,
+          class affinity_t = tensor::SymmetricTensor<double>,
+          class affinity_init_t = initialization::init_symmetric_tensor_random,
+          class vertex_t,
           class weight_t,
-          class w_init_t = initialization::init_tensor_symmetric_random,
-          class uv_init_t = initialization::init_tensor_partial_random>
+          class random_t = utils::RandomGenerator<>>
 utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start,
                                         const std::vector<vertex_t> &edges_end,
                                         const std::vector<weight_t> &edges_weight,
-                                        const std::string &output_directory,
-                                        const size_t &nof_groups,
                                         const size_t &nof_realizations,
                                         const size_t &max_nof_iterations,
-                                        const size_t &nof_convergences)
+                                        const size_t &nof_convergences,
+                                        std::vector<vertex_t> &labels,
+                                        tensor::Matrix<double> &u,
+                                        tensor::Matrix<double> &v,
+                                        std::vector<double> &affinity,
+                                        random_t random_generator = random_t{})
 {
     // Definitions and checks
     // Number of edges
@@ -76,16 +85,14 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
             std::to_string(edges_end.size()) + " target vertices\n");
     }
 
-    // Number of vertices
-    const size_t nof_vertices = utils::calculate_num_vertices(edges_start, edges_end);
-    if (nof_vertices < 2)
+    // Number of layers
+    if (edges_weight.size() % nof_edges != 0)
     {
         throw std::runtime_error(
-            "[multitensor] Number of vertices should be at least 2, intead got " +
-            std::to_string(nof_vertices) + "\n");
+            "[multitensor] Number of weights should be a multiple of the number of edges, intead got " +
+            std::to_string(edges_weight.size()) + " weights and " +
+            std::to_string(nof_edges) + " edges\n");
     }
-
-    // Number of layers
     const size_t nof_layers = edges_weight.size() / nof_edges;
     if (nof_layers < 1)
     {
@@ -95,11 +102,48 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     }
 
     // Number of groups
+    size_t nof_groups(0), affinity_size(0);
+    // Assortative case
+    if constexpr (std::is_same_v<affinity_t, tensor::DiagonalTensor<double>>)
+    {
+        nof_groups = static_cast<size_t>(affinity.size() / nof_layers);
+        affinity_size = nof_groups * nof_layers;
+    }
+    else // Non-assortative case
+    {
+        nof_groups = static_cast<size_t>(std::sqrt(affinity.size() / nof_layers));
+        affinity_size = nof_groups * nof_groups * nof_layers;
+    }
     if (nof_groups < 2)
     {
         throw std::runtime_error(
             "[multitensor] Number of groups should be at least 2, intead got " +
             std::to_string(nof_groups) + "\n");
+    }
+    if (affinity_size != affinity.size())
+    {
+        throw std::runtime_error(
+            "[multitensor] W size should have the form (k x k x nof_layers) with k = " +
+            std::to_string(nof_groups) +
+            " and nof_layers = " + std::to_string(nof_layers) +
+            ", intead got " + std::to_string(affinity.size()) + "\n");
+    }
+
+    // Number of vertices
+    const size_t nof_vertices = utils::get_num_vertices(edges_start, edges_end);
+    if (nof_vertices < 2)
+    {
+        throw std::runtime_error(
+            "[multitensor] Number of vertices should be at least 2, intead got " +
+            std::to_string(nof_vertices) + "\n");
+    }
+    if ((nof_vertices * nof_groups) != u.size())
+    {
+        throw std::runtime_error(
+            "[multitensor] U size should have the form (k x nof_vertices) with k = " +
+            std::to_string(nof_groups) +
+            " and nof_vertices = " + std::to_string(nof_vertices) +
+            ", intead got " + std::to_string(u.size()) + "\n");
     }
 
     // Check number of realizations
@@ -131,59 +175,44 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     clock_t::time_point start_clock = clock_t::now();
 
     // Build multilayer network
-    graph::Network A(edges_start, edges_end, edges_weight);
+    graph::Network<vertex_t, direction_t> A(edges_start, edges_end, edges_weight);
     A.print_graph_stats();
 
     // Extract indices of vertices that have at least one out/in-going edges
-    std::vector<size_t> index_vertices_with_out_edges;
-    std::vector<size_t> index_vertices_with_in_edges;
-    A.extract_vertices_with_edges(index_vertices_with_out_edges, index_vertices_with_in_edges);
-    assert(index_vertices_with_out_edges.size() <= nof_vertices);
-    assert(index_vertices_with_in_edges.size() <= nof_vertices);
+    auto u_list = std::make_shared<std::vector<size_t>>();
+    auto v_list = std::make_shared<std::vector<size_t>>();
+    A.extract_vertices_with_edges(u_list, v_list);
 
-    // Random generator
-    // TO DO: improve, no real seed!
-    boost::mt19937 gen;                               // random real and integer number generators
-    boost::uniform_real<double> const uni_dist(0, 1); // uniform distribution for real numbers
-    // picks a random real number in (0,1)
-    boost::variate_generator<boost::mt19937 &, boost::uniform_real<>> random_generator(gen, uni_dist);
-
-    // Affinity tensor for the groups
-    tensor::Tensor<double> w(nof_groups, nof_groups, nof_layers);
-    // Tensors linking vertices in groups
-    tensor::Tensor<double> u(nof_vertices, nof_groups), v(nof_vertices, nof_groups);
+    // Create affinity tensor by copy
+    // @todo Later on, we might use a reference to the orginal vector instead
+    affinity_t w(nof_groups, nof_layers, affinity);
 
     // Run solver
     // Diagnostics
     std::cout << "Starting algorithm...\n"
-              << "\t- Number of vertices: " << nof_vertices << " ("
-              << index_vertices_with_out_edges.size() << " with outgoing edges, "
-              << index_vertices_with_in_edges.size() << " with incoming edges)\n"
+              << "\t- Number of vertices: " << nof_vertices << "\n"
               << "\t- Number of layers: " << nof_layers << "\n"
               << "\t- Number of groups: " << nof_groups << "\n"
               << "\t- Number of realizations: " << nof_realizations << "\n"
               << std::endl;
     solver::Solver solver(nof_realizations, max_nof_iterations, nof_convergences);
-    utils::Report results = solver.run<w_init_t, uv_init_t>(
-        index_vertices_with_out_edges, index_vertices_with_in_edges, A, w, u, v, random_generator);
+    utils::Report results = solver.run<affinity_init_t>(
+        *u_list, *v_list, A, u, v, w, random_generator);
 
-    // Update duration
+    // Copy Network labels for outputs and copy affinity data
+    // @todo improve, too much data copy
+    A.extract_vertices_labels(labels);
+    affinity = w.get_data();
+
+    // Update duration and seed
     std::chrono::duration<double, std::milli> time_spam_ms = clock_t::now() - start_clock;
     results.duration = time_spam_ms.count() / 1000.;
+    results.seed = random_generator.seed;
 
     // Outputs
     std::cout << "Done!" << std::endl;
     printf("Likelihood: %8.3e\n", results.max_L2());
     printf("Duration: %8.3e s\n", results.duration);
-
-    // Write files - might be moved somewhere else later on
-    boost::filesystem::create_directory(output_directory);
-    auto dpath = boost::filesystem::canonical(output_directory);
-    std::cout << "Writing output files in directory " << dpath << std::endl;
-    utils::write_affinity_file(dpath / WOUT_FILENAME, w, results);
-    utils::write_membership_file(dpath / UOUT_FILENAME, A, u, results);
-    utils::write_membership_file(dpath / VOUT_FILENAME, A, v, results);
-    utils::write_info_file(dpath / INFO_FILENAME, results);
 
     // Returns
     return results;

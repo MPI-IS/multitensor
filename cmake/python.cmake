@@ -25,6 +25,7 @@ if(MULTI_TENSOR_PYTHON_EXTENSIONS)
         NAME "command-line-python-run"
         COMMAND ${Python3_EXECUTABLE}
             "${CMAKE_CURRENT_BINARY_DIR}/main.py"
+            -a=main/adjacency.dat
             -k=2
             -l=4
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/data

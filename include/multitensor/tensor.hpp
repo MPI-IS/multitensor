@@ -12,7 +12,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cstddef>
-#include <boost/filesystem.hpp>
+#include <cassert>
 
 #include "multitensor/parameters.hpp"
 
@@ -24,14 +24,14 @@ namespace tensor
 {
 
 /*!
- * @brief Class for a tensor of order 3.
+ * @brief Base class for a tensor of order 3.
  *
  * @tparam scalar_t Type of the tensor values
  */
 template <class scalar_t>
 class Tensor
 {
-private:
+protected:
     dimension_t nrows;
     dimension_t ncols;
     dimension_t ntubes; // 3rd component
@@ -58,6 +58,9 @@ private:
     }
 
 public:
+    //! @brief Default constructor
+    Tensor() = default;
+
     /*!
      * @brief Tensor constructor
      *
@@ -65,68 +68,51 @@ public:
      * @param[in] ncols Number of columns
      * @param[in] ntubes Number of tubes/layers
      */
-    Tensor(dimension_t nrows, dimension_t ncols, dimension_t ntubes = 1)
+    Tensor(dimension_t nrows, dimension_t ncols, dimension_t ntubes)
+        : Tensor()
+    {
+        resize(nrows, ncols, ntubes);
+    }
+
+    /*!
+     * @brief Tensor constructor from a vector
+     *
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     * @param[in] ntubes Number of tubes/layers
+     * @param[in] vec Data
+     */
+    Tensor(dimension_t nrows, dimension_t ncols, dimension_t ntubes, const std::vector<scalar_t> &vec)
         : nrows(nrows),
           ncols(ncols),
           ntubes(ntubes),
-          data(nrows * ncols * ntubes, scalar_t(0))
+          data(vec)
     {
-    }
 
-    /*!
-     * @brief Initialize a symmetric tensor randomly
-     *
-     * @tparam random_t Random generator type
-     *
-     * @param[in,out] random_generator Random generator used for the initialization
-     *
-     * This function intializes randomly a tensor using the provided random number generator.
-     * To facilitate convergence, it is initialized in a symmetric fashion.
-     */
-    template <class random_t>
-    void randomize_symmetric(random_t &random_generator)
-    {
-        assert(nrows == ncols);
-        for (size_t alpha = 0; alpha < ntubes; alpha++)
+        if (data.size() != nrows * ncols * ntubes)
         {
-            for (size_t i = 0; i < nrows; i++)
-            {
-                for (size_t j = i; j < ncols; j++)
-                {
-                    if (i == j)
-                    {
-                        operator()(i, j, alpha) = random_generator();
-                    }
-                    else
-                    {
-                        operator()(i, j, alpha) = operator()(j, i, alpha) = random_generator();
-                    }
-                }
-            }
+            throw std::runtime_error(
+                "[multitensor::tensor] Dimensions inconsistent with vector size: " +
+                std::to_string(nrows) + "x" + std::to_string(ncols) + "x" +
+                std::to_string(ntubes) + " != " + std::to_string(data.size()) + "\n");
         }
     }
 
     /*!
-     * @brief Initialize specific values of a tensor randomly
+     * @brief Function resizing the tensor
      *
-     * @tparam random_t Random generator type
-     *
-     * @param[in] elements Indices of elements to initialize randomly
-     * @param[in,out] random_generator Random generator used for the initialization
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     * @param[in] ntubes Number of tubes/layers
      */
-    template <class random_t>
-    void randomize_partial(const std::vector<size_t> &elements, random_t &random_generator)
+    void resize(dimension_t nrows_, dimension_t ncols_, dimension_t ntubes_)
     {
-        for (size_t alpha = 0; alpha < ntubes; alpha++)
-        {
-            for (size_t k = 0; k < ncols; k++)
-            {
-                for (auto j : elements)
-                {
-                    operator()(j, k, alpha) = random_generator();
-                }
-            }
-        }
+        nrows = nrows_;
+        ncols = ncols_;
+        ntubes = ntubes_;
+
+        data.clear();
+        data.assign(nrows * ncols * ntubes, scalar_t(0));
     }
 
     /*!
@@ -171,6 +157,313 @@ public:
     auto dims() const noexcept
     {
         return std::make_tuple(nrows, ncols, ntubes);
+    }
+
+    //! @brief Access the data vector
+    const std::vector<scalar_t> &get_data() const noexcept
+    {
+        return data;
+    }
+}; // end class tensor
+
+/*!
+ * @brief Class for a symmetric tensor.
+ *
+ * @tparam scalar_t Type of the tensor values
+ */
+template <class scalar_t>
+class SymmetricTensor : public Tensor<scalar_t>
+{
+public:
+    //! @brief Default constructor
+    using Tensor<scalar_t>::Tensor;
+
+    /*!
+     * @brief SymmetricTensor constructor
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     */
+    SymmetricTensor(dimension_t nrows, dimension_t ntubes)
+        : Tensor<scalar_t>::Tensor(nrows, nrows, ntubes)
+    {
+    }
+
+    /*!
+     * @brief SymmetricTensor constructor from a vector
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     * @param[in] vec Data
+     */
+    SymmetricTensor(dimension_t nrows, dimension_t ntubes, const std::vector<scalar_t> &vec)
+        : Tensor<scalar_t>::Tensor(nrows, nrows, ntubes, vec)
+    {
+    }
+
+    /*!
+     * @brief Function resizing the tensor
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     */
+    void resize(dimension_t nrows, dimension_t ntubes)
+    {
+        Tensor<scalar_t>::resize(nrows, nrows, ntubes);
+    }
+};
+
+/*!
+ * @brief Class for a matrix
+ *
+ * @tparam scalar_t Type of the tensor values
+ *
+ * @note This is a single layer tensor
+ */
+template <class scalar_t>
+class Matrix : public Tensor<scalar_t>
+{
+public:
+    //! @brief Default constructor
+    using Tensor<scalar_t>::Tensor;
+
+    /*!
+     * @brief Matrix constructor
+     *
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     */
+    Matrix(dimension_t nrows, dimension_t ncols)
+        : Tensor<scalar_t>::Tensor(nrows, ncols, 1)
+    {
+    }
+
+    /*!
+     * @brief Matrix constructor from a vector
+     *
+     * @param[in] nrows Number of rows
+     * @param[in] ncols Number of columns
+     * @param[in] vec Data
+     */
+    Matrix(dimension_t nrows, dimension_t ncols, const std::vector<scalar_t> &vec)
+        : Tensor<scalar_t>::Tensor(nrows, ncols, 1, vec)
+    {
+    }
+
+    /*!
+     * @brief Function resizing the matrix
+     *
+     * @param[in] nrows Number of rows/columnsrows
+     * @param[in] ncols Number of columns
+     */
+    void resize(dimension_t nrows, dimension_t ncols)
+    {
+        Tensor<scalar_t>::resize(nrows, ncols, 1);
+    }
+
+    /*!
+     * @brief Returns a reference to an element of the matrix
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     *
+     * @returns Tensor element
+     */
+    scalar_t &operator()(const size_t i, const size_t j)
+    {
+        return Tensor<scalar_t>::operator()(i, j, 0);
+    }
+
+    /*!
+     * @brief Returns a const reference to an element in the matrix
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     *
+     * @returns Tensor element
+     */
+    const scalar_t &operator()(const size_t i, const size_t j) const
+    {
+        return Tensor<scalar_t>::operator()(i, j, 0);
+    }
+};
+
+/*!
+ * @brief Class for a diagonal tensor
+ *
+ * @tparam scalar_t Type of the tensor values
+ *
+ * @note The values are non-0 only on the diagonals
+ */
+template <class scalar_t>
+class DiagonalTensor : public Tensor<scalar_t>
+{
+public:
+    //! @brief Default constructor
+    using Tensor<scalar_t>::Tensor;
+
+    /*!
+     * @brief DiagonalTensor constructor
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     */
+    DiagonalTensor(dimension_t nrows, dimension_t ntubes)
+        : Tensor<scalar_t>::Tensor(nrows, 1, ntubes)
+    {
+    }
+
+    /*!
+     * @brief DiagonalTensor constructor from a vector
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     * @param[in] vec Data
+     */
+    DiagonalTensor(dimension_t nrows, dimension_t ntubes, const std::vector<scalar_t> &vec)
+        : Tensor<scalar_t>::Tensor(nrows, 1, ntubes, vec)
+    {
+    }
+
+    /*!
+     * @brief Function resizing the DiagonalTensor
+     *
+     * @param[in] nrows Number of rows/columns
+     * @param[in] ntubes Number of tubes/layers
+     */
+    void resize(dimension_t nrows, dimension_t ntubes)
+    {
+        Tensor<scalar_t>::resize(nrows, 1, ntubes);
+    }
+
+    /*!
+     * @brief Returns a reference to an element of the DiagonalTensor
+     *
+     * @param[in] i Row index
+     * @param[in] alpha Tube/layer index
+     *
+     * @returns Tensor element
+     */
+    scalar_t &operator()(const size_t i, const size_t alpha)
+    {
+        return Tensor<scalar_t>::operator()(i, 0, alpha);
+    }
+
+    /*!
+     * @brief Returns a const reference to an element in the DiagonalTensor
+     *
+     * @param[in] i Row index
+     * @param[in] alpha Tube/layer index
+     *
+     * @returns Tensor element
+     */
+    const scalar_t &operator()(const size_t i, const size_t alpha) const
+    {
+        return Tensor<scalar_t>::operator()(i, 0, alpha);
+    }
+};
+
+/*!
+ * @brief Container for transposing a tensor
+ *
+ * @tparam tensor_t Tensor type
+ */
+template <class tensor_t>
+class Transpose
+{
+private:
+    tensor_t &tensor;
+
+public:
+    /*
+     * @brief Constructor
+     *
+     * param[in] tensor Tensor to transpose
+     */
+    Transpose(tensor_t &tensor)
+        : tensor(tensor)
+    {
+    }
+
+    using scalar_t = std::decay_t<decltype(tensor(0, 0))>;
+
+    /*!
+     * @brief Returns a reference to an element of the transposed tensor
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     * @param[in] alpha Tube/layer index
+     *
+     * @returns Tensor element
+     */
+    scalar_t &operator()(const size_t i, const size_t j, const size_t alpha)
+    {
+        return tensor(j, i, alpha);
+    }
+    /*!
+     * @brief Returns a const reference to an element in the transposed tensor
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     * @param[in] alpha Tube/layer index
+     *
+     * @returns Tensor element
+     */
+    const scalar_t &operator()(const size_t i, const size_t j, const size_t alpha) const
+    {
+        return tensor(j, i, alpha);
+    }
+
+    /*!
+     * @brief Returns a reference to an element of the transposed tensor
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     *
+     * @returns Tensor element
+     */
+    scalar_t &operator()(const size_t i, const size_t j)
+    {
+        // Tr(DiagTensor) = DiagTensor
+        if constexpr (std::is_same_v<tensor_t, DiagonalTensor<double>>)
+        {
+            return tensor(i, j);
+        }
+        return tensor(j, i);
+    }
+    /*!
+     * @brief Returns a const reference to an element in the transposed tensor
+     *
+     * @param[in] i Row index
+     * @param[in] j Column index
+     *
+     * @returns Tensor element
+     */
+    const scalar_t &operator()(const size_t i, const size_t j) const
+    {
+        // Tr(DiagTensor) = DiagTensor
+        if constexpr (std::is_same_v<tensor_t, DiagonalTensor<double>>)
+        {
+            return tensor(i, j);
+        }
+        return tensor(j, i);
+    }
+
+    /*!
+     * @brief The dimensions of the transpose
+     *
+     * @returns Tuple with the three dimensions
+     */
+    auto dims() const noexcept
+    {
+        // Tr(DiagTensor) = DiagTensor
+        if constexpr (std::is_same_v<tensor_t, DiagonalTensor<double>>)
+        {
+            return tensor.dims();
+        }
+        return std::make_tuple(std::get<1>(tensor.dims()),
+                               std::get<0>(tensor.dims()),
+                               std::get<2>(tensor.dims()));
     }
 };
 

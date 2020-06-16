@@ -9,4 +9,4 @@ __pycache__
 u_*.dat
 v_*.dat
 w_*.dat
-out*.dat
+*out*.dat

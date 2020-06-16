@@ -174,6 +174,11 @@ void initialize_w(vector<vector<vector<double>>> &w, istream &file)
     int a = -1;
     int L = (int)w[0][0].size();
     int K = (int)w.size();
+
+    for (int a = 0; a < L; a++)
+        for (int k = 0; k < K; k++)
+            for (int q = 0; q < K; q++)
+                w[k][q][a] = 0;
     for (string line; getline(file, line);)
     {
         std::istringstream is(line);

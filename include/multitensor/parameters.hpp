@@ -27,6 +27,9 @@ typedef size_t dimension_t;
 //! @brief Absolute precision
 const double EPS_PRECISION = 1e-6;
 
+//! @brief Noise magnitude
+const double EPS_NOISE = 0.1;
+
 //! @brief Enumeration of the reasons for termination
 enum termination_reason
 {

@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstddef>
+#include <memory>
 
 #include "multitensor/graph.hpp"
 #include "multitensor/parameters.hpp"
@@ -29,259 +30,213 @@ namespace solver
 class Solver
 {
 private:
-    unsigned int nof_realizations;
-    unsigned int max_nof_iterations;
-    unsigned int nof_convergences; // number of times the convergence criterium is satisfied before stopping the simulation
+    size_t nof_realizations;
+    size_t max_nof_iterations;
+    size_t nof_convergences; // number of times the convergence criterium is satisfied before stopping the simulation
 
     /*!
-     * @brief Update the u component
+     * @brief Update the u and v components
      *
-     * @tparam graph_t Graph type
+     * @tparam get_edges_t Class type for extracting edges and vertices
+     * @tparam affinity_t Affinity matrix type
+     * @tparam network_t Network type
      *
-     * @param[in] u_list Indices of vertices with at least one outgoing edge
-     * @param[in] v_list Indices of vertices with at least one incoming edge
+     * @param[in] numerator_list List of vertices used to calculate the numerator
+     * @param[in] denominator_list List of vertices used to calculate the denominator
      * @param[in] A Network
-     * @param[in, out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in, out] w_old Affinity tensor (previous step)
-     * @param[in, out] u_old Tensor linking vertices in groups for outgoing edges (previous step)
-     * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
+     * @param[in] w Affinity tensor
+     * @param[in] mat_fixed Matrix fixed used for computation
+     * @param[in,out] mat_to_update Matrix to update
      */
-    template <class network_t>
-    double update_u(const std::vector<size_t> &u_list,
-                    const std::vector<size_t> &v_list,
-                    const network_t &A,
-                    tensor::Tensor<double> &u,
-                    tensor::Tensor<double> &w_old,
-                    tensor::Tensor<double> &u_old,
-                    tensor::Tensor<double> &v_old)
+    template <class edges_vertices_t,
+              class affinity_t,
+              class network_t>
+    void update_vertices(const std::vector<size_t> &numerator_list,
+                         const std::vector<size_t> &denominator_list,
+                         const network_t &A,
+                         const affinity_t &w,
+                         const tensor::Matrix<double> &mat_fixed,
+                         tensor::Matrix<double> &mat_to_update,
+                         edges_vertices_t edges_vertices_proxy = edges_vertices_t{})
     {
-        using graph_t = std::decay_t<decltype(A(0))>;
+        using direction_t = typename std::decay_t<decltype(A)>::direction_type;
 
-        unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_layers(A.num_layers());
+        // Booleans used are compile-time to check if
+        //   * we are in the assortative case
+        //   * we are using directed network
+        constexpr bool assortative = std::is_same_v<affinity_t, tensor::DiagonalTensor<double>> ||
+                                     std::is_same_v<affinity_t, tensor::Transpose<tensor::DiagonalTensor<double>>>;
+        constexpr bool directed = std::is_same_v<direction_t, boost::bidirectionalS>;
 
-        graph::out_edge_iterator<graph_t> eit, eend;
-        double Z_u, Du, w_k, dist_u, u_ik, rho_ijkq, Zij_a;
-        dist_u = 0;
+        size_t nof_groups(std::get<0>(w.dims()));
+        size_t nof_layers(A.num_layers());
+        tensor::Matrix<double> mat_to_update_old(mat_to_update);
+
+        // With the undirected network, references to mat_fixed and mat_to_update are the same
+        // so when mat_to_update is updated, mat_fixed will be updated as well.
+        // In this case we need to copy of mat_fixed for mat_fixed_old.
+        const tensor::Matrix<double> *mat_fixed_old = nullptr;
+        if constexpr (directed)
+        {
+            mat_fixed_old = &mat_fixed;
+        }
+        else
+        {
+            mat_fixed_old = new tensor::Matrix<double>(mat_fixed);
+        }
+
+        double Z, D, w_k, val_ik, rho_ijkq, Zij_a;
 
         for (size_t k = 0; k < nof_groups; k++)
         {
             // Calculate Z_u
-            Z_u = 0;
-            for (size_t l = 0; l < nof_groups; l++)
+            Z = 0;
+            // Assortative case
+            if constexpr (assortative)
             {
-                w_k = Du = 0;
+                w_k = D = 0;
                 for (size_t a = 0; a < nof_layers; a++)
                 {
-                    w_k += w_old(k, l, a);
+                    w_k += w(k, a);
                 }
-                for (auto i : v_list)
+                for (auto i : denominator_list)
                 {
-                    Du += v_old(i, l);
+                    D += (*mat_fixed_old)(i, k);
                 }
-                Z_u += w_k * Du;
+                Z += w_k * D;
+            }
+            else // Non-assortative case
+            {
+                for (size_t l = 0; l < nof_groups; l++)
+                {
+                    w_k = D = 0;
+                    for (size_t a = 0; a < nof_layers; a++)
+                    {
+                        w_k += w(k, l, a);
+                    }
+                    for (auto i : denominator_list)
+                    {
+                        D += (*mat_fixed_old)(i, l);
+                    }
+                    Z += w_k * D;
+                }
             }
 
-            if (Z_u > EPS_PRECISION)
+            if (Z > EPS_PRECISION)
             {
-                for (auto i : u_list)
+                for (auto i : numerator_list)
                 {
-                    // Update only if u_ik > 0
-                    if (u_old(i, k) > EPS_PRECISION)
+                    // Update only if val_ik > 0
+                    if (mat_to_update_old(i, k) > EPS_PRECISION)
                     {
                         // Calculate the numerator
-                        u_ik = 0;
+                        val_ik = 0;
                         for (size_t a = 0; a < nof_layers; a++)
                         {
-                            for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
+                            for (auto its = edges_vertices_proxy.get_edges(i, A(a)); std::get<0>(its) != std::get<1>(its); ++std::get<0>(its))
                             {
-                                graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
+                                auto j = edges_vertices_proxy.get_vertex(std::get<0>(its), A(a));
 
                                 // Calculate rho_ijkq
                                 rho_ijkq = Zij_a = 0;
                                 for (size_t m = 0; m < nof_groups; m++)
                                 {
-                                    for (size_t l = 0; l < nof_groups; l++)
+                                    // Assortative case
+                                    if constexpr (assortative)
                                     {
-                                        Zij_a += u_old(i, m) * v_old(j, l) * w_old(m, l, a);
+                                        Zij_a += mat_to_update_old(i, m) * (*mat_fixed_old)(j, m) * w(m, a);
+                                    }
+                                    else // Non-assortative case
+                                    {
+                                        for (size_t l = 0; l < nof_groups; l++)
+                                        {
+                                            Zij_a += mat_to_update_old(i, m) * (*mat_fixed_old)(j, l) * w(m, l, a);
+                                        }
                                     }
                                 }
                                 if (Zij_a > EPS_PRECISION)
                                 {
-                                    for (size_t q = 0; q < nof_groups; q++)
+                                    // Assortative case
+                                    if constexpr (assortative)
                                     {
-                                        rho_ijkq += v_old(j, q) * w_old(k, q, a);
+                                        rho_ijkq += (*mat_fixed_old)(j, k) * w(k, a);
+                                    }
+                                    else // Non-assortative case
+                                    {
+                                        for (size_t q = 0; q < nof_groups; q++)
+                                        {
+                                            rho_ijkq += (*mat_fixed_old)(j, q) * w(k, q, a);
+                                        }
                                     }
                                     rho_ijkq /= Zij_a;
+                                    val_ik += rho_ijkq;
                                 }
-                                u_ik += rho_ijkq;
                             }
-                        } // return u_ik
+                        } // return val_ik
 
-                        u_ik = u_old(i, k) / Z_u * u_ik;
-                        if (std::abs(u_ik) < EPS_PRECISION)
+                        mat_to_update(i, k) = mat_to_update_old(i, k) / Z * val_ik;
+                        if (std::abs(mat_to_update(i, k)) < EPS_PRECISION)
                         {
-                            u_ik = 0;
+                            mat_to_update(i, k) = 0;
                         }
-                        u(i, k) = u_ik;
-
-                        // Calculate max difference
-                        dist_u = std::max(std::abs(u(i, k) - u_old(i, k)), dist_u);
                     }
                 }
             }
         } // end cycle over k
 
-        // Copy and return
-        u_old = u;
-        return dist_u;
-    }
-
-    /*!
-     * @brief Update the v component
-     *
-     * @tparam graph_t Graph type
-     *
-     * @param[in] u_list Indices of vertices with at least one outgoing edge
-     * @param[in] v_list Indices of vertices with at least one incoming edge
-     * @param[in] A Network
-     * @param[in, out] v Tensor linking vertices in groups for incoming edges
-     * @param[in, out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in, out] w_old Affinity tensor (previous step)
-     * @param[in, out] v_old Tensor linking vertices in groups for incoming edges (previous step)
-     */
-    template <class network_t>
-    double update_v(const std::vector<size_t> &u_list,
-                    const std::vector<size_t> &v_list,
-                    const network_t &A,
-                    tensor::Tensor<double> &v,
-                    tensor::Tensor<double> &u,
-                    tensor::Tensor<double> &w_old,
-                    tensor::Tensor<double> &v_old)
-    {
-        using graph_t = std::decay_t<decltype(A(0))>;
-
-        unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_layers(A.num_layers());
-
-        graph::out_edge_iterator<graph_t> eit, eend;
-        double Z_v, Dv, w_k, dist_v, v_ik, rho_ijkq, Zij_a;
-        dist_v = 0;
-
-        for (size_t k = 0; k < nof_groups; k++)
+        // Free memory if needed
+        if constexpr (!directed)
         {
-            // Calculate Z_u
-            Z_v = 0;
-            for (size_t l = 0; l < nof_groups; l++)
-            {
-                w_k = Dv = 0;
-                for (size_t a = 0; a < nof_layers; a++)
-                {
-                    w_k += w_old(l, k, a);
-                }
-                for (auto i : u_list)
-                {
-                    Dv += u(i, l);
-                }
-                Z_v += w_k * Dv;
-            }
-
-            if (Z_v > EPS_PRECISION)
-            {
-                for (auto i : v_list)
-                {
-                    // Update only if u_ik > 0
-                    if (v_old(i, k) > EPS_PRECISION)
-                    {
-                        // Calculate the numerator
-                        v_ik = 0;
-                        for (size_t a = 0; a < nof_layers; a++)
-                        {
-                            for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
-                            {
-                                graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
-
-                                // Calculate rho_ijkq
-                                rho_ijkq = Zij_a = 0;
-                                for (size_t m = 0; m < nof_groups; m++)
-                                {
-                                    for (size_t l = 0; l < nof_groups; l++)
-                                    {
-                                        Zij_a += u(j, m) * v_old(i, l) * w_old(m, l, a);
-                                    }
-                                }
-                                if (Zij_a > EPS_PRECISION)
-                                {
-                                    for (size_t q = 0; q < nof_groups; q++)
-                                    {
-                                        rho_ijkq += u(j, q) * w_old(q, k, a);
-                                    }
-                                    rho_ijkq /= Zij_a;
-                                }
-                                v_ik += rho_ijkq;
-                            }
-                        } // return u_ik
-
-                        v_ik = v_old(i, k) / Z_v * v_ik;
-                        if (std::abs(v_ik) < EPS_PRECISION)
-                        {
-                            v_ik = 0;
-                        }
-                        v(i, k) = v_ik;
-
-                        // Calculate max difference
-                        dist_v += std::abs(v(i, k) - v_old(i, k));
-                    }
-                }
-            }
-        } // end cycle over k
-
-        // Copy and return
-        v_old = v;
-        return dist_v;
+            delete mat_fixed_old;
+        }
     }
 
     /*!
      * @brief Update the affinity matrix
      *
-     * @tparam graph_t Graph type
+     * @tparam affinity_t Affinity matrix type
+     * @tparam network_t Network type
      *
      * @param[in] u_list Indices of vertices with at least one outgoing edge
      * @param[in] v_list Indices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in,out] w Affinity tensor
-     * @param[in,out] v Tensor linking vertices in groups for incoming edges
-     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in,out] w_old Affinity tensor (previous step)
+     * @param[in] u Matrix linking vertices in groups for outgoing edges
+     * @param[in] v Matrix linking vertices in groups for incoming edges
+     * @param[in,out] w Affinity matrix
+     *
+     * @note Handles the assortative and non-assortative cases.
+     * The implementation is a bit redundant but a this single-function implementation
+     * has been chosen to maintain consistency with update_vertices
      */
-    template <class network_t>
-    double update_w(const std::vector<size_t> &u_list,
-                    const std::vector<size_t> &v_list,
-                    const network_t &A,
-                    tensor::Tensor<double> &w,
-                    tensor::Tensor<double> &v,
-                    tensor::Tensor<double> &u,
-                    tensor::Tensor<double> &w_old)
+    template <class affinity_t,
+              class network_t>
+    void update_affinity(const std::vector<size_t> &u_list,
+                         const std::vector<size_t> &v_list,
+                         const network_t &A,
+                         const tensor::Matrix<double> &u,
+                         const tensor::Matrix<double> &v,
+                         affinity_t &w)
     {
         using graph_t = std::decay_t<decltype(A(0))>;
 
-        unsigned int nof_groups(std::get<0>(w_old.dims()));
-        unsigned int nof_nodes(std::get<0>(u.dims()));
-        unsigned int nof_layers(A.num_layers());
+        size_t nof_groups(std::get<0>(w.dims()));
+        size_t nof_vertices(std::get<0>(u.dims()));
+        size_t nof_layers(A.num_layers());
+        affinity_t w_old(w);
 
-        graph::out_edge_iterator<graph_t> eit, eend;
-        double Z_kq, Du, Dv, dist_w, w_kqa, rho_w, Zij_a;
-        dist_w = 0;
+        graph::out_edge_iterator_t<graph_t> eit, eend;
+        double Z_kq, Du, Dv, w_kqa, rho_w, Zij_a;
 
         for (size_t k = 0; k < nof_groups; k++)
         {
-            for (size_t q = 0; q < nof_groups; q++)
+            // Assortative case
+            if constexpr (std::is_same_v<affinity_t, tensor::DiagonalTensor<double>>)
             {
                 // Calculate Z_kq
                 Du = Dv = 0;
                 for (auto i : v_list)
                 {
-                    Dv += v(i, q);
+                    Dv += v(i, k);
                 }
                 for (auto i : u_list)
                 {
@@ -294,94 +249,145 @@ private:
                     for (size_t a = 0; a < nof_layers; a++)
                     {
                         // Update only if w_ka > 0
-                        if (w_old(k, q, a) > EPS_PRECISION)
+                        if (w_old(k, a) > EPS_PRECISION)
                         {
 
                             w_kqa = 0;
-                            for (size_t i = 0; i < nof_nodes; i++)
+                            for (size_t i = 0; i < nof_vertices; i++)
                             {
                                 // Calculate rho_w
                                 rho_w = 0;
                                 for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
                                 {
-                                    graph::Vertex<graph_t> j = target(*eit, A(a)); // OUT-EDGE
+                                    auto j = boost::target(*eit, A(a)); // OUT-EDGE
                                     Zij_a = 0;
                                     for (size_t m = 0; m < nof_groups; m++)
                                     {
-                                        for (size_t l = 0; l < nof_groups; l++)
-                                        {
-                                            Zij_a += u(i, m) * v(j, l) * w_old(m, l, a);
-                                        }
+                                        Zij_a += u(i, m) * v(j, m) * w_old(m, a);
                                     }
                                     if (Zij_a > EPS_PRECISION)
                                     {
-                                        rho_w += v(j, q) / Zij_a;
+                                        rho_w += v(j, k) / Zij_a;
                                     }
                                 } // return rho_w
 
                                 w_kqa += u(i, k) * rho_w;
                             } // return w_kqa
 
-                            w_kqa = w_old(k, q, a) / Z_kq * w_kqa;
-                            if (std::abs(w_kqa) < EPS_PRECISION)
+                            w(k, a) = w_old(k, a) / Z_kq * w_kqa;
+                            if (std::abs(w(k, a)) < EPS_PRECISION)
                             {
-                                w_kqa = 0;
+                                w(k, a) = 0;
                             }
-                            w(k, q, a) = w_kqa;
-
-                            // Calculate max difference
-                            dist_w = std::max(std::abs(w(k, q, a) - w_old(k, q, a)), dist_w);
                         }
                     }
                 }
-            } // end cycle over q
-        }     // end cycle over k
+            }
+            else // Non-assortative case
+            {
+                for (size_t q = 0; q < nof_groups; q++)
+                {
+                    // Calculate Z_kq
+                    Du = Dv = 0;
+                    for (auto i : v_list)
+                    {
+                        Dv += v(i, q);
+                    }
+                    for (auto i : u_list)
+                    {
+                        Du += u(i, k);
+                    }
+                    Z_kq = Du * Dv;
 
-        // Copy and return
-        w_old = w;
-        return dist_w;
+                    if (Z_kq > EPS_PRECISION)
+                    {
+                        for (size_t a = 0; a < nof_layers; a++)
+                        {
+                            // Update only if w_ka > 0
+                            if (w_old(k, q, a) > EPS_PRECISION)
+                            {
+
+                                w_kqa = 0;
+                                for (size_t i = 0; i < nof_vertices; i++)
+                                {
+                                    // Calculate rho_w
+                                    rho_w = 0;
+                                    for (tie(eit, eend) = boost::out_edges(i, A(a)); eit != eend; ++eit)
+                                    {
+                                        auto j = boost::target(*eit, A(a)); // OUT-EDGE
+                                        Zij_a = 0;
+                                        for (size_t m = 0; m < nof_groups; m++)
+                                        {
+                                            for (size_t l = 0; l < nof_groups; l++)
+                                            {
+                                                Zij_a += u(i, m) * v(j, l) * w_old(m, l, a);
+                                            }
+                                        }
+                                        if (Zij_a > EPS_PRECISION)
+                                        {
+                                            rho_w += v(j, q) / Zij_a;
+                                        }
+                                    } // return rho_w
+
+                                    w_kqa += u(i, k) * rho_w;
+                                } // return w_kqa
+
+                                w(k, q, a) = w_old(k, q, a) / Z_kq * w_kqa;
+                                if (std::abs(w(k, q, a)) < EPS_PRECISION)
+                                {
+                                    w(k, q, a) = 0;
+                                }
+                            }
+                        }
+                    }
+                } // end cycle over q
+            }     // end if assortative
+        }         // end cycle over k
     }
 
     /*!
      * @brief Calculates the likelyhood
      *
-     * @tparam graph_t Graph type
+     * @tparam affinity_t Affinity matrix type
+     * @tparam network_t Network type
      *
-     * @param[in] u Tensor linking vertices in groups for outgoing edges
-     * @param[in] v Tensor linking vertices in groups for incoming edges
-     * @param[in] w Affinity tensor
+     * @param[in] u Matrix linking vertices in groups for outgoing edges
+     * @param[in] v Matrix linking vertices in groups for incoming edges
+     * @param[in] w Affinity matrix
      * @param[in] A Network
      *
      * @returns Likelyhood
      */
-    template <class network_t>
-    double calculate_likelyhood(const tensor::Tensor<double> &u,
-                                const tensor::Tensor<double> &v,
-                                const tensor::Tensor<double> &w,
+    template <class affinity_t,
+              class network_t>
+    double calculate_likelyhood(const tensor::Matrix<double> &u,
+                                const tensor::Matrix<double> &v,
+                                const affinity_t &w,
                                 const network_t &A)
     {
         using graph_t = std::decay_t<decltype(A(0))>;
 
         size_t nof_groups(std::get<0>(w.dims()));
-        size_t nof_nodes(std::get<0>(u.dims()));
+        size_t nof_vertices(std::get<0>(u.dims()));
         size_t nof_layers(A.num_layers());
 
         double l(0), log_arg, uvw;
-        unsigned int nof_parallel_edges;
-        graph::out_edge_iterator<graph_t> eit, eend;
+        size_t nof_parallel_edges;
+        graph::out_edge_iterator_t<graph_t> eit, eend;
 
         for (size_t alpha = 0; alpha < nof_layers; alpha++)
         {
-            for (size_t i = 0; i < nof_nodes; i++)
+            for (size_t i = 0; i < nof_vertices; i++)
             {
-                for (size_t j = 0; j < nof_nodes; j++)
+                for (size_t j = 0; j < nof_vertices; j++)
                 {
                     log_arg = 0;
                     for (size_t k = 0; k < nof_groups; k++)
                     {
-                        for (size_t q = 0; q < nof_groups; q++)
+                        // Assortative case
+                        if constexpr (std::is_same_v<affinity_t, tensor::DiagonalTensor<double>>)
                         {
-                            uvw = u(i, k) * v(j, q) * w(k, q, alpha);
+                            uvw = u(i, k) * v(j, k) * w(k, alpha);
                             // Add this term regardeles of the value of A_ijk
                             l -= uvw;
                             // if edge exists, consider this term inside the log argument
@@ -390,7 +396,21 @@ private:
                                 log_arg += uvw;
                             }
                         }
-                    } // end cycle over k and q
+                        else
+                        {
+                            for (size_t q = 0; q < nof_groups; q++)
+                            {
+                                uvw = u(i, k) * v(j, q) * w(k, q, alpha);
+                                // Add this term regardeles of the value of A_ijk
+                                l -= uvw;
+                                // if edge exists, consider this term inside the log argument
+                                if (boost::edge(i, j, A(alpha)).second)
+                                {
+                                    log_arg += uvw;
+                                }
+                            }
+                        } // end cycle over k and q
+                    }
 
                     if (log_arg > EPS_PRECISION)
                     {
@@ -416,38 +436,54 @@ private:
     /*!
      * @brief Executes one loop of the solver
      *
-     * @tparam graph_t Graph type
+     * @tparam affinity_t Affinity matrix type
+     * @tparam network_t Network type
      *
      * @param[in] u_list ndices of vertices with at least one outgoing edge
      * @param[in] v_list ndices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @paran[in] iteration Current iteration
+     * @param[in,out] u Matrix linking vertices in groups for outgoing edges
+     * @param[in,out] v Matrix linking vertices in groups for incoming edges
+     * @param[in,out] w Affinity matrix
+     * @paran[in,out] iteration Current iteration
      * @paran[in,out] coincide Number of successful checks
      * @paran[in,out] L2 Likelyhoods
-     * @param[in,out] w Affinity tensor
-     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in,out] v Tensor linking vertices in groups for incoming edges
      *
      * @returns Whether the algorithm has converged
      */
-    template <class network_t>
+    template <class affinity_t,
+              class network_t>
     termination_reason loop(const std::vector<size_t> &u_list,
                             const std::vector<size_t> &v_list,
                             const network_t &A,
-                            unsigned int &iteration,
-                            unsigned int &coincide,
-                            double &L2,
-                            tensor::Tensor<double> &w,
-                            tensor::Tensor<double> &u,
-                            tensor::Tensor<double> &v)
+                            tensor::Matrix<double> &u,
+                            tensor::Matrix<double> &v,
+                            affinity_t &w,
+                            size_t &iteration,
+                            size_t &coincide,
+                            double &L2)
     {
-        // Variables used for copy
-        tensor::Tensor<double> w_old(w), u_old(u), v_old(v);
+        using direction_t = typename std::decay_t<decltype(A)>::direction_type;
 
-        // Split updates
-        update_u(u_list, v_list, A, u, w_old, u_old, v_old);
-        update_v(u_list, v_list, A, v, u, w_old, v_old);
-        update_w(u_list, v_list, A, w, v, u, w_old);
+        // Update u (outgoing edges)
+        update_vertices<graph::out_edges_target_vertices>(u_list, v_list, A, w, v, u);
+        // Update v (incoming edges) if we use directed network
+        if constexpr (std::is_same_v<direction_t, boost::bidirectionalS>)
+        {
+
+            // Assortative
+            if constexpr (std::is_same_v<affinity_t, tensor::DiagonalTensor<double>>)
+            {
+                update_vertices<graph::in_edges_source_vertices>(v_list, u_list, A, w, u, v);
+            }
+            else // Non-assortative case
+            {
+                tensor::Transpose wT(w);
+                update_vertices<graph::in_edges_source_vertices>(v_list, u_list, A, wT, u, v);
+            }
+        }
+        // Update w
+        update_affinity(u_list, v_list, A, u, v, w);
 
         // Check for convergence
         if (iteration % 10 == 0)
@@ -488,27 +524,29 @@ public:
      * @param[in] max_nof_iterations_ Maximum number of iterations in each realization
      * @param[in] nof_convergences_ Number of successive passed convergence criteria for declaring the results converged
      */
-    Solver(unsigned int nof_realizations_, unsigned int max_nof_iterations_, unsigned int nof_convergences_)
-        : nof_realizations(nof_realizations_),
-          max_nof_iterations(max_nof_iterations_),
-          nof_convergences(nof_convergences_)
+    Solver(size_t nof_realizations, size_t max_nof_iterations, size_t nof_convergences)
+        : nof_realizations(nof_realizations),
+          max_nof_iterations(max_nof_iterations),
+          nof_convergences(nof_convergences)
     {
     }
 
     /*!
      * @brief Run the solver
      *
-     * @tparam w_init_t Class type for the initialization of w
-     * @tparam uv_init_t Class type for the initialization of u and v
+     * @tparam affinity_init_t Class type for the initialization of w
+     * @tparam affinity_t Class type for w
+     * @tparam network_t Network type
      * @tparam random_t Random generator type
-     * @tparam graph_t Graph type
      *
      * @param[in] u_list ndices of vertices with at least one outgoing edge
      * @param[in] v_list ndices of vertices with at least one incoming edge
      * @param[in] A Network
-     * @param[in,out] w Affinity tensor
-     * @param[in,out] u Tensor linking vertices in groups for outgoing edges
-     * @param[in,out] v Tensor linking vertices in groups for incoming edges
+     * @param[in] w_init_defined If @c true, w has been initialized
+     *            and should not be modified for the first realization
+     * @param[in,out] u Matrix linking vertices in groups for outgoing edges
+     * @param[in,out] v Matrix linking vertices in groups for incoming edges
+     * @param[in,out] w Affinity matrix
      * @param[in,out] random_generator Random generator
      *
      * The solver is an explicit split-operator. At each iteration \f$t\f$, it does the following:
@@ -518,58 +556,84 @@ public:
      *
      * Additionally, the check for convergence is performed every 10 iterations
      */
-    template <class w_init_t = initialization::init_tensor_symmetric_random,
-              class uv_init_t = initialization::init_tensor_partial_random,
-              class random_t,
-              class network_t>
-    utils::Report run(const std::vector<size_t> &u_list, const std::vector<size_t> &v_list,
+    template <class affinity_init_t,
+              class affinity_t,
+              class network_t,
+              class random_t>
+    utils::Report run(const std::vector<size_t> &u_list,
+                      const std::vector<size_t> &v_list,
                       const network_t &A,
-                      tensor::Tensor<double> &w, tensor::Tensor<double> &u, tensor::Tensor<double> &v,
+                      tensor::Matrix<double> &u,
+                      tensor::Matrix<double> &v,
+                      affinity_t &w,
                       random_t &random_generator,
-                      w_init_t w_init_obj = w_init_t{},
-                      uv_init_t uv_init_obj = uv_init_t{})
+                      affinity_init_t w_init_obj = affinity_init_t{})
     {
+        using direction_t = typename std::decay_t<decltype(A)>::direction_type;
+
+        // Boolean used are compile-time to check if we are using directed network
+        constexpr bool directed = std::is_same_v<direction_t, boost::bidirectionalS>;
+
         // Dimensions
         const size_t nof_groups(std::get<0>(w.dims()));
-        const size_t nof_nodes(std::get<0>(u.dims()));
+        const size_t nof_vertices(std::get<0>(u.dims()));
         const size_t nof_layers(A.num_layers());
 
         // Results
         utils::Report results{};
         results.nof_realizations = num_real();
 
-        for (unsigned int i = 0; i < num_real(); i++)
+        // Tensors used within a realization
+        tensor::Matrix<double> u_temp(nof_vertices, nof_groups), v_temp;
+        affinity_t w_temp(nof_groups, nof_layers), w_init;
+
+        for (size_t i = 0; i < num_real(); i++)
         {
             std::cout << "Running realization # " << i << std::endl;
 
-            // Tensors used for this realization
-            // u,v,w are used to store the best configuration
-            tensor::Tensor<double> w_temp(nof_groups, nof_groups, nof_layers);
-            tensor::Tensor<double> u_temp(nof_nodes, nof_groups), v_temp(nof_nodes, nof_groups);
+            // w initialization
+            w_init_obj(w, w_temp, random_generator);
 
-            // Initialize tensors
-            w_init_obj(w_temp, random_generator);
+            // u and v initialization
             // TO CHECK: there is a difference here in case some nodes in the files dont have in/out edges
             // i.e. remove node 299 in the data file.
-            uv_init_obj(v_list, v_temp, random_generator);
-            uv_init_obj(u_list, u_temp, random_generator);
+            // Compile-time if statement
+            // We need to initialize v only if the network is directed
+            if constexpr (directed)
+            {
+                v_temp.resize(nof_vertices, nof_groups);
+                initialization::init_tensor_rows_random(v_list, v_temp, random_generator);
+            }
+            initialization::init_tensor_rows_random(u_list, u_temp, random_generator);
 
-            // Likelihood,convergence criteria and iterations
-            double L2(std::numeric_limits<double>::max());
-            unsigned int iteration(0), coincide(0);
+            // Likelihood, convergence criteria and iterations
+            double L2(std::numeric_limits<double>::lowest());
+            size_t iteration(0), coincide(0);
             assert(max_iter() > 0);
 
             // Termination reason
             termination_reason term_reason = NO_TERMINATION;
             while (term_reason == NO_TERMINATION)
             {
-                term_reason = loop(u_list, v_list, A,
-                                   iteration, coincide, L2,
-                                   w_temp, u_temp, v_temp);
+                // Compile-time if statement
+                // Here we choose between directed and undirected network
+                if constexpr (directed)
+                {
+                    term_reason = loop(u_list, v_list, A,
+                                       u_temp, v_temp, w_temp,
+                                       iteration, coincide, L2);
+                }
+                else
+                {
+                    // Undirected network
+                    term_reason = loop(u_list, v_list, A,
+                                       u_temp, u_temp, w_temp,
+                                       iteration, coincide, L2);
+                }
             }
-
             std::cout << "\t... finished after " << iteration << " iterations. "
-                      << "Reason: " << get_termination_reason_name(term_reason) << std::endl;
+                      << "Reason: " << get_termination_reason_name(term_reason)
+                      << ". Likelihood: " << L2 << std::endl;
 
             // Update report and best configuration
             results.vec_iter.emplace_back(iteration);
@@ -578,7 +642,10 @@ public:
             {
                 std::swap(w, w_temp);
                 std::swap(u, u_temp);
-                std::swap(v, v_temp);
+                if constexpr (directed)
+                {
+                    std::swap(v, v_temp);
+                }
             }
             results.vec_L2.emplace_back(L2);
         }
@@ -588,23 +655,23 @@ public:
     }
 
     //! @brief Returns the number of realizations.
-    unsigned int num_real() const noexcept
+    size_t num_real() const noexcept
     {
         return nof_realizations;
     }
 
     //! @brief Returns the number of realizations.
-    unsigned int max_iter() const noexcept
+    size_t max_iter() const noexcept
     {
         return max_nof_iterations;
     }
 
     //! @brief Returns the number convergence checks to declare convergence.
-    unsigned int num_conv() const noexcept
+    size_t num_conv() const noexcept
     {
         return nof_convergences;
     }
-};
+}; // namespace solver
 
 } // namespace solver
 } // namespace multitensor
