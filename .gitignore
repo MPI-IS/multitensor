@@ -1,12 +1,17 @@
 build
+release
+debug
 *.DS_Store
 *.o
 *.exe
 *.vs*
 __pycache__
+dist/
+*egg-*
 
 # data from tests
 u_*.dat
 v_*.dat
 w_*.dat
 *out*.dat
+results/

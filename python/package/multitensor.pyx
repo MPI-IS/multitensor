@@ -4,10 +4,141 @@ from libcpp.vector cimport vector
 import numpy
 cimport numpy
 
-from .Report cimport Report
-from .tensor cimport Tensor, Matrix, SymmetricTensor, DiagonalTensor
+
+# 0 - Imports
+cdef extern from "multitensor/utils.hpp" namespace "multitensor::utils":
+    cdef cppclass Report:
+        int nof_realizations
+        vector[double] vec_L2
+        vector[size_t] vec_iter
+        vector[const char *] vec_term_reason
+        double duration
+
+        Report() except +
+        double max_L2()
+
+cdef extern from "multitensor/tensor.hpp" namespace "multitensor::tensor":
+    cdef cppclass Tensor[scalar_t]:
+        size_t nrows
+        size_t ncols
+        size_t ntubes
+        vector[scalar_t] data
+
+        Tensor() except +
+        Tensor(size_t nrows, size_t ncols, size_t ntubes=1) except +
+
+        void resize(size_t nrows_, size_t ncols_, size_t ntubes)
+        size_t get_nrows()
+        size_t get_ncols()
+        size_t get_ntubes()
+
+        scalar_t & operator()(const size_t i, const size_t j, const size_t k)
+
+    cdef cppclass Matrix[scalar_t](Tensor[scalar_t]):
+        Matrix() except +
+        Matrix(size_t nrows, size_t ncols) except +
+
+        void resize(size_t nrows, size_t ncols)
+        scalar_t & operator()(const size_t i, const size_t j)
+
+    cdef cppclass SymmetricTensor[scalar_t](Tensor[scalar_t]):
+        SymmetricTensor() except +
+        SymmetricTensor(size_t nrows, size_t ntubes) except +
+
+        void resize(size_t nrwos, size_t ntubes)
+
+    cdef cppclass DiagonalTensor[scalar_t](Tensor[scalar_t]):
+        DiagonalTensor() except +
+        DiagonalTensor(size_t nrows, size_t ntubes)
 
 
+# I - Reader funcions
+cdef extern from "boost/filesystem.hpp" namespace "boost::filesystem":
+    cppclass path:
+        pass
+
+
+cdef extern from "app_utils.hpp" namespace "app":
+    cdef void c_read_adjacency_data "read_adjacency_data" [
+        weight_t](
+        const path & filename,
+        vector[size_t] & edges_start,
+        vector[size_t] & edges_end,
+        vector[weight_t] & edges_weights
+    )
+
+    cdef void c_read_affinity_data "read_affinity_data" (
+        const path & filename,
+        const bint & assortative,
+        vector[numpy.float_t] & w
+    )
+
+
+def read_adjacency_data(filename):
+
+    cdef string c_filename = string(bytearray(filename.encode()))
+    # We define empty vectors that will be populated by the vertices
+    # correponding to the beginning and end the end of the network
+    # edges, as well as a vector for the unraveled edge weight matrix.
+    cdef vector[size_t] edges_start
+    cdef vector[size_t] edges_end
+    cdef vector[numpy.float_t] edges_weights
+
+    # We read the data using the C function.
+    c_read_adjacency_data[numpy.float_t](
+        < const path & > c_filename,
+        < vector[size_t] & > edges_start,
+        < vector[size_t] & > edges_end,
+        < vector[numpy.float_t] & > edges_weights,
+    )
+
+    # And then we copy it into the numpy arrays.
+    py_edges_start = numpy.zeros([edges_start.size()], dtype=numpy.int)
+    py_edges_end = numpy.zeros([edges_start.size()], dtype=numpy.int)
+    py_edges_weights = numpy.zeros([edges_weights.size()], dtype=numpy.float)
+
+    for i in range(edges_start.size()):
+        py_edges_start[i] = edges_start[i]
+
+    for i in range(edges_end.size()):
+        py_edges_end[i] = edges_end[i]
+
+    for i in range(edges_weights.size()):
+        py_edges_weights[i] = edges_weights[i]
+
+    return py_edges_start, py_edges_end, py_edges_weights
+
+
+def read_affinity_data(filename, nof_groups, nof_layers, assortative):
+
+    cdef string c_filename = string(bytearray(filename.encode()))
+
+    # We define the vector for the affinity matrix.
+    cdef vector[numpy.float_t] w
+
+    # And resize it to the appropriate size depending on whether we're
+    # working with the assortative case or not.
+    if assortative:
+        w.resize(nof_groups * nof_layers)
+    else:
+        w.resize(nof_groups * nof_groups * nof_layers)
+
+    # Read the data using the C fucntion.
+    c_read_affinity_data(
+        < const path & > c_filename,
+        < const bint & > assortative,
+        < vector[numpy.float_t] & > w
+    )
+
+    # Copy the result into the numpy array.
+    py_w = numpy.zeros([w.size()], dtype=numpy.float)
+    for i in range(w.size()):
+        py_w[i] = w[i]
+
+    return py_w
+
+
+# II - Algorithm
 # Here we define all the necessary types.
 # We start with exporting direction selectors from boost graph library.
 cdef extern from "boost/graph/graph_selectors.hpp" namespace "boost":
@@ -52,9 +183,8 @@ ctypedef fused weight_t:
     numpy.float_t
 
 
-# This is a python wrapper for the report returned by the solver. For
-# a description of the C interface you can refer to Report.pxd.
-cdef class PyReport:
+# This is a python wrapper for the report returned by the solver.
+cdef class ReportWrapper:
     cdef Report report
 
     @property
@@ -105,29 +235,30 @@ cdef class PyReport:
 # vertices from the edge endpoints.
 cdef extern from "multitensor/utils.hpp" namespace "multitensor::utils":
     cdef size_t get_num_vertices[vertex_t](
-        const vector[vertex_t] &edges_start,
-        const vector[vertex_t] &edges_end
+        const vector[vertex_t] & edges_start,
+        const vector[vertex_t] & edges_end
     )
 
 
 # Main entry point of the algorithm.
 cdef extern from "multitensor/main.hpp" namespace "multitensor":
-    cdef Report multitensor_factorization[direction_t, affinity_t, affinity_init_t, vertex_t, weight_t] (
-        const vector[vertex_t] &edges_start,
-        const vector[vertex_t] &edges_end,
-        const vector[weight_t] &edges_weight,
-        const size_t &nof_realizations,
-        const size_t &max_nof_iterations,
-        const size_t &nof_convergences,
-        vector[vertex_t] &labels,
-        Matrix[numpy.float_t] &u,
-        Matrix[numpy.float_t] &v,
-        vector[numpy.float_t] &affinity
+    cdef Report c_multitensor_factorization "multitensor_factorization"[
+        direction_t, affinity_t, affinity_init_t, vertex_t, weight_t](
+        const vector[vertex_t] & edges_start,
+        const vector[vertex_t] & edges_end,
+        const vector[weight_t] & edges_weight,
+        const size_t & nof_realizations,
+        const size_t & max_nof_iterations,
+        const size_t & nof_convergences,
+        vector[vertex_t] & labels,
+        Matrix[numpy.float_t] & u,
+        Matrix[numpy.float_t] & v,
+        vector[numpy.float_t] & affinity
     )
 
 
 # Python wrapper for the algorithm.
-def py_multitensor_factorization(
+def multitensor_factorization(
     numpy.ndarray[vertex_t, ndim=1, cast=True] edges_start not None,
     numpy.ndarray[vertex_t, ndim=1, cast=True] edges_end not None,
     numpy.ndarray[weight_t, ndim=1, cast=True] edges_weights not None,
@@ -137,8 +268,9 @@ def py_multitensor_factorization(
     bint assortative,
     size_t nof_realizations,
     size_t max_nof_iterations,
-    size_t nof_convergences,
+    size_t nof_convergences
 ):
+    """Some docstrings are missing here..."""
 
     # We start by initializing the output variables of the C function.
     # Report can be initialized as empty.
@@ -151,8 +283,8 @@ def py_multitensor_factorization(
     # done in C function in reverse.
     cdef size_t nof_edges = edges_start.size
     cdef size_t nof_vertices = get_num_vertices[vertex_t](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end)
+        < const vector[vertex_t] & > edges_start,
+        < const vector[vertex_t] & > edges_end)
     cdef size_t nof_layers = edges_weights.size / nof_edges
 
     # Preallocate the output matrices.
@@ -174,7 +306,7 @@ def py_multitensor_factorization(
         affinity = vector[numpy.float_t](affinity_size)
     else:
         # or by copying the initial condition vector
-        affinity = <vector[numpy.float_t]> init_affinity
+        affinity = <vector[numpy.float_t] > init_affinity
 
     # Create an empty label vector. Not sure why we need this :)
     cdef vector[vertex_t] labels = vector[vertex_t](nof_vertices)
@@ -184,16 +316,16 @@ def py_multitensor_factorization(
     # the case of weight_t being an int.
     if weight_t is numpy.int_t and not directed and not assortative and init_affinity is None:
         # case 0: undirected + non-assortative + w random
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -201,32 +333,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.int_t and directed and not assortative and init_affinity is None:
         # case 1: directed + non-assortative + w random
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.int_t and not directed and assortative and init_affinity is None:
         # case 2: undirected + assortative + w random
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -234,32 +366,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.int_t and directed and assortative and init_affinity is None:
         # case 3: directed + assortative + w random
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.int_t and not directed and not assortative and init_affinity is not None:
         # case 4: undirected + non-assortative + w from file
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[SymmetricTensor[numpy.float_t]],
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -267,32 +399,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.int_t and directed and not assortative and init_affinity is not None:
         # case 5: directed + non-assortative + w from file
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[SymmetricTensor[numpy.float_t]],
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.int_t and not directed and assortative and init_affinity is not None:
         # case 6: undirected + assortative + w from file
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[DiagonalTensor[numpy.float_t]],
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -300,16 +432,16 @@ def py_multitensor_factorization(
     if weight_t is numpy.int_t and directed and assortative and init_affinity is not None:
         # case 7: directed + assortative + w from file
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[DiagonalTensor[numpy.float_t]],
             vertex_t,
             numpy.int_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -320,16 +452,16 @@ def py_multitensor_factorization(
     # switch case repeated for floating-piont weight_t.
     if weight_t is numpy.float_t and not directed and not assortative and init_affinity is None:
         # case 0: undirected + non-assortative + w random
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -337,32 +469,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.float_t and directed and not assortative and init_affinity is None:
         # case 1: directed + non-assortative + w random
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.float_t and not directed and assortative and init_affinity is None:
         # case 2: undirected + assortative + w random
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -370,32 +502,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.float_t and directed and assortative and init_affinity is None:
         # case 3: directed + assortative + w random
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_random,
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.float_t and not directed and not assortative and init_affinity is not None:
         # case 4: undirected + non-assortative + w from file
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[SymmetricTensor[numpy.float_t]],
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -403,32 +535,32 @@ def py_multitensor_factorization(
     if weight_t is numpy.float_t and directed and not assortative and init_affinity is not None:
         # case 5: directed + non-assortative + w from file
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             SymmetricTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[SymmetricTensor[numpy.float_t]],
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
 
     if weight_t is numpy.float_t and not directed and assortative and init_affinity is not None:
         # case 6: undirected + assortative + w from file
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             undirectedS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[DiagonalTensor[numpy.float_t]],
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -436,16 +568,16 @@ def py_multitensor_factorization(
     if weight_t is numpy.float_t and directed and assortative and init_affinity is not None:
         # case 7: directed + assortative + w from file
         v.resize(nof_vertices, nof_groups)
-        report = multitensor_factorization[
+        report = c_multitensor_factorization[
             bidirectionalS,
             DiagonalTensor[numpy.float_t],
             init_symmetric_tensor_from_initial[DiagonalTensor[numpy.float_t]],
             vertex_t,
             numpy.float_t
         ](
-            <const vector[vertex_t] &> edges_start,
-            <const vector[vertex_t] &> edges_end,
-            <const vector[weight_t] &> edges_weights,
+            < const vector[vertex_t] & > edges_start,
+            < const vector[vertex_t] & > edges_end,
+            < const vector[weight_t] & > edges_weights,
             nof_realizations, max_nof_iterations, nof_convergences,
             labels, u, v, affinity
         )
@@ -454,7 +586,7 @@ def py_multitensor_factorization(
     # objects. It is pretty much the same for every data type in here
     # -- we initialize an empty python instance and then we manually
     # copy all the data from C object into a python object.
-    py_report = PyReport()
+    py_report = ReportWrapper()
     py_report.nof_realizations = report.nof_realizations
     py_report.vec_L2 = report.vec_L2
     py_report.vec_iter = report.vec_iter
