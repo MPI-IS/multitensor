@@ -9,6 +9,7 @@
 #pragma once
 
 #include <iostream>
+#include <iterator>
 #include <random>
 #include <vector>
 #include <set>

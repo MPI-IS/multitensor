@@ -50,7 +50,7 @@ if(ENABLE_PYTHON_WRAPPER)
     message(STATUS "[PYTHON] Configuring Python bindings")
 
     # Find python3
-    set (CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
+    set(CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
     find_package (Python3 COMPONENTS Interpreter Development)
     if(Python3_FOUND)
         message(STATUS "[PYTHON] python3 interpreter found at following location '${Python3_EXECUTABLE}'")
@@ -73,7 +73,6 @@ if(ENABLE_PYTHON_WRAPPER)
             endif()
         endif()
 
-        #[[ For now we do not need neither numpy nor cython
         if(NOT DEFINED NUMPY_INCLUDE_PATH)
             # Determining the numpy headers location
             execute_process(
@@ -92,13 +91,15 @@ if(ENABLE_PYTHON_WRAPPER)
         endif()
 
         # Find Cython
-        find_program(CYTHON_PROGRAM NAMES cython)
+        get_filename_component(_python_path "${Python3_EXECUTABLE}" DIRECTORY)
+        find_program(CYTHON_PROGRAM
+            NAMES cython
+            HINTS ${_python_path})
         if(CYTHON_PROGRAM)
             message(STATUS "[PYTHON] Cython wrapper found ${CYTHON_PROGRAM}")
         else()
             message(STATUS "[PYTHON] Cython wrapper not found - will use the .cpp file provided")
         endif()
-        ]]
     else()
       message(STATUS "[PYTHON] Python not found!")
     endif()

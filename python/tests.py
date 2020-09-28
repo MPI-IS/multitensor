@@ -2,17 +2,19 @@
 
 
 import os
-import random
-import unittest
+from unittest import TestCase
 
 import numpy
 
-import multitensor
-
+from multitensor import (
+    multitensor_factorization,
+    read_adjacency_data,
+    read_affinity_data,
+    ReportWrapper
+)
 
 PARENT_DIRECTORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIRECTORY = os.path.join(PARENT_DIRECTORY, "data")
-assert os.path.isdir(DATA_DIRECTORY)
 
 
 class InputFileMixin:
@@ -25,9 +27,11 @@ class InputFileMixin:
     expected type and the shape.
     """
 
-    adjacency_filename = NotImplemented
-    num_groups = NotImplemented
+    # Attributes required in the derived classes
+    adjacency_filename = None
+    num_groups = None
 
+    # Optinal arguments
     affinity_filename = None
     assortative = False
     undirected = False
@@ -41,7 +45,7 @@ class InputFileMixin:
         adjacency_filename = os.path.join(
             DATA_DIRECTORY, self.adjacency_filename)
         self.edges_start, self.edges_end, self.edges_weights = (
-            multitensor.read_adjacency_data(adjacency_filename))
+            read_adjacency_data(adjacency_filename))
 
         self.num_vertices = len(
             set(self.edges_start) | set(self.edges_end))
@@ -53,7 +57,9 @@ class InputFileMixin:
             affinity_filename = os.path.join(
                 DATA_DIRECTORY, self.affinity_filename)
 
-            self.init_affinity = multitensor.read_affinity_data(
+            print(affinity_filename)
+
+            self.init_affinity = read_affinity_data(
                 affinity_filename, self.num_groups, self.num_layers, self.assortative)
 
     def test_factorization_does_not_crash_and_has_sensible_output(self):
@@ -62,7 +68,7 @@ class InputFileMixin:
         crashing and then verify that everything has a reasonable type
         and shape.
         """
-        u, v, w, report = multitensor.multitensor_factorization(
+        u, v, w, report = multitensor_factorization(
             self.edges_start,
             self.edges_end,
             self.edges_weights,
@@ -77,7 +83,7 @@ class InputFileMixin:
         self.assertIsInstance(u, numpy.ndarray)
         self.assertIsInstance(v, numpy.ndarray)
         self.assertIsInstance(w, numpy.ndarray)
-        self.assertIsInstance(report, multitensor.Report)
+        self.assertIsInstance(report, ReportWrapper)
 
         self.assertEqual(u.shape, (self.num_vertices, self.num_groups))
         if not self.undirected:
@@ -88,24 +94,24 @@ class InputFileMixin:
             self.assertEqual(w.shape, (self.num_groups * self.num_groups * self.num_layers, ))
 
 
-class DirectedMainInputFileTestCase(InputFileMixin, unittest.TestCase):
+class DirectedMainInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "main/adjacency.dat"
     num_groups = 2
 
 
-class UndirectedInputFileTestCase(InputFileMixin, unittest.TestCase):
+class UndirectedInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "undirected/adjacency.dat"
     num_groups = 2
     undirected = True
 
 
-class WInputInputFileTestCase(InputFileMixin, unittest.TestCase):
+class WInputInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "w_input/adjacency_k2L4.dat"
     affinity_filename = "w_input/w_k2_k2L4_A.dat"
     num_groups = 2
 
 
-class MultiRealInputFileTestCase(InputFileMixin, unittest.TestCase):
+class MultiRealInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "multi_real/adjacency_k2L4.dat"
     affinity_filename = "multi_real/w_k2_k2L4_r2.dat"
 
@@ -113,7 +119,7 @@ class MultiRealInputFileTestCase(InputFileMixin, unittest.TestCase):
     num_realizations = 2
 
 
-class AssortativeInputFileTestCase(InputFileMixin, unittest.TestCase):
+class AssortativeInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "assortative/adjacency_assortative_k3L4.dat"
 
     num_groups = 3
@@ -122,14 +128,14 @@ class AssortativeInputFileTestCase(InputFileMixin, unittest.TestCase):
     assortative = True
 
 
-class LegacyMainInputFileTestCase(InputFileMixin, unittest.TestCase):
+class LegacyMainInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "legacy_main/adjacency.dat"
 
     num_groups = 2
     num_realizations = 2
 
 
-class LegacyUndirectedMainInputFileTestCase(InputFileMixin, unittest.TestCase):
+class LegacyUndirectedMainInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "legacy_undirected/adjacency.dat"
 
     num_groups = 2

@@ -11,7 +11,6 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-
 # Extract version number
 file(READ ${CMAKE_SOURCE_DIR}/version.txt ver)
 project(MultiTensor VERSION ${ver})
@@ -58,33 +57,45 @@ set(multitensor_legacy_undirected_src
     )
 
 # libraries
-add_library(multitensor_default INTERFACE)
-target_include_directories(multitensor_default
-    INTERFACE
-        ${CMAKE_SOURCE_DIR}/legacy/include/
-        ${CMAKE_SOURCE_DIR}/legacy/src/)
-target_sources(multitensor_default
-    INTERFACE
-        $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_default_src}>) # for the IDE to see the library
+if(NOT MSVC)
+    add_library(multitensor_default INTERFACE)
+    target_include_directories(multitensor_default
+        INTERFACE
+            ${CMAKE_SOURCE_DIR}/legacy/include/
+            ${CMAKE_SOURCE_DIR}/legacy/src/)
+    target_sources(multitensor_default
+        INTERFACE
+            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_default_src}>) # for the IDE to see the library
 
-add_library(multitensor_undirected INTERFACE)
-target_include_directories(multitensor_undirected
-    INTERFACE
-        ${CMAKE_SOURCE_DIR}/legacy/include/
-        ${CMAKE_SOURCE_DIR}/legacy/src/)
-target_sources(multitensor_undirected
-    INTERFACE
-        $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_undirected_src}>) # for the IDE to see the library
+    add_library(multitensor_undirected INTERFACE)
+    target_include_directories(multitensor_undirected
+        INTERFACE
+            ${CMAKE_SOURCE_DIR}/legacy/include/
+            ${CMAKE_SOURCE_DIR}/legacy/src/)
+    target_sources(multitensor_undirected
+        INTERFACE
+            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_undirected_src}>) # for the IDE to see the library
+
+    add_executable(Multitensor_main legacy/applications/src/MultiTensor_main.cpp)
+    target_link_libraries(Multitensor_main multitensor_default Boost::system Boost::filesystem Boost::program_options)
+
+    add_executable(Multitensor_undirected legacy/applications/src/MultiTensor_undirected.cpp)
+    target_link_libraries(Multitensor_undirected multitensor_undirected Boost::system Boost::filesystem Boost::program_options)
+
+    set_target_properties(
+        Multitensor_main
+        PROPERTIES
+        FOLDER "Applications")
+endif()
 
 add_library(multitensor INTERFACE)
-target_include_directories(multitensor
-    INTERFACE
-        ${CMAKE_SOURCE_DIR}/include/
-        ${CMAKE_SOURCE_DIR}/src/)
-target_sources(multitensor
-    INTERFACE
-        $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
-
+    target_include_directories(multitensor
+        INTERFACE
+            ${CMAKE_SOURCE_DIR}/include/
+            ${CMAKE_SOURCE_DIR}/src/)
+    target_sources(multitensor
+        INTERFACE
+            $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
 
 add_library(multitensor_utils
     ${CMAKE_SOURCE_DIR}/applications/include/app_utils.hpp
@@ -94,21 +105,13 @@ target_include_directories(multitensor_utils
     PUBLIC
     ${CMAKE_SOURCE_DIR}/applications/include/
     ${CMAKE_SOURCE_DIR}/applications/src/)
+target_compile_options(multitensor_utils PUBLIC -fPIC)
+
+
 
 # executables
-add_executable(Multitensor_main legacy/applications/src/MultiTensor_main.cpp)
-target_link_libraries(Multitensor_main multitensor_default Boost::system Boost::filesystem Boost::program_options)
-
-add_executable(Multitensor_undirected legacy/applications/src/MultiTensor_undirected.cpp)
-target_link_libraries(Multitensor_undirected multitensor_undirected Boost::system Boost::filesystem Boost::program_options)
-
 add_executable(Multitensor applications/src/MultiTensor.cpp)
 target_link_libraries(Multitensor multitensor multitensor_utils)
-
-set_target_properties(
-    Multitensor_main Multitensor_undirected Multitensor
-    PROPERTIES
-    FOLDER "Applications")
 
 # Unit tests
 add_executable(test_multitensor
@@ -143,18 +146,23 @@ function(add_test_cmd_line
     add_test(
         NAME "command-line-${test_name}-run"
         COMMAND ${test_program} ${ARGN}
-        WORKING_DIRECTORY ${test_folder})
+        WORKING_DIRECTORY ${test_folder}
+    )
 
     if("${test_program}" STREQUAL "Multitensor")
         add_test(
             NAME "command-line-${test_name}-verify-content"
-            COMMAND bash "-c" "${test_folder}/compare.sh ${test_folder}/results"
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/data/${test_name})
+            COMMAND ${CMAKE_COMMAND}
+                "-Dresults=${test_folder}/results"
+                "-Dground_truth=${CMAKE_SOURCE_DIR}/tests/data/${test_name}"
+                -P ${CMAKE_SOURCE_DIR}/cmake/verify_content.cmake
+        )
 
         set_tests_properties(
             "command-line-${test_name}-verify-content"
             PROPERTIES
-            DEPENDS "command-line-${test_name}-run")
+            DEPENDS "command-line-${test_name}-run"
+        )
     endif()
 
 endfunction()
@@ -200,19 +208,21 @@ add_test_cmd_line(
     --r 1
     --assortative)
 
-add_test_cmd_line(
-    "legacy_main"
-    Multitensor_main
-    -a adjacency.dat
-    -k 2
-    -l 4)
+if(NOT MSVC)
+    add_test_cmd_line(
+        "legacy_main"
+        Multitensor_main
+        -a adjacency.dat
+        -k 2
+        -l 4)
 
-add_test_cmd_line(
-    "legacy_undirected"
-    Multitensor_undirected
-    -a adjacency.dat
-    -k 2
-    -l 4)
+    add_test_cmd_line(
+        "legacy_undirected"
+        Multitensor_undirected
+        -a adjacency.dat
+        -k 2
+        -l 4)
+endif()
 
 
 #########################
