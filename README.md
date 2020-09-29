@@ -8,49 +8,66 @@ for community detection, link prediction and measure layer interdependence.
 Installation
 ============
 
-The project is written in `C++` and uses [CMake](https://cmake.org/) for building:
+The project is written in `C++` and builds
 
 - the main library
-- the [Python3](https://www.python.org/) bindings
+- the Python bindings
 - the tests
+- the benchmark
 - the documentation
 
 
 Requirements
 ------------
 
+- [Boost libraries](http://www.boost.org)
 - [CMake](https://cmake.org/) for building the project
-- [Boost](http://www.boost.org) for the unit tests
+- [Python3](https://www.python.org/) for building the Python bindings
+and running the benchmark
+- [Doxygen](https://www.doxygen.nl/index.html) for generating the documentation
 
 
 Configuring and building the project with CMake
 -----------------------------------------------
 
 To configure and build the project, simply type in:
-
 ```
-cd $MULTI_TENSOR_DIR
-mkdir build
-cd build
-cmake -DBOOST_ROOT=$BOOST_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
-make
+$ cd $MULTI_TENSOR_DIR
+$ mkdir build
+$ cd build
+$ cmake -DBOOST_ROOT=$BOOST_PATH -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+$ make
 ```
 where
-* `Boost` is installed under `$BOOST_PATH`
-* `$MULTI_TENSOR_DIR` is the entry point of the library repository
+* `$MULTI_TENSOR_DIR` is the root of this repository
+* `$BOOST_PATH` is the location of the `Boost` libraries
 * `$BUILD_TYPE` is the configuration you wish to build (usually `Release` or `Debug`)
-
 
 Running the tests
 -----------------
 Once the project is built, just type
-
 ```
-make test
+$ make test
 ```
 
 This will run the unit tests and the functional tests,
 also for Python if the extensions are enabled.
+
+Running the benchmark
+---------------------
+
+To run the benchmark (Table III) from the [paper](#References),
+run from the `build` directory:
+```
+$ cd benchmark
+$ python benchmark_runner.py --test $TEST_NAME
+```
+
+Please run first
+```
+$ python benchmark_runner.py --help
+```
+to get more information about the possible options and available tests.
 
 Usage
 =====
@@ -66,10 +83,10 @@ Use the `help` option to obtain more details about the binary:
 ./Multitensor --help
 ```
 
-You can run it against exampled provided in the ``data`` folder, for instance:
+You can run it against examples provided in the ``data`` folder, for instance:
 ```
 cd data
-./Multitensor --a adjacency.dat --k 2
+./Multitensor --a $MULTI_TENSOR_DIR/data/main/adjacency.dat --k 2
 ```
 
 

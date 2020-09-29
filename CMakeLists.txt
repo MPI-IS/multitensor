@@ -19,6 +19,7 @@ message(STATUS "Project ${CMAKE_PROJECT_NAME} v${CMAKE_PROJECT_VERSION}")
 enable_testing()
 
 option(ENABLE_PYTHON_WRAPPER "Enable the python extensions" ON)
+option(ENABLE_BENCHMARK "Enable the benchmark" ON)
 
 # 0:silent
 add_definitions(-DMULTITENSOR_VERBOSE=1)
@@ -89,13 +90,13 @@ if(NOT MSVC)
 endif()
 
 add_library(multitensor INTERFACE)
-    target_include_directories(multitensor
-        INTERFACE
-            ${CMAKE_SOURCE_DIR}/include/
-            ${CMAKE_SOURCE_DIR}/src/)
-    target_sources(multitensor
-        INTERFACE
-            $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
+target_include_directories(multitensor
+    INTERFACE
+        ${CMAKE_SOURCE_DIR}/include/
+        ${CMAKE_SOURCE_DIR}/src/)
+target_sources(multitensor
+    INTERFACE
+        $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
 
 add_library(multitensor_utils
     ${CMAKE_SOURCE_DIR}/applications/include/app_utils.hpp
@@ -233,3 +234,8 @@ include(cmake/python.cmake)
 #########################
 # Documentation (Doxygen)
 include(cmake/documentation.cmake)
+
+
+###########
+# Benchmark
+include(cmake/benchmark.cmake)

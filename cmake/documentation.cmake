@@ -1,21 +1,16 @@
-# (c) 2014-2019, Max Planck Society.
-# Distributed under the Boost Software License, Version 1.0. (See accompanying
-# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
 #
 # This file contains the logic for generating the documentation with Doxygen
 #
 
 if(NOT DOXYGEN_FOUND)
-    message(STATUS "[DOC] Doxygen not found")
     return()
 endif()
 
 message(STATUS "[DOC] Configuring the documentation")
 
-configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in
-               ${CMAKE_CURRENT_BINARY_DIR}/documentation/Doxyfile)
-
+configure_file(
+    ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/documentation/Doxyfile)
 
 add_custom_target(Doxygen
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}

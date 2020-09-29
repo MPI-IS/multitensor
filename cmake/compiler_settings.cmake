@@ -1,7 +1,3 @@
-# Copyright 2019, Max Planck Society.
-# Distributed under the "GNU GPL v3" licence.
-# (See accompanying file LICENSE.md)
-
 #
 # This file contains the global compilation settings
 #
