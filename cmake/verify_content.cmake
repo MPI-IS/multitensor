@@ -1,6 +1,8 @@
-# Cmake script to verify the content of a run. Variables are
+#
+# Script to verify the content of a run. Variables are
 # - 'results' points to a folder containing the results of the tests
 # - 'ground_truth' points to a folder containing the ground truth
+#
 
 set(DATALIST u v w)
 foreach(X IN LISTS DATALIST)

@@ -1,6 +1,6 @@
-# Copyright 2019, Max Planck Society.
-# Distributed under the "GNU GPL v3" licence.
-# (See accompanying file LICENSE.md)
+#
+# This file contains the logic for setting up the thridparties configurations
+#
 
 # Boost
 # disable auto link
@@ -24,7 +24,7 @@ set(Boost_NO_BOOST_CMAKE        ON)
 set(Boost_ADDITIONAL_VERSIONS
     "1.54" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0"
     "1.60" "1.60.0" "1.61" "1.61.0" "1.62" "1.62.0" "1.63" "1.63.0" "1.64" "1.64.0" "1.65" "1.65.0" "1.68" "1.68.0"
-    "1.69" "1.69.0" "1.70" "1.70.0")
+    "1.69" "1.69.0" "1.70" "1.70.0" "1.71" "1.71.0" "1.72" "1.72.0" "1.73" "1.73.0" "1.74" "1.75.0")
 
 # if BOOST_ROOT is defined, we look only there, otherwise we also look into the system paths
 if(DEFINED BOOST_ROOT)
@@ -42,12 +42,14 @@ endif()
 
 # Doxygen
 find_package(Doxygen)
+if(NOT DOXYGEN_FOUND)
+    message(STATUS "[DOC] Doxygen not found")
+endif()
 
-
-# Python3
-set(MULTI_TENSOR_PYTHON_EXTENSIONS FALSE)
+# Python3 extension
+set(MULTITENSOR_PYTHON_EXTENSIONS FALSE)
 if(ENABLE_PYTHON_WRAPPER)
-    message(STATUS "[PYTHON] Configuring Python bindings")
+    message(STATUS "[PYTHON] Checking python3 configuration")
 
     # Find python3
     set(CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
@@ -104,9 +106,28 @@ if(ENABLE_PYTHON_WRAPPER)
       message(STATUS "[PYTHON] Python not found!")
     endif()
 
+    # if all the conditions are met, we enable the python+cython+numpy extensions
+    if((NOT "${NUMPY_INCLUDE_PATH}" STREQUAL "") AND (NOT "${PYTHON_SHARED_LIBRARY_EXTENSION}" STREQUAL ""))
+        set(MULTITENSOR_PYTHON_EXTENSIONS TRUE)
+    endif()
+
 endif()
 
-# if all the conditions are met, we enable the python+cython+numpy extensions
-if((NOT "${PYTHON_SHARED_LIBRARY_EXTENSION}" STREQUAL ""))
-    set(MULTI_TENSOR_PYTHON_EXTENSIONS TRUE)
+
+# Benchmark
+set(MULTITENSOR_ENABLE_BENCHMARK FALSE)
+if(ENABLE_BENCHMARK)
+    message(STATUS "[BENCHMARK] Checking python3 configuration")
+
+    # Python might have been already found for the extension
+    if(NOT Python3_Interpreter_FOUND)
+        set(CMAKE_FIND_FRAMEWORK NEVER) # needed on OSX to point to the virtualenv
+        find_package (Python3 COMPONENTS Interpreter)
+    endif()
+    if(Python3_Interpreter_FOUND)
+        message(STATUS "[BENCHMARK] python3 interpreter found at following location '${Python3_EXECUTABLE}'")
+        set(MULTITENSOR_ENABLE_BENCHMARK TRUE)
+    else()
+        message(STATUS "[BENCHMARK] python3 interpreter not found")
+    endif()
 endif()
