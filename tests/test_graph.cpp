@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_full_network)
         auto edge = std::make_tuple(edges_start[i], edges_end[i]);
         for (size_t alpha = 0; alpha < nof_layers; alpha++)
         {
-            unsigned w = edges_weight[i * nof_layers + alpha];
+            auto w = edges_weight[i * nof_layers + alpha];
             if (w > EPS_PRECISION)
             {
                 vec_of_maps[alpha][edge] = w;

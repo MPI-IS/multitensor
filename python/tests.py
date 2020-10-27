@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 import os
 from unittest import TestCase
 
@@ -36,7 +33,7 @@ class InputFileMixin:
     assortative = False
     undirected = False
     num_realizations = 1
-    num_iterations = 500
+    num_iterations = 100
     num_convergences = 10
 
     def setUp(self):
@@ -56,9 +53,6 @@ class InputFileMixin:
         if self.affinity_filename:
             affinity_filename = os.path.join(
                 DATA_DIRECTORY, self.affinity_filename)
-
-            print(affinity_filename)
-
             self.init_affinity = read_affinity_data(
                 affinity_filename, self.num_groups, self.num_layers, self.assortative)
 
@@ -114,29 +108,12 @@ class WInputInputFileTestCase(InputFileMixin, TestCase):
 class MultiRealInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "multi_real/adjacency_k2L4.dat"
     affinity_filename = "multi_real/w_k2_k2L4_r2.dat"
-
     num_groups = 2
     num_realizations = 2
 
 
 class AssortativeInputFileTestCase(InputFileMixin, TestCase):
     adjacency_filename = "assortative/adjacency_assortative_k3L4.dat"
-
     num_groups = 3
     num_realizations = 1
-
     assortative = True
-
-
-class LegacyMainInputFileTestCase(InputFileMixin, TestCase):
-    adjacency_filename = "legacy_main/adjacency.dat"
-
-    num_groups = 2
-    num_realizations = 2
-
-
-class LegacyUndirectedMainInputFileTestCase(InputFileMixin, TestCase):
-    adjacency_filename = "legacy_undirected/adjacency.dat"
-
-    num_groups = 2
-    num_realizations = 2

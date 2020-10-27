@@ -106,9 +106,6 @@ target_include_directories(multitensor_utils
     PUBLIC
     ${CMAKE_SOURCE_DIR}/applications/include/
     ${CMAKE_SOURCE_DIR}/applications/src/)
-target_compile_options(multitensor_utils PUBLIC -fPIC)
-
-
 
 # executables
 add_executable(Multitensor applications/src/MultiTensor.cpp)
@@ -173,7 +170,8 @@ add_test_cmd_line(
     Multitensor
     --a adjacency.dat
     --k 2
-    --s 5489)
+    --s 5489
+    --maxit 100)
 
 add_test_cmd_line(
     "undirected"
@@ -181,7 +179,8 @@ add_test_cmd_line(
     --a adjacency.dat
     --k 2
     --s 5489
-    --undirected)
+    --undirected
+    --maxit 100)
 
 add_test_cmd_line(
     "w_input"
@@ -189,7 +188,8 @@ add_test_cmd_line(
     --a adjacency_k2L4.dat
     --k 2
     --s 5489
-    --w w_k2_k2L4_A.dat)
+    --w w_k2_k2L4_A.dat
+    --maxit 100)
 
 add_test_cmd_line(
     "multi_real"
@@ -198,7 +198,8 @@ add_test_cmd_line(
     --k 2
     --s 5489
     --w w_k2_k2L4_r2.dat
-    --r 2)
+    --r 2
+    --maxit 100)
 
 add_test_cmd_line(
     "assortative"
@@ -206,24 +207,8 @@ add_test_cmd_line(
     --a adjacency_assortative_k3L4.dat
     --k 3
     --s 5489
-    --r 1
-    --assortative)
-
-if(NOT MSVC)
-    add_test_cmd_line(
-        "legacy_main"
-        Multitensor_main
-        -a adjacency.dat
-        -k 2
-        -l 4)
-
-    add_test_cmd_line(
-        "legacy_undirected"
-        Multitensor_undirected
-        -a adjacency.dat
-        -k 2
-        -l 4)
-endif()
+    --assortative
+    --maxit 100)
 
 
 #########################

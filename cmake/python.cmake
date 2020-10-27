@@ -14,29 +14,69 @@ set(PYTHON_PACKAGE_SRC_DIR ${PYTHON_SRC_DIR}/package)
 
 # either generate the .cpp from the .pyx file is Cython exists
 # or copy the .cpp from the repo
+set(_cython_generated_file_bare "${CMAKE_CURRENT_BINARY_DIR}/multitensor_bare.cpp")
 set(_cython_generated_file "${CMAKE_CURRENT_BINARY_DIR}/multitensor.cpp")
 if(CYTHON_PROGRAM)
     add_custom_command(
         OUTPUT
-            ${_cython_generated_file}
+            ${_cython_generated_file_bare}
         COMMAND
             ${CYTHON_PROGRAM}
         ARGS
             --cplus -3
             "${PYTHON_PACKAGE_SRC_DIR}/multitensor.pyx"
             -o
-            ${_cython_generated_file}
+            ${_cython_generated_file_bare}
         COMMENT
             "[PYTHON] Generating the binding files with Cython"
         DEPENDS
             "${PYTHON_PACKAGE_SRC_DIR}/multitensor.pyx"
-            ${multitensor_src})
+            ${multitensor_src}
+    )
 else()
-    message(STATUS "[Python] Copy the .ccp file form the repository")
-    configure_file(
-        ${PYTHON_PACKAGE_SRC_DIR}/multitensor.cpp
-        ${_cython_generated_file}
-        COPYONLY)
+    add_custom_command(
+        OUTPUT
+            ${_cython_generated_file_bare}
+        COMMAND
+            ${CMAKE_COMMAND}
+        ARGS
+            -E copy
+            ${PYTHON_PACKAGE_SRC_DIR}/multitensor.cpp
+            ${_cython_generated_file_bare}
+        COMMENT
+            "[PYTHON] Copying the .ccp file form the repository"
+        DEPENDS
+            ${PYTHON_PACKAGE_SRC_DIR}/multitensor.cpp
+    )
+endif()
+
+# Hack the python headers for builds on Windows
+if(MSVC)
+    add_custom_command(
+        OUTPUT
+            ${_cython_generated_file}
+        COMMAND ${CMAKE_COMMAND}
+            ARGS
+                "-Dfile1=${PYTHON_SRC_DIR}/hack_python_headers.hpp"
+                "-Dfile2=${_cython_generated_file_bare}"
+                "-Doutput=${_cython_generated_file}"
+                -P "${CMAKE_SOURCE_DIR}/cmake/cat_files.cmake"
+        COMMENT "[PYTHON] Windows builds - hacking Python headers"
+        DEPENDS
+            ${PYTHON_SRC_DIR}/hack_python_headers.hpp
+            ${_cython_generated_file_bare})
+else()
+    add_custom_command(
+        OUTPUT
+            ${_cython_generated_file}
+        COMMAND ${CMAKE_COMMAND}
+            ARGS
+                -E copy
+                ${_cython_generated_file_bare}
+                ${_cython_generated_file}
+        COMMENT "[PYTHON] Non-Windows builds - copying file"
+        DEPENDS
+            ${_cython_generated_file_bare})
 endif()
 
 add_custom_target(
