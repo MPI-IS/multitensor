@@ -8,7 +8,7 @@ cimport numpy
 # 0 - Imports
 cdef extern from "multitensor/utils.hpp" namespace "multitensor::utils":
     cdef cppclass Report:
-        int nof_realizations
+        size_t nof_realizations
         vector[double] vec_L2
         vector[size_t] vec_iter
         vector[const char *] vec_term_reason

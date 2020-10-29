@@ -40,55 +40,8 @@ set(multitensor_src
     ${CMAKE_SOURCE_DIR}/include/multitensor/tensor.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/utils.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/main.hpp)
-set(multitensor_legacy_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/main.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/include/mlg.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/tools_assortative.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/tools.cpp
-    )
-set(multitensor_legacy_default_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/cycle_over_realizations.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/cycle_over_realizations.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/em_update.cpp
-    )
-set(multitensor_legacy_undirected_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/cycle_over_realizations_undirected.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/cycle_over_realizations_undirected.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/em_update_undirected.cpp
-    )
 
 # libraries
-if(NOT MSVC)
-    add_library(multitensor_default INTERFACE)
-    target_include_directories(multitensor_default
-        INTERFACE
-            ${CMAKE_SOURCE_DIR}/legacy/include/
-            ${CMAKE_SOURCE_DIR}/legacy/src/)
-    target_sources(multitensor_default
-        INTERFACE
-            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_default_src}>) # for the IDE to see the library
-
-    add_library(multitensor_undirected INTERFACE)
-    target_include_directories(multitensor_undirected
-        INTERFACE
-            ${CMAKE_SOURCE_DIR}/legacy/include/
-            ${CMAKE_SOURCE_DIR}/legacy/src/)
-    target_sources(multitensor_undirected
-        INTERFACE
-            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_undirected_src}>) # for the IDE to see the library
-
-    add_executable(Multitensor_main legacy/applications/src/MultiTensor_main.cpp)
-    target_link_libraries(Multitensor_main multitensor_default Boost::system Boost::filesystem Boost::program_options)
-
-    add_executable(Multitensor_undirected legacy/applications/src/MultiTensor_undirected.cpp)
-    target_link_libraries(Multitensor_undirected multitensor_undirected Boost::system Boost::filesystem Boost::program_options)
-
-    set_target_properties(
-        Multitensor_main
-        PROPERTIES
-        FOLDER "Applications")
-endif()
-
 add_library(multitensor INTERFACE)
 target_include_directories(multitensor
     INTERFACE
@@ -120,13 +73,14 @@ add_executable(test_multitensor
     tests/test_solver.cpp
     tests/test_tensor.cpp
     tests/test_utils.cpp)
-target_link_libraries(test_multitensor multitensor
-      Boost::unit_test_framework
-      Boost::system
-      Boost::filesystem)
+target_link_libraries(test_multitensor
+    multitensor
+    Boost::unit_test_framework
+    Boost::system
+    Boost::filesystem)
 add_test(
-      NAME multitensor_unit_tests
-      COMMAND test_multitensor)
+    NAME multitensor_unit_tests
+    COMMAND test_multitensor)
 
 # Functional tests
 # Helper for command line run
