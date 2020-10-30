@@ -1,3 +1,10 @@
+'''
+Python wrapper for the multitensor library
+
+:author: Ivan Oreshnikov <ivan.oreshnikov@tuebingen.mog.de>
+:author: Jean-Claude Passy <jean-claude.passy@tuebingen.mpg.de>
+'''
+
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
@@ -11,7 +18,7 @@ cdef extern from "multitensor/utils.hpp" namespace "multitensor::utils":
         size_t nof_realizations
         vector[double] vec_L2
         vector[size_t] vec_iter
-        vector[const char *] vec_term_reason
+        vector[const char * ] vec_term_reason
         double duration
 
         Report() except +
@@ -75,6 +82,17 @@ cdef extern from "app_utils.hpp" namespace "app":
 
 
 def read_adjacency_data(filename):
+    """
+    Read adjacency matrix data and creates the necessary vectors.
+
+    :param str filename: Name of the file containing the data
+    :returns: 3-tuple containing:
+
+        * the labels of vertices where an edge starts
+        * the labels of vertices where an edge ends
+        * the edge weights
+    :rtype: tuple(numpy.array)
+    """
 
     cdef string c_filename = string(bytearray(filename.encode()))
     # We define empty vectors that will be populated by the vertices
@@ -110,7 +128,16 @@ def read_adjacency_data(filename):
 
 
 def read_affinity_data(filename, nof_groups, nof_layers, assortative):
+    """
+    Reads affinity file matrix data and creates the necessary numpy arrays
 
+    :param str filename: Name of the file containing the data
+    :param int nof_groups: Number of groups
+    :param int nof_layers: Number of layers
+    :param bool assortative: Whether the affinity matrix is assortative
+    :returns: The affinity data
+    :rtype: numpy.array
+    """
     cdef string c_filename = string(bytearray(filename.encode()))
 
     # We define the vector for the affinity matrix.
@@ -185,10 +212,13 @@ ctypedef fused weight_t:
 
 # This is a python wrapper for the report returned by the solver.
 cdef class ReportWrapper:
+    """Wrapper for the report returned by the solver."""
+
     cdef Report report
 
     @property
     def nof_realizations(self):
+        """Number of realizations."""
         return self.report.nof_realizations
 
     @nof_realizations.setter
@@ -197,6 +227,7 @@ cdef class ReportWrapper:
 
     @property
     def vec_L2(self):
+        """Likelihood for each realization."""
         return self.report.vec_L2
 
     @vec_L2.setter
@@ -205,6 +236,7 @@ cdef class ReportWrapper:
 
     @property
     def vec_iter(self):
+        """Number of iterations for each realization."""
         return self.report.vec_iter
 
     @vec_iter.setter
@@ -213,6 +245,7 @@ cdef class ReportWrapper:
 
     @property
     def vec_term_reason(self):
+        """Reason for terminating the solver for each realization."""
         return self.report.vec_term_reason
 
     @vec_term_reason.setter
@@ -221,13 +254,16 @@ cdef class ReportWrapper:
 
     @property
     def duration(self):
+        """Duration (in seconds) of the full run."""
         return self.report.duration
 
     @duration.setter
     def duration(self, duration):
         self.report.duration = duration
 
+    @property
     def max_L2(self):
+        """Maximum likelihood."""
         return self.report.max_L2()
 
 
@@ -257,20 +293,40 @@ cdef extern from "multitensor/main.hpp" namespace "multitensor":
     )
 
 
-# Python wrapper for the algorithm.
 def multitensor_factorization(
     numpy.ndarray[vertex_t, ndim=1, cast=True] edges_start not None,
     numpy.ndarray[vertex_t, ndim=1, cast=True] edges_end not None,
     numpy.ndarray[weight_t, ndim=1, cast=True] edges_weights not None,
     size_t nof_groups,
-    numpy.ndarray[numpy.float_t, ndim=1, cast=True] init_affinity,
     bint directed,
     bint assortative,
     size_t nof_realizations,
     size_t max_nof_iterations,
-    size_t nof_convergences
+    size_t nof_convergences,
+    numpy.ndarray[numpy.float_t, ndim=1, cast=True] init_affinity,
 ):
-    """Some docstrings are missing here..."""
+    """
+    Multitensor factorization algorithm.
+
+    :param numpy.array edges_start: Labels of vertices where an edge starts
+    :param numpy.array edges_end: Labels of vertices where an edge ends
+    :param numpy.array edges_weight: Edges weights
+    :param int nof_groups: Number of groups
+    :param bool directed: Whether the network is directed
+    :param bool assortative: Whether the layers are assortative
+    :param int nof_realizations: Number of realizations
+    :param int max_nof_iterations: Maximum number of iterations in each realization
+    :param int nof_convergences: Number of successive passed convergence criteria
+        for declaring the results converged
+    :param numpy.array init_affinity: Initial affinity matrix
+    :returns: 4-tuple containing:
+
+        * the numpy array linking outgoing vertices
+        * the numpy array linking incoming vertices
+        * the numpy array containing the affinity values
+        * the detailed report
+    :rtype: tuple(numpy.array, numpy.array, numpy.array, ReportWrapper)
+    """
 
     # We start by initializing the output variables of the C function.
     # Report can be initialized as empty.

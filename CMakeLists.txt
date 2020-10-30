@@ -35,7 +35,7 @@ include(cmake/thirdparty.cmake)
 set(multitensor_src
     ${CMAKE_SOURCE_DIR}/include/multitensor/graph.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/initialization.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor/parameters.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/params.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/solver.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/tensor.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/utils.hpp
@@ -52,6 +52,7 @@ target_sources(multitensor
         $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
 
 add_library(multitensor_utils
+    ${CMAKE_SOURCE_DIR}/applications/include/app_params.hpp
     ${CMAKE_SOURCE_DIR}/applications/include/app_utils.hpp
     ${CMAKE_SOURCE_DIR}/applications/src/app_utils.cpp)
 target_link_libraries(multitensor_utils PUBLIC multitensor Boost::filesystem)
@@ -172,7 +173,7 @@ include(cmake/python.cmake)
 
 #########################
 # Documentation (Doxygen)
-include(cmake/documentation.cmake)
+include(cmake/doxygen_doc.cmake)
 
 
 ###########

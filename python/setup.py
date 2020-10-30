@@ -30,7 +30,7 @@ setup(
         "jean-claude.passy@tuebignen.mpg.de, "
         "ivan.oreshnikov@tuebingen.mpg.de"
     ),
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     install_requires=["numpy"],
     packages=['.'],
     package_data={".": [

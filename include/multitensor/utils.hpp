@@ -64,6 +64,8 @@ struct Report
 /*!
  * @brief Utility function calculating the number of vertices from input data
  *
+ * @tparam vertex_t Type of vertices
+ *
  * @param[in] edges_start Labels of vertices where an edge starts
  * @param[in] edges_end Labels of vertices where an edge ends
  *
@@ -85,10 +87,13 @@ size_t get_num_vertices(const std::vector<vertex_t> &edges_start,
 /*!
  * @brief Class representing a random variate generator
  *
+ * @tparam rng_t Type of the random generator
+ * @tparam dist_t Type of the distribution
+ *
  * @note Built using random number generator together with a random number distribution
  */
 template <class rng_t = std::mt19937,
-            class dist_t = boost::uniform_real<>>
+          class dist_t = boost::uniform_real<>>
 struct RandomGenerator
 {
     //! The seed

@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <cassert>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 
 namespace multitensor
 {
@@ -32,9 +32,13 @@ template <class scalar_t>
 class Tensor
 {
 protected:
+    //! @brief Number of rows
     dimension_t nrows;
+    //! @brief Number of columns
     dimension_t ncols;
-    dimension_t ntubes; // 3rd component
+    //! @brief Number of tubes (3rd component)
+    dimension_t ntubes;
+    //! @brief Data
     std::vector<scalar_t> data;
 
     /*!
@@ -149,41 +153,25 @@ public:
         return data.size();
     }
 
-    /*!
-     * @brief The dimensions of a tensor
-     *
-     * @returns Tuple with the three dimensions
-     */
+    //! @brief Returns a 3-tuple containing the dimensions of the tensor
     auto dims() const noexcept
     {
         return std::make_tuple(nrows, ncols, ntubes);
     }
 
-    /*!
-     * @brief nrows getter
-     *
-     * @returns Number of rows
-     */
+    //! Returns the number of rows
     dimension_t get_nrows() const noexcept
     {
         return nrows;
     }
 
-    /*!
-     * @brief ncols getter
-     *
-     * @returns Number of columns
-     */
+    //! Returns the number of columns
     dimension_t get_ncols() const noexcept
     {
         return ncols;
     }
 
-    /*!
-     * @brief ntubes getter
-     *
-     * @returns Number of tubes
-     */
+    //! Returns the number of tubes
     dimension_t get_ntubes() const noexcept
     {
         return ntubes;
@@ -402,6 +390,7 @@ template <class tensor_t>
 class Transpose
 {
 private:
+    //! Tensor
     tensor_t &tensor;
 
 public:
@@ -479,11 +468,7 @@ public:
         return tensor(j, i);
     }
 
-    /*!
-     * @brief The dimensions of the transpose
-     *
-     * @returns Tuple with the three dimensions
-     */
+    //! @brief Returns a 3-tuple containing the dimensions of the transpose
     auto dims() const noexcept
     {
         // Tr(DiagTensor) = DiagTensor

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/tensor.hpp"
 
 namespace multitensor
@@ -38,7 +38,7 @@ struct init_symmetric_tensor_random
      * @pre Tensor must have been resized appropriately.
      */
     template <class tensor_t,
-                class random_t>
+              class random_t>
     void operator()(const tensor_t & /*Tinit*/, tensor_t &T, random_t &random_generator)
     {
         using scalar_t = std::decay_t<decltype(T(0, 0))>;
@@ -157,8 +157,8 @@ struct init_symmetric_tensor_from_initial
 template <class scalar_t,
           class random_t>
 void init_tensor_rows_random(const std::vector<dimension_t> &elements,
-                                tensor::Matrix<scalar_t> &mat,
-                                random_t &random_generator)
+                             tensor::Matrix<scalar_t> &mat,
+                             random_t &random_generator)
 {
     auto dims = mat.dims();
     const dimension_t ncols{std::get<1>(dims)};

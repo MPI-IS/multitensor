@@ -15,7 +15,7 @@
 #include <memory>
 
 #include "multitensor/graph.hpp"
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/tensor.hpp"
 #include "multitensor/utils.hpp"
 
@@ -26,18 +26,19 @@ namespace multitensor
 namespace solver
 {
 
-//!@brief Class for the solver
+//! @brief Class for the solver
 class Solver
 {
 private:
+
     size_t nof_realizations;
     size_t max_nof_iterations;
-    size_t nof_convergences; // number of times the convergence criterium is satisfied before stopping the simulation
+    size_t nof_convergences;
 
     /*!
      * @brief Update the u and v components
      *
-     * @tparam get_edges_t Class type for extracting edges and vertices
+     * @tparam get_edges_t Proxy type for extracting edges and vertices
      * @tparam affinity_t Affinity matrix type
      * @tparam network_t Network type
      *
@@ -47,6 +48,7 @@ private:
      * @param[in] w Affinity tensor
      * @param[in] mat_fixed Matrix fixed used for computation
      * @param[in,out] mat_to_update Matrix to update
+     * @param[in,out] edges_vertices_proxy Proxy for extracting edges and vertices
      */
     template <class edges_vertices_t,
               class affinity_t,
@@ -671,7 +673,7 @@ public:
     {
         return nof_convergences;
     }
-}; // namespace solver
+}; // class Solver
 
 } // namespace solver
 } // namespace multitensor

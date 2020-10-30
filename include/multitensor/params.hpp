@@ -53,15 +53,3 @@ get_termination_reason_name(termination_reason tr)
         return "NO_TERMINATION";
     }
 }
-
-//! @brief U output filename
-const std::string UOUT_FILENAME = "u_out.dat";
-
-//! @brief V output filename
-const std::string VOUT_FILENAME = "v_out.dat";
-
-//! @brief W output filename
-const std::string WOUT_FILENAME = "w_out.dat";
-
-//! @brief Information filename
-const std::string INFO_FILENAME = "run_info.dat";

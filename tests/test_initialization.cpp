@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <boost/test/unit_test.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/initialization.hpp"
 #include "multitensor/tensor.hpp"
 #include "fixtures.hpp"

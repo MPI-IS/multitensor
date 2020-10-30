@@ -15,7 +15,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/utils.hpp"
 #include "fixtures.hpp"
 

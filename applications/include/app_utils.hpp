@@ -22,7 +22,7 @@
 #include <set>
 #include <boost/filesystem.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/tensor.hpp"
 #include "multitensor/utils.hpp"
 
@@ -112,6 +112,7 @@ void read_adjacency_data(const boost::filesystem::path &filename,
  * @brief Read affinity file matrix data and creates the necessary tensor
  *
  * @param[in] filename Name of the file containing the data
+ * @param[in] assortative Whether the affinity matrix is assortative
  * @param[in,out] w Vector containing the values of the Affinity tensor
  */
 void read_affinity_data(const boost::filesystem::path &filename,

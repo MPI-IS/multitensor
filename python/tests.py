@@ -67,12 +67,12 @@ class InputFileMixin:
             self.edges_end,
             self.edges_weights,
             self.num_groups,
-            self.init_affinity,
             not self.undirected,
             self.assortative,
             self.num_realizations,
             self.num_iterations,
-            self.num_convergences)
+            self.num_convergences,
+            self.init_affinity)
 
         self.assertIsInstance(u, numpy.ndarray)
         self.assertIsInstance(v, numpy.ndarray)

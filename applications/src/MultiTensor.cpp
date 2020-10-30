@@ -3,6 +3,7 @@
 #include <ctime>
 #include <boost/graph/adjacency_list.hpp>
 
+#include "app_params.hpp"
 #include "app_utils.hpp"
 #include "multitensor/main.hpp"
 #include "multitensor/utils.hpp"

@@ -16,7 +16,7 @@
 #include <set>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/graph.hpp"
 #include "multitensor/initialization.hpp"
 #include "multitensor/solver.hpp"
@@ -35,6 +35,7 @@ namespace multitensor
  * @tparam affinity_init_t The type of the initialization for the affinity
  * @tparam vertex_t Edges label type
  * @tparam weight_t The type of an edge weight
+ * @tparam random_t The type of the random generator
  *
  * @param[in] edges_start Labels of vertices where an edge starts
  * @param[in] edges_end Labels of vertices where an edge ends
@@ -46,6 +47,7 @@ namespace multitensor
  * @param[in,out] u Tensors linking outgoing vertices
  * @param[in,out] v Tensors linking incoming vertices
  * @param[in,out] affinity Affinity values
+ * @param[in,out] random_generator Random generator
  *
  * @returns Detailed results of the algorithm.
  */

@@ -126,8 +126,41 @@ add_dependencies(multitensor_py_dist multitensor_py)
 add_test(
     NAME multitensor_python_test
     COMMAND ${Python3_EXECUTABLE} -m unittest discover -vvv
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python)
+    WORKING_DIRECTORY ${PYTHON_SRC_DIR})
 # Add path to the library
 set_tests_properties(multitensor_python_test
     PROPERTIES
         ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:multitensor_py>")
+
+# Sphinx documentation for Python extension
+set(SPHINX_SRC_DIR ${PYTHON_SRC_DIR}/sphinx_doc)
+set(SPHINX_TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/sphinx_doc)
+file(COPY ${SPHINX_SRC_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# To get version and project name from cmake
+configure_file(
+    ${SPHINX_SRC_DIR}/source/conf.py
+    ${SPHINX_TARGET_DIR}/source/conf.py)
+
+# Find sphinx build
+get_filename_component(PYTHON_BIN_DIR ${Python3_EXECUTABLE} DIRECTORY)
+find_program(SPHINX_EXECUTABLE
+    NAMES sphinx-build
+    PATHS ${PYTHON_BIN_DIR}
+    DOC "Sphinx documentation generator")
+
+add_custom_target(Sphinx
+    COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/sphinx_doc/build
+    COMMAND
+    PYTHON_ADDITIONAL_FOLDERS=$<TARGET_FILE_DIR:multitensor_py>
+        ${SPHINX_EXECUTABLE} -q -b html
+        ${SPHINX_TARGET_DIR}/source
+        ${SPHINX_TARGET_DIR}/build
+    COMMENT "Generating Sphinx documentation"
+    DEPENDS multitensor_py
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:multitensor_py>
+    SOURCES
+        ${SPHINX_SRC_DIR}/source/conf.py
+        ${SPHINX_SRC_DIR}/source/definitions.rst
+        ${SPHINX_SRC_DIR}/source/index.rst
+)
