@@ -1,7 +1,10 @@
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
 #
-# Script to verify the content of a run. Variables are
-# - 'results' points to a folder containing the results of the tests
-# - 'ground_truth' points to a folder containing the ground truth
+# This script verifies the content of a run. Variables are
+#   - 'results' points to a folder containing the results of the tests
+#   - 'ground_truth' points to a folder containing the ground truth
 #
 
 set(DATALIST u v w)

@@ -1,12 +1,13 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
  * @brief File for hacking the Python headers
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
- *
- * This file modifying the inclusion of the python libs on Windows
- * and prevents the linking to the debug libraries python3x_d.lib
  */
 
 #ifndef MULTITENSOR_HACK_PYTHON_H__

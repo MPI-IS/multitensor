@@ -1,12 +1,14 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
- * @brief Implementation of graphs and related functions
+ * @brief Implementation of graphs and multilayer network
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
- *
- * This file contains the implementation for creating and manipulating
- * graphs, and building a multilayer network of graphs.
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once

@@ -2,19 +2,19 @@ MultiTensor
 ===========
 
 The **MutliTensor** is a library for multilayer network tensor factorization that can be used
-for community detection, link prediction and measure layer interdependence.
+for community detection, link prediction and to measure layer interdependence.
 
 
 Installation
 ============
 
-The project is written in `C++` and builds
+The project is written in `C++` and includes
 
 - the main library
-- the Python bindings
+- the Python extension
 - the tests
 - the benchmark
-- the documentation
+- the documentations
 
 
 Requirements
@@ -22,9 +22,9 @@ Requirements
 
 - [Boost libraries](http://www.boost.org)
 - [CMake](https://cmake.org/) for building the project
-- [Python3](https://www.python.org/) for building the Python bindings
-and running the benchmark
-- [Doxygen](https://www.doxygen.nl/index.html) for generating the documentation
+- [Python 3.6+](https://www.python.org/) and [Numpy](https://numpy.org/)
+for building the Python bindings and running the benchmark
+- [Doxygen](https://www.doxygen.nl/index.html) for generating the main documentation
 
 
 Configuring and building the project with CMake
@@ -43,6 +43,14 @@ where
 * `$BOOST_PATH` is the location of the `Boost` libraries
 * `$BUILD_TYPE` is the configuration you wish to build (usually `Release` or `Debug`)
 
+Documentation
+-------------
+
+The main documentation is written with Doxygen. It can be built the following way:
+```
+$ make doxygen
+```
+
 Running the tests
 -----------------
 Once the project is built, just type
@@ -56,23 +64,16 @@ also for Python if the extensions are enabled.
 Running the benchmark
 ---------------------
 
-To run the benchmark (Table III) from the [paper](#References),
+To run the benchmark (Table III) from the [De Bacco et al. 2017](#References),
 run from the `build` directory:
 ```
 $ cd benchmark
+$ python benchmark_runner.py --help
 $ python benchmark_runner.py --test $TEST_NAME
 ```
 
-Please run first
-```
-$ python benchmark_runner.py --help
-```
-to get more information about the possible options and available tests.
-
 Usage
 =====
-
-The folder `data` contains sample adjacency files used for testing the code.
 
 C++ API
 -------
@@ -80,72 +81,64 @@ C++ API
 A binary `Multitensor` is provided to use the C++ implementation.
 Use the `help` option to obtain more details about the binary:
 ```
-./Multitensor --help
+$ ./Multitensor --help
 ```
 
-You can run it against examples provided in the ``data`` folder, for instance:
+You can run it against the examples provided in the `data` folder
+in the source repository, for instance:
 ```
-cd data
-./Multitensor --a $MULTI_TENSOR_DIR/data/main/adjacency.dat --k 2
+$ ./Multitensor --a $MULTITENSOR_SRC_DIR/data/main/adjacency.dat --k 2
 ```
-
-
-Python API
-----------
-
-To us the python implementation (slower):
-
-```
-python main.py -k=2 -l=4 -a=adjacency.dat -E=_endfile.dat
-```
-
-### Required arguments
-
-- `-a` : Adjacency matrix file
-- `-f` : Folder where the adjacency input and output are/will be stored (inside `data` folder).
-
-### Optional arguments
-
-- `-E` : Output end of file where the paramters' files will be stored. Example: `-E="_abc.dat" ` output files will be `u_K4_abc.dat`,`v_K4_abc.dat`,`w_K4_abc.dat` (assuming that k=4). Default value is `-E=".dat"`.
-- `-i` : Initialization flag: if `i=0` than parametrs are randomly initialized; if `i=1` the membership vectors u and v and w are initialized form file; if `i=2` only w is initialized from file; if `i=3` only u and v are initialized from file, w instead is random. Default is `i=0`.
-
-* `-w` : End of the file where the parameters can be initialized from, in case initialization variable is greater than 0.
-
-* `-l` : Number of layers, default is 4.
-* `-k` : Number of communities, default is 5.
-* `-r` : Number of different realizations, the final parameters will be the one corresponding to the realization leading to the max likelihood. Default is 1.
-* `-t` : Max iteration time. Default is 500.
-* `-e` : Convergence tolerance. Default is 0.1 .
-* `-g` : Error added when intializing parameters from file. Default is 0.1 .
-* `-o` : Flag to output adjacency matrix. Default is 0 (False).
-* `-y` : Decision variable for convergence. Default is 2.
-* `-z` : Seed for random real numbers.
-* `-A` : Flag to call the (faster) restricted assortative version (purely diagonal affinity matrix).
-* `-u` : Flag to call the undirected network, default is 0 (False).
+By default, the results of the algorithm are written in the `results` folder.
 
 Input format
 ------------
 
 The multilayer adjacency matrix should be formatted as an edge list with L+3 columns:
 
-`E node1 node2 3 0 0 1`
+```
+E node1 node2 3 0 0 1
+```
 
-The first columns tells the algorithm that the row denotes an edge; the second and third are the source and target nodes of that edge, respectively; l+3 column tells if there is that edge in the l-th layer and the weigth (must be integer). In this example the edge node1 --> node2 exists in layer 1 with weight 3 and in layer 4 with weight 1, but not in layer 2 and 3.
+* The first column (`E`) tells the algorithm that the row denotes an edge
+* The second and third are the labels source and target nodes of that edge, respectively
+* The remaining columns represent the edge weight in each layer
 
-Note: if the network is undirected, you only need to input each edge once. You then need to specificy to the algotihm that you are considering the undirected case: for the `cpp` version this is done by running `./MultiTensor_undirected` (first you need to compile it by changing the Makefile accordingly); for the `python` version this is done by giving as a command line input parameter `-u=1`.
+In the example above the edge *node1* --> *node2* exists in layer 1 with weight 3
+and in layer 4 with weight 1, but not in layer 2 and 3.
 
 Output format
 -------------
 
-Three files will be generated inside the `data` folder: the two NxK membership matrices `U` and `V`, and the KxK layer affinity matrix `W`. Supposing that K=4 and `E=".dat"` the output files will be inside `data` folder with names:
-- `u_K4.dat`
-- `v_K4.dat`
-- `w_K4.dat`
+Four files will be generated inside an output folder (by default named `results`):`
+* some information about the run of the algorithm
+* the NxK membership matrix `U`
+* the NxK membership matrix `V`
+* the KxK layer affinity matrix `W`
 
-The first line outputs the Max Likelihood among the realizations.
-For the membership files, the subsequent lines contain L+1 columns: the first one is the node label, the follwing ones are the (not normalized) membership vectors' entries.
-For the affinity matrix file, the subsequent lines start with the number of the layer and then the matrix for that layer.
-For the restricted assortative version only the diagonal entries of the affinity matrix are printed. The first entry of each row is the layer index.
+For the membership matrices, the first column is the node label and the following ones the membership vector entries.
+
+
+As for the affinity matrix, it is organized in blocks separated by an empty line.
+Each block starts with the layer number followed by the matrix for that layer. For the assortative version only the diagonal entries of the affinity matrix are printed. The first entry of each row is the layer index.
+
+Python API
+----------
+
+A Python extension build with [Cython](https://cython.org/) is also provided.
+To build it:
+```
+$ pip install -U numpy cython # cython is optional
+$ make multitensor_py
+```
+
+The API is described in the Sphinx documentation
+which can be built the following way:
+```
+$ pip install -U sphinx sphinx-bootstrap-theme
+$ make sphinx
+```
+
 
 References
 ==========

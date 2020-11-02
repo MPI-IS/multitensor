@@ -1,3 +1,6 @@
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
 #
 # This file contains the logic for building the python extension and running the tests
 #
@@ -146,21 +149,23 @@ get_filename_component(PYTHON_BIN_DIR ${Python3_EXECUTABLE} DIRECTORY)
 find_program(SPHINX_EXECUTABLE
     NAMES sphinx-build
     PATHS ${PYTHON_BIN_DIR}
-    DOC "Sphinx documentation generator")
+    DOC "[PYTHON] Sphinx documentation generator")
 
-add_custom_target(Sphinx
+add_custom_target(sphinx
     COMMAND
         ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/sphinx_doc/build
     COMMAND
-    PYTHON_ADDITIONAL_FOLDERS=$<TARGET_FILE_DIR:multitensor_py>
+    PYTHONPATH=$<TARGET_FILE_DIR:multitensor_py>
         ${SPHINX_EXECUTABLE} -q -b html
         ${SPHINX_TARGET_DIR}/source
         ${SPHINX_TARGET_DIR}/build
-    COMMENT "Generating Sphinx documentation"
+    COMMENT "[PYTHON] Generating Sphinx documentation"
     DEPENDS multitensor_py
-    WORKING_DIRECTORY $<TARGET_FILE_DIR:multitensor_py>
     SOURCES
         ${SPHINX_SRC_DIR}/source/conf.py
         ${SPHINX_SRC_DIR}/source/definitions.rst
         ${SPHINX_SRC_DIR}/source/index.rst
 )
+set_target_properties(sphinx
+    PROPERTIES
+        FOLDER "Documentation")

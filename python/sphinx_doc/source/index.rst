@@ -39,6 +39,7 @@ in your build directory:
 
 .. code::
 
+    $ pip install -U numpy cython # cython is optional
     $ make multitensor_py
 
 
@@ -47,9 +48,10 @@ Getting started
 
 To use the algorithm, import the module inside you *Python* session:
 
-.. code:: python
+.. code-block:: python
 
-	import multitensor
+    import multitensor
+    help(multitensor)
 
 
 Indices and tables

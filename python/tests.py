@@ -1,4 +1,10 @@
-import os
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
+"""Module for testing the Python extension."""
+
+from pathlib import Path
 from unittest import TestCase
 
 import numpy
@@ -10,8 +16,8 @@ from multitensor import (
     ReportWrapper
 )
 
-PARENT_DIRECTORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIRECTORY = os.path.join(PARENT_DIRECTORY, "data")
+PARENT_DIRECTORY = Path(__file__).parent.parent
+DATA_DIRECTORY = PARENT_DIRECTORY / "data"
 
 
 class InputFileMixin:
@@ -37,10 +43,8 @@ class InputFileMixin:
     num_convergences = 10
 
     def setUp(self):
-        super().setUp()
 
-        adjacency_filename = os.path.join(
-            DATA_DIRECTORY, self.adjacency_filename)
+        adjacency_filename = DATA_DIRECTORY / self.adjacency_filename
         self.edges_start, self.edges_end, self.edges_weights = (
             read_adjacency_data(adjacency_filename))
 
@@ -51,8 +55,7 @@ class InputFileMixin:
 
         self.init_affinity = None
         if self.affinity_filename:
-            affinity_filename = os.path.join(
-                DATA_DIRECTORY, self.affinity_filename)
+            affinity_filename = DATA_DIRECTORY / self.affinity_filename
             self.init_affinity = read_affinity_data(
                 affinity_filename, self.num_groups, self.num_layers, self.assortative)
 

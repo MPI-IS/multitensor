@@ -1,8 +1,12 @@
-"""
-Configuration to create a wheel.
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
 
-:note: got help from
-https://stackoverflow.com/questions/35112511/pip-setup-py-bdist-wheel-no-longer-builds-forced-non-pure-wheels/36886459#36886459
+"""
+Configuration to create a distribution.
+
+:note: got help from https://stackoverflow.com/questions/35112511/
+pip-setup-py-bdist-wheel-no-longer-builds-forced-non-pure-wheels/36886459#36886459
 """
 
 from setuptools import setup, Distribution

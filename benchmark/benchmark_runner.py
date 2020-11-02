@@ -1,4 +1,12 @@
-"""Module for running and analyzing a benchmark."""
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
+"""
+Module for running and analyzing a benchmark.
+
+:author: Jean-Claude Passy <jean-claude.passy@tuebingen.mpg.de>
+"""
 
 
 import argparse
@@ -258,8 +266,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--exe', metavar='EXE', type=str,
                         default=str(Path.cwd().parent / 'Multitensor'), help='Executable')
-    parser.add_argument('--test', metavar='TEST', action='append', help='Benchmark to run',
-                        required=True, choices=list(all_benchmark_types.keys()) + ['all'])
+    parser.add_argument('--test', action='append', help='Benchmark to run',
+                        default=['all'], choices=list(all_benchmark_types.keys()) + ['all'])
 
     # Get args from command line
     args = parser.parse_args()

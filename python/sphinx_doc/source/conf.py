@@ -14,7 +14,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from pathlib import Path
 import os
 import sys
 import sphinx_bootstrap_theme
@@ -44,20 +43,6 @@ if os.getenv('PYTHON_ADDITIONAL_FOLDERS'):
     sys.path.insert(0, os.getenv('PYTHON_ADDITIONAL_FOLDERS'))
 else:
     sys.path.insert(0, os.path.abspath('.'))
-
-# Make sure __init__ is always documented
-# from https://stackoverflow.com/a/5599712/1617295
-
-
-def skip(app, what, name, obj, skip, options):
-    if name == "__init__":
-        return not (hasattr(obj, "__doc__") and obj.__doc__)
-    return skip
-
-
-def setup(app):
-    app.connect("autodoc-skip-member", skip)
-
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

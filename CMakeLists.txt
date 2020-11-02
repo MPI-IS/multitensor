@@ -1,6 +1,7 @@
-# Copyright 2019, Max Planck Society.
-# Distributed under the "GNU GPL v3" licence.
-# (See accompanying file LICENSE.md)
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 
 cmake_minimum_required (VERSION 3.5)
 cmake_policy(SET CMP0054 NEW)
@@ -62,7 +63,7 @@ target_include_directories(multitensor_utils
     ${CMAKE_SOURCE_DIR}/applications/src/)
 
 # executables
-add_executable(Multitensor applications/src/MultiTensor.cpp)
+add_executable(Multitensor applications/src/multitensor.cpp)
 target_link_libraries(Multitensor multitensor multitensor_utils)
 
 # Unit tests
