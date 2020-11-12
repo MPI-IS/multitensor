@@ -110,6 +110,23 @@ set_target_properties(multitensor_py
         SUFFIX "${PYTHON_SHARED_LIBRARY_EXTENSION}"
         FOLDER "Python")
 
+# If macOS, add MACOSX_DEPLOYMENT_TARGET
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c
+            "import sysconfig; print(sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET'))"
+        OUTPUT_VARIABLE MACOSX_TARGET
+        ERROR_VARIABLE  MACOSX_TARGET_ERROR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(MACOSX_TARGET_ERROR STREQUAL "")
+        target_compile_options(multitensor_py PUBLIC "-mmacosx-version-min=${MACOSX_TARGET}")
+        target_link_options(multitensor_py PUBLIC "-mmacosx-version-min=${MACOSX_TARGET}")
+    else()
+        message(WARNING "[PYTHON] MACOSX_DEPLOYMENT_TARGET not found")
+    endif()
+endif()
 
 # Setup.py to build distributions
 set(_setup_py_in ${PYTHON_SRC_DIR}/setup.py)

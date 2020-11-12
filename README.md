@@ -2,7 +2,7 @@ MultiTensor
 ===========
 
 The **MutliTensor** is a library for multilayer network tensor factorization that can be used
-for community detection, link prediction and to measure layer interdependence.
+for community detection, link prediction, and to measure layer interdependence.
 
 
 Installation
@@ -40,7 +40,7 @@ $ make
 ```
 where
 * `$MULTI_TENSOR_DIR` is the root of this repository
-* `$BOOST_PATH` is the location of the `Boost` libraries
+* `$BOOST_PATH` is the location of the `Boost` libraries (e.g. `/usr/local/Cellar/boost/1.72.0_3/`)
 * `$BUILD_TYPE` is the configuration you wish to build (usually `Release` or `Debug`)
 
 Documentation

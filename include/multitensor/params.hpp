@@ -32,6 +32,9 @@ typedef size_t dimension_t;
 //! @brief Absolute precision
 const double EPS_PRECISION = 1e-6;
 
+//! @brief Absolute precision for logLikelihood convergence
+const double EPS_PRECISION_LIKELIHOOD = 1e-4;
+
 //! @brief Noise magnitude
 const double EPS_NOISE = 0.1;
 

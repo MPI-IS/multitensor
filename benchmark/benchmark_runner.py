@@ -44,6 +44,12 @@ def cosine_similarity(U_infer, U0, P):
     CS = sum(
         (U_infer[:, k].T @ U0[:, k] for k in range(K))
     )
+
+    # OLD version
+    # CS1 = sum(
+    #     (np.dot(U_infer[i],U0[i]) for i in range(N) )
+    # )
+    # assert abs(CS/N-CS1/N)<0.01
     return CS / N
 
 

@@ -497,7 +497,7 @@ private:
         {
             double L2_old = L2;
             L2 = calculate_likelyhood(u, v, w, A);
-            if (std::abs(L2_old - L2) < EPS_PRECISION)
+            if (std::abs(L2_old - L2)/std::abs(L2_old) < EPS_PRECISION_LIKELIHOOD)
             {
                 coincide++;
             }

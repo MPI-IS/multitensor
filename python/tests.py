@@ -44,7 +44,7 @@ class InputFileMixin:
 
     def setUp(self):
 
-        adjacency_filename = DATA_DIRECTORY / self.adjacency_filename
+        adjacency_filename = str(DATA_DIRECTORY / self.adjacency_filename)
         self.edges_start, self.edges_end, self.edges_weights = (
             read_adjacency_data(adjacency_filename))
 
@@ -55,7 +55,7 @@ class InputFileMixin:
 
         self.init_affinity = None
         if self.affinity_filename:
-            affinity_filename = DATA_DIRECTORY / self.affinity_filename
+            affinity_filename = str(DATA_DIRECTORY / self.affinity_filename)
             self.init_affinity = read_affinity_data(
                 affinity_filename, self.num_groups, self.num_layers, self.assortative)
 

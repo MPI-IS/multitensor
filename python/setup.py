@@ -9,7 +9,7 @@ Configuration to create a distribution.
 pip-setup-py-bdist-wheel-no-longer-builds-forced-non-pure-wheels/36886459#36886459
 """
 
-from setuptools import setup, Distribution
+from setuptools import setup, Distribution, find_packages
 
 
 class BinaryDistribution(Distribution):
@@ -24,10 +24,10 @@ setup(
     version="{{version}}",
     description=(
         "A library for multilayer network tensor factorization that "
-        "can be used for community detection, link prediction and measure "
-        "layer interdependence."
+        "can be used for community detection, link prediction, "
+        "and to measure layer interdependence."
     ),
-    url="https://code.is.localnet/project/21/",
+    url="https://github.com/MPI-IS/multitensor",
     author="Caterina De Bacco, Jean-Claude Passy, Ivan Oreshnikov",
     author_email=(
         "caterina.debacco@tuebingen.mpg.de, "

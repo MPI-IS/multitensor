@@ -85,9 +85,9 @@ void read_adjacency_data(const boost::filesystem::path &filename,
         std::istringstream is(line);
 
         // First character should be an E for edge
-        std::string tok;
-        is >> tok;
-        assert(tok == "E");
+        // std::string tok;
+        // is >> tok;
+        // assert(tok == "E");
 
         // Second two characters are the edges ids
         // TO DO: might use tuple later on
