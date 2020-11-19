@@ -89,7 +89,7 @@ void read_affinity_data(const boost::filesystem::path &filename,
         nof_layers++;
     }
 
-    // Now build vecor...
+    // Now build vector...
     in.clear();
     in.seekg(0);
 

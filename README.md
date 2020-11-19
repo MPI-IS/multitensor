@@ -25,7 +25,7 @@ Requirements
 - [Python 3.6+](https://www.python.org/) and [Numpy](https://numpy.org/)
 for building the Python bindings and running the benchmark
 - [Doxygen](https://www.doxygen.nl/index.html) for generating the main documentation
-
+- [Sphinx](https://www.sphinx-doc.org/en/master/) for generating the documentation for python extension
 
 Configuring and building the project with CMake
 -----------------------------------------------
@@ -42,6 +42,8 @@ where
 * `$MULTI_TENSOR_DIR` is the root of this repository
 * `$BOOST_PATH` is the location of the `Boost` libraries (e.g. `/usr/local/Cellar/boost/1.72.0_3/`)
 * `$BUILD_TYPE` is the configuration you wish to build (usually `Release` or `Debug`)
+
+Please, make sure that you have all the necessary dependencies installed before you run `cmake`, otherwise some of the installation targets will be missing from the resulting make files.
 
 Documentation
 -------------
@@ -125,17 +127,17 @@ Each block starts with the layer number followed by the matrix for that layer. F
 Python API
 ----------
 
-A Python extension build with [Cython](https://cython.org/) is also provided.
-To build it:
+A Python extension built with [Cython](https://cython.org/) is also provided. To build it:
 ```
 $ pip install -U numpy cython # cython is optional
+$ cmake ..
 $ make multitensor_py
 ```
 
-The API is described in the Sphinx documentation
-which can be built the following way:
+The API is described in the Sphinx documentation which can be built the following way:
 ```
 $ pip install -U sphinx sphinx-bootstrap-theme
+$ cmake ..
 $ make sphinx
 ```
 

@@ -16,7 +16,7 @@
 #include <set>
 #include <ctime>
 #include <random>
-#include <boost/random.hpp>
+#include <algorithm>
 
 #include "multitensor/tensor.hpp"
 
@@ -98,7 +98,7 @@ size_t get_num_vertices(const std::vector<vertex_t> &edges_start,
  * @note Built using random number generator together with a random number distribution
  */
 template <class rng_t = std::mt19937,
-          class dist_t = boost::uniform_real<>>
+          class dist_t = std::uniform_real_distribution<>>
 struct RandomGenerator
 {
     //! The seed

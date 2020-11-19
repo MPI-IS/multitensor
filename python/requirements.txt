@@ -1,3 +1,5 @@
+cython
+nose
 numpy
 sphinx
 sphinx_bootstrap_theme
