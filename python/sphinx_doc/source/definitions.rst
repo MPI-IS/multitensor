@@ -4,6 +4,6 @@ Definitions
 ==================
 
 .. automodule:: multitensor
-   :members: multitensor_factorization, read_adjacency_data, read_affinity_data, ReportWrapper
+   :members: run, ReportWrapper
    :undoc-members:
    :show-inheritance:

@@ -625,6 +625,8 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "stdexcept"
 #include "typeinfo"
 #include <string>
+#include <stddef.h>
+#include <time.h>
 #include <vector>
 #include <stdio.h>
 #include "numpy/arrayobject.h"
@@ -634,10 +636,9 @@ static CYTHON_INLINE float __PYX_NAN() {
     
 #include "multitensor/utils.hpp"
 #include "multitensor/tensor.hpp"
-#include "boost/filesystem.hpp"
-#include "app_utils.hpp"
 #include "boost/graph/graph_selectors.hpp"
 #include "multitensor/initialization.hpp"
+#include <random>
 #include "multitensor/main.hpp"
 #ifdef _OPENMP
 #include <omp.h>
@@ -1064,7 +1065,7 @@ typedef npy_double __pyx_t_5numpy_double_t;
  */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
-/* "package/multitensor.pyx":182
+/* "package/multitensor.pyx":106
  * # At the moment we support only the integer numbers as the graph
  * # vertices. We might want to extend this later.
  * ctypedef numpy.int_t vertex_t             # <<<<<<<<<<<<<<
@@ -1099,7 +1100,7 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 
 /*--- Type declarations ---*/
 struct __pyx_obj_7package_11multitensor_ReportWrapper;
-struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization;
+struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run;
 struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr;
 
 /* "../../../../../Softwares/envs/multitensor/lib/python3.7/site-packages/numpy/__init__.pxd":728
@@ -1138,7 +1139,7 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "package/multitensor.pyx":193
+/* "package/multitensor.pyx":117
  * 
  * # This is a python wrapper for the report returned by the solver.
  * cdef class ReportWrapper:             # <<<<<<<<<<<<<<
@@ -1151,29 +1152,29 @@ struct __pyx_obj_7package_11multitensor_ReportWrapper {
 };
 
 
-/* "package/multitensor.pyx":275
+/* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
-struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization {
+struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run {
   PyObject_HEAD
-  PyObject *__pyx_v_init_affinity;
+  PyObject *__pyx_v_w_data;
 };
 
 
-/* "package/multitensor.pyx":340
- *         init_affinity = read_affinity_data(init_affinity_filename)
- *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)             # <<<<<<<<<<<<<<
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- *             [l.ravel() for l in init_affinity]
+/* "package/multitensor.pyx":277
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])             # <<<<<<<<<<<<<<
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
  */
 struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr {
   PyObject_HEAD
-  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *__pyx_outer_scope;
+  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *__pyx_outer_scope;
   PyObject *__pyx_v_l;
   PyObject *__pyx_t_0;
   Py_ssize_t __pyx_t_1;
@@ -1255,6 +1256,56 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject
 /* GetBuiltinName.proto */
 static PyObject *__Pyx_GetBuiltinName(PyObject *name);
 
+/* PyObjectCall.proto */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
+#else
+#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
+#endif
+
+/* PyThreadStateGet.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
+#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
+#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
+#else
+#define __Pyx_PyThreadState_declare
+#define __Pyx_PyThreadState_assign
+#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
+#endif
+
+/* PyErrFetchRestore.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#if CYTHON_COMPILING_IN_CPYTHON
+#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
+#else
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#endif
+#else
+#define __Pyx_PyErr_Clear() PyErr_Clear()
+#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
+#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
+#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
+#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
+#endif
+
+/* RaiseException.proto */
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
+/* RaiseArgTupleInvalid.proto */
+static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
+    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
+
 /* RaiseDoubleKeywords.proto */
 static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_name);
 
@@ -1263,9 +1314,37 @@ static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
 
-/* RaiseArgTupleInvalid.proto */
-static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
-    Py_ssize_t num_min, Py_ssize_t num_max, Py_ssize_t num_found);
+/* None.proto */
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname);
+
+/* GetItemInt.proto */
+#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
+    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
+               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
+#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
+    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
+    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
+    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              int wraparound, int boundscheck);
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
+                                                     int is_list, int wraparound, int boundscheck);
+
+/* ObjectGetItem.proto */
+#if CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key);
+#else
+#define __Pyx_PyObject_GetItem(obj, key)  PyObject_GetItem(obj, key)
+#endif
 
 /* PyDictVersioning.proto */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
@@ -1344,13 +1423,6 @@ static PyObject *__Pyx_PyFunction_FastCallDict(PyObject *func, PyObject **args, 
     (assert(__pyx_pyframe_localsplus_offset), (PyObject **)(((char *)(frame)) + __pyx_pyframe_localsplus_offset))
 #endif
 
-/* PyObjectCall.proto */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
-#else
-#define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
-#endif
-
 /* PyObjectCall2Args.proto */
 static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
 
@@ -1361,179 +1433,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
 
 /* PyObjectCallOneArg.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
-/* PyIntBinop.proto */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_SubtractObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
-#else
-#define __Pyx_PyInt_SubtractObjC(op1, op2, intval, inplace, zerodivision_check)\
-    (inplace ? PyNumber_InPlaceSubtract(op1, op2) : PyNumber_Subtract(op1, op2))
-#endif
-
-/* GetItemInt.proto */
-#define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_Fast(o, (Py_ssize_t)i, is_list, wraparound, boundscheck) :\
-    (is_list ? (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL) :\
-               __Pyx_GetItemInt_Generic(o, to_py_func(i))))
-#define __Pyx_GetItemInt_List(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_List_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
-    (PyErr_SetString(PyExc_IndexError, "list index out of range"), (PyObject*)NULL))
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
-                                                              int wraparound, int boundscheck);
-#define __Pyx_GetItemInt_Tuple(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
-    (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
-    __Pyx_GetItemInt_Tuple_Fast(o, (Py_ssize_t)i, wraparound, boundscheck) :\
-    (PyErr_SetString(PyExc_IndexError, "tuple index out of range"), (PyObject*)NULL))
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
-                                                              int wraparound, int boundscheck);
-static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j);
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i,
-                                                     int is_list, int wraparound, int boundscheck);
-
-/* ListAppend.proto */
-#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
-static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
-    PyListObject* L = (PyListObject*) list;
-    Py_ssize_t len = Py_SIZE(list);
-    if (likely(L->allocated > len) & likely(len > (L->allocated >> 1))) {
-        Py_INCREF(x);
-        PyList_SET_ITEM(list, len, x);
-        __Pyx_SET_SIZE(list, len + 1);
-        return 0;
-    }
-    return PyList_Append(list, x);
-}
-#else
-#define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
-#endif
-
-/* PyIntBinop.proto */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
-#else
-#define __Pyx_PyInt_AddObjC(op1, op2, intval, inplace, zerodivision_check)\
-    (inplace ? PyNumber_InPlaceAdd(op1, op2) : PyNumber_Add(op1, op2))
-#endif
-
-/* ObjectGetItem.proto */
-#if CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key);
-#else
-#define __Pyx_PyObject_GetItem(obj, key)  PyObject_GetItem(obj, key)
-#endif
-
-/* GetTopmostException.proto */
-#if CYTHON_USE_EXC_INFO_STACK
-static _PyErr_StackItem * __Pyx_PyErr_GetTopmostException(PyThreadState *tstate);
-#endif
-
-/* PyThreadStateGet.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
-#define __Pyx_PyThreadState_assign  __pyx_tstate = __Pyx_PyThreadState_Current;
-#define __Pyx_PyErr_Occurred()  __pyx_tstate->curexc_type
-#else
-#define __Pyx_PyThreadState_declare
-#define __Pyx_PyThreadState_assign
-#define __Pyx_PyErr_Occurred()  PyErr_Occurred()
-#endif
-
-/* SaveResetException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_ExceptionSave(type, value, tb)  __Pyx__ExceptionSave(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#define __Pyx_ExceptionReset(type, value, tb)  __Pyx__ExceptionReset(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-#else
-#define __Pyx_ExceptionSave(type, value, tb)   PyErr_GetExcInfo(type, value, tb)
-#define __Pyx_ExceptionReset(type, value, tb)  PyErr_SetExcInfo(type, value, tb)
-#endif
-
-/* PyErrExceptionMatches.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_ExceptionMatches(err) __Pyx_PyErr_ExceptionMatchesInState(__pyx_tstate, err)
-static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err);
-#else
-#define __Pyx_PyErr_ExceptionMatches(err)  PyErr_ExceptionMatches(err)
-#endif
-
-/* GetException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_GetException(type, value, tb)  __Pyx__GetException(__pyx_tstate, type, value, tb)
-static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#else
-static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
-#endif
-
-/* PyObjectFormatSimple.proto */
-#if CYTHON_COMPILING_IN_PYPY
-    #define __Pyx_PyObject_FormatSimple(s, f) (\
-        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
-        PyObject_Format(s, f))
-#elif PY_MAJOR_VERSION < 3
-    #define __Pyx_PyObject_FormatSimple(s, f) (\
-        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
-        likely(PyString_CheckExact(s)) ? PyUnicode_FromEncodedObject(s, NULL, "strict") :\
-        PyObject_Format(s, f))
-#elif CYTHON_USE_TYPE_SLOTS
-    #define __Pyx_PyObject_FormatSimple(s, f) (\
-        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
-        likely(PyLong_CheckExact(s)) ? PyLong_Type.tp_str(s) :\
-        likely(PyFloat_CheckExact(s)) ? PyFloat_Type.tp_str(s) :\
-        PyObject_Format(s, f))
-#else
-    #define __Pyx_PyObject_FormatSimple(s, f) (\
-        likely(PyUnicode_CheckExact(s)) ? (Py_INCREF(s), s) :\
-        PyObject_Format(s, f))
-#endif
-
-/* IncludeStringH.proto */
-#include <string.h>
-
-/* JoinPyUnicode.proto */
-static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
-                                      Py_UCS4 max_char);
-
-/* PyErrFetchRestore.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  __Pyx_ErrRestoreInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)    __Pyx_ErrFetchInState(PyThreadState_GET(), type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  __Pyx_ErrRestoreInState(__pyx_tstate, type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)    __Pyx_ErrFetchInState(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#if CYTHON_COMPILING_IN_CPYTHON
-#define __Pyx_PyErr_SetNone(exc) (Py_INCREF(exc), __Pyx_ErrRestore((exc), NULL, NULL))
-#else
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#endif
-#else
-#define __Pyx_PyErr_Clear() PyErr_Clear()
-#define __Pyx_PyErr_SetNone(exc) PyErr_SetNone(exc)
-#define __Pyx_ErrRestoreWithState(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchWithState(type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestoreInState(tstate, type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetchInState(tstate, type, value, tb)  PyErr_Fetch(type, value, tb)
-#define __Pyx_ErrRestore(type, value, tb)  PyErr_Restore(type, value, tb)
-#define __Pyx_ErrFetch(type, value, tb)  PyErr_Fetch(type, value, tb)
-#endif
-
-/* SwapException.proto */
-#if CYTHON_FAST_THREAD_STATE
-#define __Pyx_ExceptionSwap(type, value, tb)  __Pyx__ExceptionSwap(__pyx_tstate, type, value, tb)
-static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
-#else
-static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb);
-#endif
-
-/* RaiseException.proto */
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
-
-/* None.proto */
-static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname);
 
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1559,11 +1458,79 @@ static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
 #define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
 
+/* GetException.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_GetException(type, value, tb)  __Pyx__GetException(__pyx_tstate, type, value, tb)
+static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#else
+static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
+#endif
+
+/* SwapException.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_ExceptionSwap(type, value, tb)  __Pyx__ExceptionSwap(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#else
+static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb);
+#endif
+
+/* GetTopmostException.proto */
+#if CYTHON_USE_EXC_INFO_STACK
+static _PyErr_StackItem * __Pyx_PyErr_GetTopmostException(PyThreadState *tstate);
+#endif
+
+/* SaveResetException.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_ExceptionSave(type, value, tb)  __Pyx__ExceptionSave(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb);
+#define __Pyx_ExceptionReset(type, value, tb)  __Pyx__ExceptionReset(__pyx_tstate, type, value, tb)
+static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb);
+#else
+#define __Pyx_ExceptionSave(type, value, tb)   PyErr_GetExcInfo(type, value, tb)
+#define __Pyx_ExceptionReset(type, value, tb)  PyErr_SetExcInfo(type, value, tb)
+#endif
+
+/* PyIntBinop.proto */
+#if !CYTHON_COMPILING_IN_PYPY
+static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, long intval, int inplace, int zerodivision_check);
+#else
+#define __Pyx_PyInt_AddObjC(op1, op2, intval, inplace, zerodivision_check)\
+    (inplace ? PyNumber_InPlaceAdd(op1, op2) : PyNumber_Add(op1, op2))
+#endif
+
 /* SliceObject.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
         PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
         PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
         int has_cstart, int has_cstop, int wraparound);
+
+/* ListAppend.proto */
+#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
+static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
+    PyListObject* L = (PyListObject*) list;
+    Py_ssize_t len = Py_SIZE(list);
+    if (likely(L->allocated > len) & likely(len > (L->allocated >> 1))) {
+        Py_INCREF(x);
+        PyList_SET_ITEM(list, len, x);
+        __Pyx_SET_SIZE(list, len + 1);
+        return 0;
+    }
+    return PyList_Append(list, x);
+}
+#else
+#define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
+#endif
+
+/* PyErrExceptionMatches.proto */
+#if CYTHON_FAST_THREAD_STATE
+#define __Pyx_PyErr_ExceptionMatches(err) __Pyx_PyErr_ExceptionMatchesInState(__pyx_tstate, err)
+static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err);
+#else
+#define __Pyx_PyErr_ExceptionMatches(err)  PyErr_ExceptionMatches(err)
+#endif
+
+/* IncludeStringH.proto */
+#include <string.h>
 
 /* PyObject_GenericGetAttrNoDict.proto */
 #if CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP && PY_VERSION_HEX < 0x03070000
@@ -1599,9 +1566,6 @@ static PyTypeObject *__Pyx_ImportType(PyObject* module, const char *module_name,
 /* Import.proto */
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
-/* ImportFrom.proto */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
-
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
 #define __Pyx_CLineForTraceback(tstate, c_line)  (((CYTHON_CLINE_IN_TRACEBACK)) ? c_line : 0)
@@ -1630,9 +1594,6 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
 
 /* None.proto */
 #include <new>
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CppExceptionConversion.proto */
 #ifndef __Pyx_CppExn2PyErr
@@ -1675,6 +1636,12 @@ static void __Pyx_CppExn2PyErr() {
   }
 }
 #endif
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value);
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_long(npy_long value);
 
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
@@ -1779,6 +1746,12 @@ static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE npy_long __Pyx_PyInt_As_npy_long(PyObject *);
+
+/* CIntFromPy.proto */
+static CYTHON_INLINE time_t __Pyx_PyInt_As_time_t(PyObject *);
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
@@ -1894,6 +1867,10 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'libcpp.string' */
 
+/* Module declarations from 'libc.stddef' */
+
+/* Module declarations from 'libc.time' */
+
 /* Module declarations from 'libcpp.vector' */
 
 /* Module declarations from 'cpython.buffer' */
@@ -1924,7 +1901,7 @@ static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 
 /* Module declarations from 'package.multitensor' */
 static PyTypeObject *__pyx_ptype_7package_11multitensor_ReportWrapper = 0;
-static PyTypeObject *__pyx_ptype_7package_11multitensor___pyx_scope_struct__multitensor_factorization = 0;
+static PyTypeObject *__pyx_ptype_7package_11multitensor___pyx_scope_struct__run = 0;
 static PyTypeObject *__pyx_ptype_7package_11multitensor___pyx_scope_struct_1_genexpr = 0;
 static PyObject *__pyx_convert_vector_to_py_double(const std::vector<double>  &); /*proto*/
 static std::vector<double>  __pyx_convert_vector_from_py_double(PyObject *); /*proto*/
@@ -1941,11 +1918,11 @@ extern int __pyx_module_is_main_package__multitensor;
 int __pyx_module_is_main_package__multitensor = 0;
 
 /* Implementation of 'package.multitensor' */
-static PyObject *__pyx_builtin_range;
+static PyObject *__pyx_builtin_RuntimeError;
 static PyObject *__pyx_builtin_TypeError;
+static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ImportError;
-static const char __pyx_k_A[] = "A";
-static const char __pyx_k_e[] = "e";
+static const char __pyx_k_T[] = "T";
 static const char __pyx_k_i[] = "i";
 static const char __pyx_k_j[] = "j";
 static const char __pyx_k_l[] = "l";
@@ -1954,37 +1931,37 @@ static const char __pyx_k_v[] = "v";
 static const char __pyx_k_c_u[] = "c_u";
 static const char __pyx_k_c_v[] = "c_v";
 static const char __pyx_k_end[] = "end";
+static const char __pyx_k_rng[] = "rng";
+static const char __pyx_k_run[] = "run";
+static const char __pyx_k_w_l[] = "w_l";
 static const char __pyx_k_args[] = "args";
-static const char __pyx_k_data[] = "data";
 static const char __pyx_k_diag[] = "diag";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
+static const char __pyx_k_seed[] = "seed";
 static const char __pyx_k_send[] = "send";
 static const char __pyx_k_size[] = "size";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_array[] = "array";
 static const char __pyx_k_begin[] = "begin";
 static const char __pyx_k_close[] = "close";
-static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_numpy[] = "numpy";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_ravel[] = "ravel";
-static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_throw[] = "throw";
 static const char __pyx_k_astype[] = "astype";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_labels[] = "labels";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_report[] = "report";
+static const char __pyx_k_w_data[] = "w_data";
 static const char __pyx_k_genexpr[] = "genexpr";
 static const char __pyx_k_loadtxt[] = "loadtxt";
 static const char __pyx_k_logging[] = "logging";
 static const char __pyx_k_reshape[] = "reshape";
-static const char __pyx_k_toarray[] = "toarray";
-static const char __pyx_k_warning[] = "warning";
+static const char __pyx_k_adj_data[] = "adj_data";
 static const char __pyx_k_affinity[] = "affinity";
 static const char __pyx_k_directed[] = "directed";
-static const char __pyx_k_filename[] = "filename";
 static const char __pyx_k_getstate[] = "__getstate__";
 static const char __pyx_k_num_vals[] = "num_vals";
 static const char __pyx_k_setstate[] = "__setstate__";
@@ -1993,18 +1970,14 @@ static const char __pyx_k_edges_end[] = "edges_end";
 static const char __pyx_k_nof_edges[] = "nof_edges";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_c_affinity[] = "c_affinity";
-static const char __pyx_k_csr_matrix[] = "csr_matrix";
 static const char __pyx_k_nof_groups[] = "nof_groups";
 static const char __pyx_k_nof_layers[] = "nof_layers";
-static const char __pyx_k_num_groups[] = "num_groups";
-static const char __pyx_k_num_layers[] = "num_layers";
-static const char __pyx_k_use_sparse[] = "use_sparse";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_assortative[] = "assortative";
 static const char __pyx_k_concatenate[] = "concatenate";
 static const char __pyx_k_edges_start[] = "edges_start";
+static const char __pyx_k_RuntimeError[] = "RuntimeError";
 static const char __pyx_k_nof_vertices[] = "nof_vertices";
-static const char __pyx_k_scipy_sparse[] = "scipy.sparse";
 static const char __pyx_k_ReportWrapper[] = "ReportWrapper";
 static const char __pyx_k_affinity_size[] = "affinity_size";
 static const char __pyx_k_edges_weights[] = "edges_weights";
@@ -2018,25 +1991,21 @@ static const char __pyx_k_nof_realizations[] = "nof_realizations";
 static const char __pyx_k_adjacency_filename[] = "adjacency_filename";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_max_nof_iterations[] = "max_nof_iterations";
-static const char __pyx_k_read_affinity_data[] = "read_affinity_data";
+static const char __pyx_k_run_locals_genexpr[] = "run.<locals>.genexpr";
 static const char __pyx_k_package_multitensor[] = "package.multitensor";
-static const char __pyx_k_read_adjacency_data[] = "read_adjacency_data";
 static const char __pyx_k_init_affinity_filename[] = "init_affinity_filename";
-static const char __pyx_k_multitensor_factorization[] = "multitensor_factorization";
 static const char __pyx_k_Users_jpassy_Work_Projects_RGs[] = "/Users/jpassy/Work/Projects/RGs/multi-tensor-factorization/python/package/multitensor.pyx";
 static const char __pyx_k_Python_wrapper_for_the_multiten[] = "\nPython wrapper for the multitensor library\n\n:author: Ivan Oreshnikov <ivan.oreshnikov@tuebingen.mog.de>\n:author: Jean-Claude Passy <jean-claude.passy@tuebingen.mpg.de>\n";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
-static const char __pyx_k_of_the_adjacency_data_Using_num[] = " of the adjacency data. Using numpy arrays, exception was: \t e";
-static const char __pyx_k_Cannot_use_scipy_sparse_matrix_f[] = "Cannot use scipy sparse matrix for reading layer ";
-static const char __pyx_k_multitensor_factorization_locals[] = "multitensor_factorization.<locals>.genexpr";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 static const char __pyx_k_self_c_obj_cannot_be_converted_t[] = "self.c_obj cannot be converted to a Python object for pickling";
-static PyObject *__pyx_n_s_A;
-static PyObject *__pyx_kp_u_Cannot_use_scipy_sparse_matrix_f;
 static PyObject *__pyx_n_s_ImportError;
 static PyObject *__pyx_n_s_ReportWrapper;
+static PyObject *__pyx_n_s_RuntimeError;
+static PyObject *__pyx_n_s_T;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_kp_s_Users_jpassy_Work_Projects_RGs;
+static PyObject *__pyx_n_s_adj_data;
 static PyObject *__pyx_n_s_adjacency_filename;
 static PyObject *__pyx_n_s_affinity;
 static PyObject *__pyx_n_s_affinity_ravel;
@@ -2052,17 +2021,12 @@ static PyObject *__pyx_n_s_c_v;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_concatenate;
-static PyObject *__pyx_n_s_csr_matrix;
-static PyObject *__pyx_n_s_data;
 static PyObject *__pyx_n_s_diag;
 static PyObject *__pyx_n_s_directed;
-static PyObject *__pyx_n_s_dtype;
-static PyObject *__pyx_n_s_e;
 static PyObject *__pyx_n_s_edges_end;
 static PyObject *__pyx_n_s_edges_start;
 static PyObject *__pyx_n_s_edges_weights;
 static PyObject *__pyx_n_s_end;
-static PyObject *__pyx_n_s_filename;
 static PyObject *__pyx_n_s_genexpr;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_n_s_i;
@@ -2076,8 +2040,6 @@ static PyObject *__pyx_n_s_loadtxt;
 static PyObject *__pyx_n_s_logging;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_max_nof_iterations;
-static PyObject *__pyx_n_s_multitensor_factorization;
-static PyObject *__pyx_n_s_multitensor_factorization_locals;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_nof_convergences;
 static PyObject *__pyx_n_s_nof_edges;
@@ -2085,40 +2047,34 @@ static PyObject *__pyx_n_s_nof_groups;
 static PyObject *__pyx_n_s_nof_layers;
 static PyObject *__pyx_n_s_nof_realizations;
 static PyObject *__pyx_n_s_nof_vertices;
-static PyObject *__pyx_n_s_num_groups;
-static PyObject *__pyx_n_s_num_layers;
 static PyObject *__pyx_n_s_num_vals;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_kp_u_numpy_core_multiarray_failed_to;
 static PyObject *__pyx_kp_u_numpy_core_umath_failed_to_impor;
-static PyObject *__pyx_kp_u_of_the_adjacency_data_Using_num;
 static PyObject *__pyx_n_s_package_multitensor;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_ravel;
-static PyObject *__pyx_n_s_read_adjacency_data;
-static PyObject *__pyx_n_s_read_affinity_data;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
 static PyObject *__pyx_n_s_report;
 static PyObject *__pyx_n_s_reshape;
-static PyObject *__pyx_n_s_scipy_sparse;
+static PyObject *__pyx_n_s_rng;
+static PyObject *__pyx_n_s_run;
+static PyObject *__pyx_n_s_run_locals_genexpr;
+static PyObject *__pyx_n_s_seed;
 static PyObject *__pyx_kp_s_self_c_obj_cannot_be_converted_t;
 static PyObject *__pyx_n_s_send;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
-static PyObject *__pyx_n_s_shape;
 static PyObject *__pyx_n_s_size;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_throw;
-static PyObject *__pyx_n_s_toarray;
 static PyObject *__pyx_n_s_u;
-static PyObject *__pyx_n_s_use_sparse;
 static PyObject *__pyx_n_s_v;
-static PyObject *__pyx_n_s_warning;
+static PyObject *__pyx_n_s_w_data;
+static PyObject *__pyx_n_s_w_l;
 static PyObject *__pyx_n_s_weigths_dtype;
-static PyObject *__pyx_pf_7package_11multitensor_read_adjacency_data(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_use_sparse); /* proto */
-static PyObject *__pyx_pf_7package_11multitensor_2read_affinity_data(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_filename); /* proto */
 static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizations___get__(struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self); /* proto */
 static int __pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizations_2__set__(struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self, PyObject *__pyx_v_nof_realizations); /* proto */
 static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2___get__(struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self); /* proto */
@@ -2132,10 +2088,10 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_8duration_2__set__(st
 static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6max_L2___get__(struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper___reduce_cython__(CYTHON_UNUSED struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_2__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_7package_11multitensor_25multitensor_factorization_genexpr(PyObject *__pyx_self); /* proto */
-static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_adjacency_filename, PyObject *__pyx_v_nof_groups, PyObject *__pyx_v_directed, PyObject *__pyx_v_assortative, PyObject *__pyx_v_nof_realizations, PyObject *__pyx_v_max_nof_iterations, PyObject *__pyx_v_nof_convergences, PyObject *__pyx_v_init_affinity_filename, PyObject *__pyx_v_weigths_dtype); /* proto */
+static PyObject *__pyx_pf_7package_11multitensor_3run_genexpr(PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_7package_11multitensor_run(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_adjacency_filename, PyObject *__pyx_v_nof_groups, PyObject *__pyx_v_directed, PyObject *__pyx_v_assortative, PyObject *__pyx_v_nof_realizations, PyObject *__pyx_v_max_nof_iterations, PyObject *__pyx_v_nof_convergences, PyObject *__pyx_v_init_affinity_filename, PyObject *__pyx_v_weigths_dtype, PyObject *__pyx_v_seed); /* proto */
 static PyObject *__pyx_tp_new_7package_11multitensor_ReportWrapper(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct__multitensor_factorization(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct__run(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct_1_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
@@ -2143,904 +2099,23 @@ static PyObject *__pyx_int_2;
 static PyObject *__pyx_int_10;
 static PyObject *__pyx_int_500;
 static PyObject *__pyx_int_neg_1;
-static PyObject *__pyx_k__5;
-static PyObject *__pyx_slice_;
-static PyObject *__pyx_slice__2;
-static PyObject *__pyx_tuple__3;
-static PyObject *__pyx_tuple__4;
+static PyObject *__pyx_k__3;
+static PyObject *__pyx_tuple_;
+static PyObject *__pyx_slice__4;
+static PyObject *__pyx_slice__5;
+static PyObject *__pyx_slice__9;
+static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__8;
-static PyObject *__pyx_tuple__9;
 static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
+static PyObject *__pyx_tuple__12;
 static PyObject *__pyx_tuple__13;
-static PyObject *__pyx_tuple__15;
-static PyObject *__pyx_codeobj__12;
 static PyObject *__pyx_codeobj__14;
-static PyObject *__pyx_codeobj__16;
 /* Late includes */
 
-/* "package/multitensor.pyx":82
- * 
- * 
- * def read_adjacency_data(filename, use_sparse=True):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the adjacency matrix data into arrays.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7package_11multitensor_1read_adjacency_data(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7package_11multitensor_read_adjacency_data[] = "\n    Loads the adjacency matrix data into arrays.\n\n    :param str filename: Name of the file containing the data\n    :param bool use_sparse: If True, use scipy sparse matrix instead of numpy array\n    :returns: a list of L NxN arrays where\n\n        * N is the number of edges\n        * L is the number of layers\n        * element (i,j,k) represent the weight of the edge from i to j in layer k\n    :rtype: list(numpy.array) or list(scipy.sparse.csr_matrix)\n\n    :note: The adjacency data is read in floats.\n    Casting the weights is then done in <multitensor_factorization>\n    ";
-static PyMethodDef __pyx_mdef_7package_11multitensor_1read_adjacency_data = {"read_adjacency_data", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7package_11multitensor_1read_adjacency_data, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7package_11multitensor_read_adjacency_data};
-static PyObject *__pyx_pw_7package_11multitensor_1read_adjacency_data(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  PyObject *__pyx_v_filename = 0;
-  PyObject *__pyx_v_use_sparse = 0;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("read_adjacency_data (wrapper)", 0);
-  {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_filename,&__pyx_n_s_use_sparse,0};
-    PyObject* values[2] = {0,0};
-    values[1] = ((PyObject *)Py_True);
-    if (unlikely(__pyx_kwds)) {
-      Py_ssize_t kw_args;
-      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
-      switch (pos_args) {
-        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-        CYTHON_FALLTHROUGH;
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      kw_args = PyDict_Size(__pyx_kwds);
-      switch (pos_args) {
-        case  0:
-        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_filename)) != 0)) kw_args--;
-        else goto __pyx_L5_argtuple_error;
-        CYTHON_FALLTHROUGH;
-        case  1:
-        if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_use_sparse);
-          if (value) { values[1] = value; kw_args--; }
-        }
-      }
-      if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "read_adjacency_data") < 0)) __PYX_ERR(0, 82, __pyx_L3_error)
-      }
-    } else {
-      switch (PyTuple_GET_SIZE(__pyx_args)) {
-        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-        break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-    }
-    __pyx_v_filename = values[0];
-    __pyx_v_use_sparse = values[1];
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("read_adjacency_data", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 82, __pyx_L3_error)
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("package.multitensor.read_adjacency_data", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7package_11multitensor_read_adjacency_data(__pyx_self, __pyx_v_filename, __pyx_v_use_sparse);
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7package_11multitensor_read_adjacency_data(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_use_sparse) {
-  PyObject *__pyx_v_data = NULL;
-  PyObject *__pyx_v_num_layers = NULL;
-  PyObject *__pyx_v_A = NULL;
-  PyObject *__pyx_v_l = NULL;
-  CYTHON_UNUSED PyObject *__pyx_v_e = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  Py_ssize_t __pyx_t_4;
-  PyObject *(*__pyx_t_5)(PyObject *);
-  int __pyx_t_6;
-  int __pyx_t_7;
-  int __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  PyObject *__pyx_t_11 = NULL;
-  PyObject *__pyx_t_12 = NULL;
-  PyObject *__pyx_t_13 = NULL;
-  int __pyx_t_14;
-  PyObject *__pyx_t_15 = NULL;
-  PyObject *__pyx_t_16 = NULL;
-  Py_ssize_t __pyx_t_17;
-  Py_UCS4 __pyx_t_18;
-  PyObject *__pyx_t_19 = NULL;
-  int __pyx_t_20;
-  char const *__pyx_t_21;
-  PyObject *__pyx_t_22 = NULL;
-  PyObject *__pyx_t_23 = NULL;
-  PyObject *__pyx_t_24 = NULL;
-  PyObject *__pyx_t_25 = NULL;
-  PyObject *__pyx_t_26 = NULL;
-  PyObject *__pyx_t_27 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_adjacency_data", 0);
-
-  /* "package/multitensor.pyx":100
- * 
- *     # Load file
- *     data = numpy.loadtxt(filename)             # <<<<<<<<<<<<<<
- * 
- *     # First two columns are for the edges, the rest for each layer
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_numpy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_loadtxt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_2)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_2);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-    }
-  }
-  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_v_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_filename);
-  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_data = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":103
- * 
- *     # First two columns are for the edges, the rest for each layer
- *     num_layers = data.shape[1] - 2             # <<<<<<<<<<<<<<
- * 
- *     # Adjacency data
- */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_t_3, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_num_layers = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":106
- * 
- *     # Adjacency data
- *     A = []             # <<<<<<<<<<<<<<
- *     for l in range(num_layers):
- *         if not use_sparse:
- */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_A = ((PyObject*)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":107
- *     # Adjacency data
- *     A = []
- *     for l in range(num_layers):             # <<<<<<<<<<<<<<
- *         if not use_sparse:
- *             A.append(data[:, [0, 1, l + 2]])
- */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_num_layers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
-    __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3); __pyx_t_4 = 0;
-    __pyx_t_5 = NULL;
-  } else {
-    __pyx_t_4 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 107, __pyx_L1_error)
-  }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  for (;;) {
-    if (likely(!__pyx_t_5)) {
-      if (likely(PyList_CheckExact(__pyx_t_3))) {
-        if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_3)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_1); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 107, __pyx_L1_error)
-        #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        #endif
-      } else {
-        if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_4); __Pyx_INCREF(__pyx_t_1); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 107, __pyx_L1_error)
-        #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        #endif
-      }
-    } else {
-      __pyx_t_1 = __pyx_t_5(__pyx_t_3);
-      if (unlikely(!__pyx_t_1)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 107, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_1);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_l, __pyx_t_1);
-    __pyx_t_1 = 0;
-
-    /* "package/multitensor.pyx":108
- *     A = []
- *     for l in range(num_layers):
- *         if not use_sparse:             # <<<<<<<<<<<<<<
- *             A.append(data[:, [0, 1, l + 2]])
- *         else:
- */
-    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_v_use_sparse); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 108, __pyx_L1_error)
-    __pyx_t_7 = ((!__pyx_t_6) != 0);
-    if (__pyx_t_7) {
-
-      /* "package/multitensor.pyx":109
- *     for l in range(num_layers):
- *         if not use_sparse:
- *             A.append(data[:, [0, 1, l + 2]])             # <<<<<<<<<<<<<<
- *         else:
- *             try:
- */
-      __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_l, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_INCREF(__pyx_int_0);
-      __Pyx_GIVEREF(__pyx_int_0);
-      PyList_SET_ITEM(__pyx_t_2, 0, __pyx_int_0);
-      __Pyx_INCREF(__pyx_int_1);
-      __Pyx_GIVEREF(__pyx_int_1);
-      PyList_SET_ITEM(__pyx_t_2, 1, __pyx_int_1);
-      __Pyx_GIVEREF(__pyx_t_1);
-      PyList_SET_ITEM(__pyx_t_2, 2, __pyx_t_1);
-      __pyx_t_1 = 0;
-      __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_INCREF(__pyx_slice_);
-      __Pyx_GIVEREF(__pyx_slice_);
-      PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_slice_);
-      __Pyx_GIVEREF(__pyx_t_2);
-      PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_t_2);
-      __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_data, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_A, __pyx_t_2); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-      /* "package/multitensor.pyx":108
- *     A = []
- *     for l in range(num_layers):
- *         if not use_sparse:             # <<<<<<<<<<<<<<
- *             A.append(data[:, [0, 1, l + 2]])
- *         else:
- */
-      goto __pyx_L5;
-    }
-
-    /* "package/multitensor.pyx":111
- *             A.append(data[:, [0, 1, l + 2]])
- *         else:
- *             try:             # <<<<<<<<<<<<<<
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:
- */
-    /*else*/ {
-      {
-        __Pyx_PyThreadState_declare
-        __Pyx_PyThreadState_assign
-        __Pyx_ExceptionSave(&__pyx_t_9, &__pyx_t_10, &__pyx_t_11);
-        __Pyx_XGOTREF(__pyx_t_9);
-        __Pyx_XGOTREF(__pyx_t_10);
-        __Pyx_XGOTREF(__pyx_t_11);
-        /*try:*/ {
-
-          /* "package/multitensor.pyx":112
- *         else:
- *             try:
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))             # <<<<<<<<<<<<<<
- *             except Exception as e:
- *                 logging.warning(
- */
-          __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_csr_matrix); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_12 = __Pyx_PyInt_AddObjC(__pyx_v_l, __pyx_int_2, 2, 0, 0); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_13 = PyList_New(3); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_13);
-          __Pyx_INCREF(__pyx_int_0);
-          __Pyx_GIVEREF(__pyx_int_0);
-          PyList_SET_ITEM(__pyx_t_13, 0, __pyx_int_0);
-          __Pyx_INCREF(__pyx_int_1);
-          __Pyx_GIVEREF(__pyx_int_1);
-          PyList_SET_ITEM(__pyx_t_13, 1, __pyx_int_1);
-          __Pyx_GIVEREF(__pyx_t_12);
-          PyList_SET_ITEM(__pyx_t_13, 2, __pyx_t_12);
-          __pyx_t_12 = 0;
-          __pyx_t_12 = PyTuple_New(2); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_12);
-          __Pyx_INCREF(__pyx_slice_);
-          __Pyx_GIVEREF(__pyx_slice_);
-          PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_slice_);
-          __Pyx_GIVEREF(__pyx_t_13);
-          PyTuple_SET_ITEM(__pyx_t_12, 1, __pyx_t_13);
-          __pyx_t_13 = 0;
-          __pyx_t_13 = __Pyx_PyObject_GetItem(__pyx_v_data, __pyx_t_12); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_13);
-          __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-          __pyx_t_12 = NULL;
-          if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
-            __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_1);
-            if (likely(__pyx_t_12)) {
-              PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-              __Pyx_INCREF(__pyx_t_12);
-              __Pyx_INCREF(function);
-              __Pyx_DECREF_SET(__pyx_t_1, function);
-            }
-          }
-          __pyx_t_2 = (__pyx_t_12) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_12, __pyx_t_13) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_13);
-          __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-          __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-          if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_GOTREF(__pyx_t_2);
-          __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_A, __pyx_t_2); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 112, __pyx_L6_error)
-          __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-          /* "package/multitensor.pyx":111
- *             A.append(data[:, [0, 1, l + 2]])
- *         else:
- *             try:             # <<<<<<<<<<<<<<
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:
- */
-        }
-        __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-        __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-        __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
-        goto __pyx_L13_try_end;
-        __pyx_L6_error:;
-        __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-        __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
-        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-        /* "package/multitensor.pyx":113
- *             try:
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:             # <<<<<<<<<<<<<<
- *                 logging.warning(
- *                     f'Cannot use scipy sparse matrix for reading layer {l} of the adjacency data. '
- */
-        __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
-        if (__pyx_t_14) {
-          __Pyx_AddTraceback("package.multitensor.read_adjacency_data", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_13) < 0) __PYX_ERR(0, 113, __pyx_L8_except_error)
-          __Pyx_GOTREF(__pyx_t_2);
-          __Pyx_GOTREF(__pyx_t_1);
-          __Pyx_GOTREF(__pyx_t_13);
-          __Pyx_INCREF(__pyx_t_1);
-          __pyx_v_e = __pyx_t_1;
-          /*try:*/ {
-
-            /* "package/multitensor.pyx":114
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:
- *                 logging.warning(             # <<<<<<<<<<<<<<
- *                     f'Cannot use scipy sparse matrix for reading layer {l} of the adjacency data. '
- *                     f'Using numpy arrays, exception was: '
- */
-            __Pyx_GetModuleGlobalName(__pyx_t_15, __pyx_n_s_logging); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 114, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_15);
-            __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_warning); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 114, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_16);
-            __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-
-            /* "package/multitensor.pyx":115
- *             except Exception as e:
- *                 logging.warning(
- *                     f'Cannot use scipy sparse matrix for reading layer {l} of the adjacency data. '             # <<<<<<<<<<<<<<
- *                     f'Using numpy arrays, exception was: '
- *                     f'\t e'
- */
-            __pyx_t_15 = PyTuple_New(3); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 115, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_15);
-            __pyx_t_17 = 0;
-            __pyx_t_18 = 127;
-            __Pyx_INCREF(__pyx_kp_u_Cannot_use_scipy_sparse_matrix_f);
-            __pyx_t_17 += 49;
-            __Pyx_GIVEREF(__pyx_kp_u_Cannot_use_scipy_sparse_matrix_f);
-            PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_kp_u_Cannot_use_scipy_sparse_matrix_f);
-            __pyx_t_19 = __Pyx_PyObject_FormatSimple(__pyx_v_l, __pyx_empty_unicode); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 115, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_19);
-            __pyx_t_18 = (__Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_19) > __pyx_t_18) ? __Pyx_PyUnicode_MAX_CHAR_VALUE(__pyx_t_19) : __pyx_t_18;
-            __pyx_t_17 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_19);
-            __Pyx_GIVEREF(__pyx_t_19);
-            PyTuple_SET_ITEM(__pyx_t_15, 1, __pyx_t_19);
-            __pyx_t_19 = 0;
-            __Pyx_INCREF(__pyx_kp_u_of_the_adjacency_data_Using_num);
-            __pyx_t_17 += 62;
-            __Pyx_GIVEREF(__pyx_kp_u_of_the_adjacency_data_Using_num);
-            PyTuple_SET_ITEM(__pyx_t_15, 2, __pyx_kp_u_of_the_adjacency_data_Using_num);
-            __pyx_t_19 = __Pyx_PyUnicode_Join(__pyx_t_15, 3, __pyx_t_17, __pyx_t_18); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 115, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_19);
-            __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-            __pyx_t_15 = NULL;
-            if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_16))) {
-              __pyx_t_15 = PyMethod_GET_SELF(__pyx_t_16);
-              if (likely(__pyx_t_15)) {
-                PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_16);
-                __Pyx_INCREF(__pyx_t_15);
-                __Pyx_INCREF(function);
-                __Pyx_DECREF_SET(__pyx_t_16, function);
-              }
-            }
-            __pyx_t_12 = (__pyx_t_15) ? __Pyx_PyObject_Call2Args(__pyx_t_16, __pyx_t_15, __pyx_t_19) : __Pyx_PyObject_CallOneArg(__pyx_t_16, __pyx_t_19);
-            __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
-            __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-            if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 114, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_12);
-            __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-            __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-
-            /* "package/multitensor.pyx":119
- *                     f'\t e'
- *                 )
- *                 return read_adjacency_data(filename, use_sparse=False)             # <<<<<<<<<<<<<<
- *     return A
- * 
- */
-            __Pyx_XDECREF(__pyx_r);
-            __Pyx_GetModuleGlobalName(__pyx_t_12, __pyx_n_s_read_adjacency_data); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 119, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_12);
-            __pyx_t_16 = PyTuple_New(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 119, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_16);
-            __Pyx_INCREF(__pyx_v_filename);
-            __Pyx_GIVEREF(__pyx_v_filename);
-            PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_v_filename);
-            __pyx_t_19 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 119, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_19);
-            if (PyDict_SetItem(__pyx_t_19, __pyx_n_s_use_sparse, Py_False) < 0) __PYX_ERR(0, 119, __pyx_L19_error)
-            __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_16, __pyx_t_19); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 119, __pyx_L19_error)
-            __Pyx_GOTREF(__pyx_t_15);
-            __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-            __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-            __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-            __pyx_r = __pyx_t_15;
-            __pyx_t_15 = 0;
-            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-            __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-            goto __pyx_L18_return;
-          }
-
-          /* "package/multitensor.pyx":113
- *             try:
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:             # <<<<<<<<<<<<<<
- *                 logging.warning(
- *                     f'Cannot use scipy sparse matrix for reading layer {l} of the adjacency data. '
- */
-          /*finally:*/ {
-            __pyx_L19_error:;
-            /*exception exit:*/{
-              __Pyx_PyThreadState_declare
-              __Pyx_PyThreadState_assign
-              __pyx_t_22 = 0; __pyx_t_23 = 0; __pyx_t_24 = 0; __pyx_t_25 = 0; __pyx_t_26 = 0; __pyx_t_27 = 0;
-              __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-              __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
-              __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
-              __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
-              if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_25, &__pyx_t_26, &__pyx_t_27);
-              if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_22, &__pyx_t_23, &__pyx_t_24) < 0)) __Pyx_ErrFetch(&__pyx_t_22, &__pyx_t_23, &__pyx_t_24);
-              __Pyx_XGOTREF(__pyx_t_22);
-              __Pyx_XGOTREF(__pyx_t_23);
-              __Pyx_XGOTREF(__pyx_t_24);
-              __Pyx_XGOTREF(__pyx_t_25);
-              __Pyx_XGOTREF(__pyx_t_26);
-              __Pyx_XGOTREF(__pyx_t_27);
-              __pyx_t_14 = __pyx_lineno; __pyx_t_20 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
-              {
-                __Pyx_DECREF(__pyx_v_e);
-                __pyx_v_e = NULL;
-              }
-              if (PY_MAJOR_VERSION >= 3) {
-                __Pyx_XGIVEREF(__pyx_t_25);
-                __Pyx_XGIVEREF(__pyx_t_26);
-                __Pyx_XGIVEREF(__pyx_t_27);
-                __Pyx_ExceptionReset(__pyx_t_25, __pyx_t_26, __pyx_t_27);
-              }
-              __Pyx_XGIVEREF(__pyx_t_22);
-              __Pyx_XGIVEREF(__pyx_t_23);
-              __Pyx_XGIVEREF(__pyx_t_24);
-              __Pyx_ErrRestore(__pyx_t_22, __pyx_t_23, __pyx_t_24);
-              __pyx_t_22 = 0; __pyx_t_23 = 0; __pyx_t_24 = 0; __pyx_t_25 = 0; __pyx_t_26 = 0; __pyx_t_27 = 0;
-              __pyx_lineno = __pyx_t_14; __pyx_clineno = __pyx_t_20; __pyx_filename = __pyx_t_21;
-              goto __pyx_L8_except_error;
-            }
-            __pyx_L18_return: {
-              __pyx_t_27 = __pyx_r;
-              __pyx_r = 0;
-              __Pyx_DECREF(__pyx_v_e);
-              __pyx_v_e = NULL;
-              __pyx_r = __pyx_t_27;
-              __pyx_t_27 = 0;
-              goto __pyx_L9_except_return;
-            }
-          }
-        }
-        goto __pyx_L8_except_error;
-        __pyx_L8_except_error:;
-
-        /* "package/multitensor.pyx":111
- *             A.append(data[:, [0, 1, l + 2]])
- *         else:
- *             try:             # <<<<<<<<<<<<<<
- *                 A.append(csr_matrix(data[:, [0, 1, l + 2]]))
- *             except Exception as e:
- */
-        __Pyx_XGIVEREF(__pyx_t_9);
-        __Pyx_XGIVEREF(__pyx_t_10);
-        __Pyx_XGIVEREF(__pyx_t_11);
-        __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
-        goto __pyx_L1_error;
-        __pyx_L9_except_return:;
-        __Pyx_XGIVEREF(__pyx_t_9);
-        __Pyx_XGIVEREF(__pyx_t_10);
-        __Pyx_XGIVEREF(__pyx_t_11);
-        __Pyx_ExceptionReset(__pyx_t_9, __pyx_t_10, __pyx_t_11);
-        goto __pyx_L0;
-        __pyx_L13_try_end:;
-      }
-    }
-    __pyx_L5:;
-
-    /* "package/multitensor.pyx":107
- *     # Adjacency data
- *     A = []
- *     for l in range(num_layers):             # <<<<<<<<<<<<<<
- *         if not use_sparse:
- *             A.append(data[:, [0, 1, l + 2]])
- */
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "package/multitensor.pyx":120
- *                 )
- *                 return read_adjacency_data(filename, use_sparse=False)
- *     return A             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_A);
-  __pyx_r = __pyx_v_A;
-  goto __pyx_L0;
-
-  /* "package/multitensor.pyx":82
- * 
- * 
- * def read_adjacency_data(filename, use_sparse=True):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the adjacency matrix data into arrays.
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_12);
-  __Pyx_XDECREF(__pyx_t_13);
-  __Pyx_XDECREF(__pyx_t_15);
-  __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_XDECREF(__pyx_t_19);
-  __Pyx_AddTraceback("package.multitensor.read_adjacency_data", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_data);
-  __Pyx_XDECREF(__pyx_v_num_layers);
-  __Pyx_XDECREF(__pyx_v_A);
-  __Pyx_XDECREF(__pyx_v_l);
-  __Pyx_XDECREF(__pyx_v_e);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
 /* "package/multitensor.pyx":123
- * 
- * 
- * def read_affinity_data(filename):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the affinity matrix data into arrays.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7package_11multitensor_3read_affinity_data(PyObject *__pyx_self, PyObject *__pyx_v_filename); /*proto*/
-static char __pyx_doc_7package_11multitensor_2read_affinity_data[] = "\n    Loads the affinity matrix data into arrays.\n\n    :param str filename: Name of the file containing the data\n    :returns: a list of L KxK arrays where\n\n        * K is the number of groups\n        * L is the number of layers\n        * element (i,j,k) represent the density of edges between group i and j in layer k\n    :rtype: list(numpy.array)\n    ";
-static PyMethodDef __pyx_mdef_7package_11multitensor_3read_affinity_data = {"read_affinity_data", (PyCFunction)__pyx_pw_7package_11multitensor_3read_affinity_data, METH_O, __pyx_doc_7package_11multitensor_2read_affinity_data};
-static PyObject *__pyx_pw_7package_11multitensor_3read_affinity_data(PyObject *__pyx_self, PyObject *__pyx_v_filename) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("read_affinity_data (wrapper)", 0);
-  __pyx_r = __pyx_pf_7package_11multitensor_2read_affinity_data(__pyx_self, ((PyObject *)__pyx_v_filename));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7package_11multitensor_2read_affinity_data(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_filename) {
-  PyObject *__pyx_v_data = NULL;
-  PyObject *__pyx_v_num_layers = NULL;
-  CYTHON_UNUSED PyObject *__pyx_v_num_groups = NULL;
-  PyObject *__pyx_v_A = NULL;
-  PyObject *__pyx_v_l = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  Py_ssize_t __pyx_t_4;
-  PyObject *(*__pyx_t_5)(PyObject *);
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
-  int __pyx_t_8;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("read_affinity_data", 0);
-
-  /* "package/multitensor.pyx":137
- * 
- *     # Load file
- *     data = numpy.loadtxt(filename)             # <<<<<<<<<<<<<<
- *     num_layers = data.shape[0]
- *     num_groups = data.shape[1] - 1
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_numpy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_loadtxt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_2)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_2);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-    }
-  }
-  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_v_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_filename);
-  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_data = __pyx_t_1;
-  __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":138
- *     # Load file
- *     data = numpy.loadtxt(filename)
- *     num_layers = data.shape[0]             # <<<<<<<<<<<<<<
- *     num_groups = data.shape[1] - 1
- * 
- */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 138, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_GetItemInt(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_num_layers = __pyx_t_3;
-  __pyx_t_3 = 0;
-
-  /* "package/multitensor.pyx":139
- *     data = numpy.loadtxt(filename)
- *     num_layers = data.shape[0]
- *     num_groups = data.shape[1] - 1             # <<<<<<<<<<<<<<
- * 
- *     A = []
- */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 139, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_3, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 139, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_SubtractObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 139, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_num_groups = __pyx_t_3;
-  __pyx_t_3 = 0;
-
-  /* "package/multitensor.pyx":141
- *     num_groups = data.shape[1] - 1
- * 
- *     A = []             # <<<<<<<<<<<<<<
- *     for l in range(num_layers):
- *         A.append(numpy.diag(data[l, 1:]))
- */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 141, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_v_A = ((PyObject*)__pyx_t_3);
-  __pyx_t_3 = 0;
-
-  /* "package/multitensor.pyx":142
- * 
- *     A = []
- *     for l in range(num_layers):             # <<<<<<<<<<<<<<
- *         A.append(numpy.diag(data[l, 1:]))
- *     return A
- */
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_num_layers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
-    __pyx_t_1 = __pyx_t_3; __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
-    __pyx_t_5 = NULL;
-  } else {
-    __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 142, __pyx_L1_error)
-  }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  for (;;) {
-    if (likely(!__pyx_t_5)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        #endif
-      } else {
-        if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
-        #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        #endif
-      }
-    } else {
-      __pyx_t_3 = __pyx_t_5(__pyx_t_1);
-      if (unlikely(!__pyx_t_3)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 142, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_3);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_l, __pyx_t_3);
-    __pyx_t_3 = 0;
-
-    /* "package/multitensor.pyx":143
- *     A = []
- *     for l in range(num_layers):
- *         A.append(numpy.diag(data[l, 1:]))             # <<<<<<<<<<<<<<
- *     return A
- * 
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_numpy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_diag); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_v_l);
-    __Pyx_GIVEREF(__pyx_v_l);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_l);
-    __Pyx_INCREF(__pyx_slice__2);
-    __Pyx_GIVEREF(__pyx_slice__2);
-    PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_slice__2);
-    __pyx_t_7 = __Pyx_PyObject_GetItem(__pyx_v_data, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_2)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_2);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    __pyx_t_3 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_2, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_A, __pyx_t_3); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 143, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-    /* "package/multitensor.pyx":142
- * 
- *     A = []
- *     for l in range(num_layers):             # <<<<<<<<<<<<<<
- *         A.append(numpy.diag(data[l, 1:]))
- *     return A
- */
-  }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":144
- *     for l in range(num_layers):
- *         A.append(numpy.diag(data[l, 1:]))
- *     return A             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(__pyx_v_A);
-  __pyx_r = __pyx_v_A;
-  goto __pyx_L0;
-
-  /* "package/multitensor.pyx":123
- * 
- * 
- * def read_affinity_data(filename):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the affinity matrix data into arrays.
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("package.multitensor.read_affinity_data", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_data);
-  __Pyx_XDECREF(__pyx_v_num_layers);
-  __Pyx_XDECREF(__pyx_v_num_groups);
-  __Pyx_XDECREF(__pyx_v_A);
-  __Pyx_XDECREF(__pyx_v_l);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "package/multitensor.pyx":199
  * 
  *     @property
  *     def nof_realizations(self):             # <<<<<<<<<<<<<<
@@ -3070,7 +2145,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizati
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":201
+  /* "package/multitensor.pyx":125
  *     def nof_realizations(self):
  *         """Number of realizations."""
  *         return self.c_obj.nof_realizations             # <<<<<<<<<<<<<<
@@ -3078,13 +2153,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizati
  *     @nof_realizations.setter
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_obj.nof_realizations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_self->c_obj.nof_realizations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":199
+  /* "package/multitensor.pyx":123
  * 
  *     @property
  *     def nof_realizations(self):             # <<<<<<<<<<<<<<
@@ -3103,7 +2178,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizati
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":204
+/* "package/multitensor.pyx":128
  * 
  *     @nof_realizations.setter
  *     def nof_realizations(self, nof_realizations):             # <<<<<<<<<<<<<<
@@ -3133,17 +2208,17 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizations_2_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "package/multitensor.pyx":205
+  /* "package/multitensor.pyx":129
  *     @nof_realizations.setter
  *     def nof_realizations(self, nof_realizations):
  *         self.c_obj.nof_realizations = nof_realizations             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_1 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_1 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 129, __pyx_L1_error)
   __pyx_v_self->c_obj.nof_realizations = __pyx_t_1;
 
-  /* "package/multitensor.pyx":204
+  /* "package/multitensor.pyx":128
  * 
  *     @nof_realizations.setter
  *     def nof_realizations(self, nof_realizations):             # <<<<<<<<<<<<<<
@@ -3162,7 +2237,7 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_16nof_realizations_2_
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":208
+/* "package/multitensor.pyx":132
  * 
  *     @property
  *     def vec_L2(self):             # <<<<<<<<<<<<<<
@@ -3192,7 +2267,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2___get__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":210
+  /* "package/multitensor.pyx":134
  *     def vec_L2(self):
  *         """Likelihood for each realization."""
  *         return self.c_obj.vec_L2             # <<<<<<<<<<<<<<
@@ -3200,13 +2275,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2___get__
  *     @vec_L2.setter
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_vector_to_py_double(__pyx_v_self->c_obj.vec_L2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_to_py_double(__pyx_v_self->c_obj.vec_L2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":208
+  /* "package/multitensor.pyx":132
  * 
  *     @property
  *     def vec_L2(self):             # <<<<<<<<<<<<<<
@@ -3225,7 +2300,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2___get__
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":213
+/* "package/multitensor.pyx":137
  * 
  *     @vec_L2.setter
  *     def vec_L2(self, vec_L2):             # <<<<<<<<<<<<<<
@@ -3255,17 +2330,17 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2_2__set__(stru
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "package/multitensor.pyx":214
+  /* "package/multitensor.pyx":138
  *     @vec_L2.setter
  *     def vec_L2(self, vec_L2):
  *         self.c_obj.vec_L2 = vec_L2             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_vec_L2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_double(__pyx_v_vec_L2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L1_error)
   __pyx_v_self->c_obj.vec_L2 = __pyx_t_1;
 
-  /* "package/multitensor.pyx":213
+  /* "package/multitensor.pyx":137
  * 
  *     @vec_L2.setter
  *     def vec_L2(self, vec_L2):             # <<<<<<<<<<<<<<
@@ -3284,7 +2359,7 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_6vec_L2_2__set__(stru
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":217
+/* "package/multitensor.pyx":141
  * 
  *     @property
  *     def vec_iter(self):             # <<<<<<<<<<<<<<
@@ -3314,7 +2389,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8vec_iter___get
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":219
+  /* "package/multitensor.pyx":143
  *     def vec_iter(self):
  *         """Number of iterations for each realization."""
  *         return self.c_obj.vec_iter             # <<<<<<<<<<<<<<
@@ -3322,13 +2397,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8vec_iter___get
  *     @vec_iter.setter
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_vector_to_py_size_t(__pyx_v_self->c_obj.vec_iter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 219, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_to_py_size_t(__pyx_v_self->c_obj.vec_iter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 143, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":217
+  /* "package/multitensor.pyx":141
  * 
  *     @property
  *     def vec_iter(self):             # <<<<<<<<<<<<<<
@@ -3347,7 +2422,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8vec_iter___get
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":222
+/* "package/multitensor.pyx":146
  * 
  *     @vec_iter.setter
  *     def vec_iter(self, vec_iter):             # <<<<<<<<<<<<<<
@@ -3377,17 +2452,17 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_8vec_iter_2__set__(st
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "package/multitensor.pyx":223
+  /* "package/multitensor.pyx":147
  *     @vec_iter.setter
  *     def vec_iter(self, vec_iter):
  *         self.c_obj.vec_iter = vec_iter             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_size_t(__pyx_v_vec_iter); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_size_t(__pyx_v_vec_iter); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 147, __pyx_L1_error)
   __pyx_v_self->c_obj.vec_iter = __pyx_t_1;
 
-  /* "package/multitensor.pyx":222
+  /* "package/multitensor.pyx":146
  * 
  *     @vec_iter.setter
  *     def vec_iter(self, vec_iter):             # <<<<<<<<<<<<<<
@@ -3406,7 +2481,7 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_8vec_iter_2__set__(st
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":226
+/* "package/multitensor.pyx":150
  * 
  *     @property
  *     def vec_term_reason(self):             # <<<<<<<<<<<<<<
@@ -3436,7 +2511,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_15vec_term_reas
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":228
+  /* "package/multitensor.pyx":152
  *     def vec_term_reason(self):
  *         """Reason for terminating the solver for each realization."""
  *         return self.c_obj.vec_term_reason             # <<<<<<<<<<<<<<
@@ -3444,13 +2519,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_15vec_term_reas
  *     @vec_term_reason.setter
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_vector_to_py_char__const___2a_(__pyx_v_self->c_obj.vec_term_reason); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_to_py_char__const___2a_(__pyx_v_self->c_obj.vec_term_reason); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":226
+  /* "package/multitensor.pyx":150
  * 
  *     @property
  *     def vec_term_reason(self):             # <<<<<<<<<<<<<<
@@ -3469,7 +2544,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_15vec_term_reas
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":231
+/* "package/multitensor.pyx":155
  * 
  *     @vec_term_reason.setter
  *     def vec_term_reason(self, vec_term_reason):             # <<<<<<<<<<<<<<
@@ -3499,17 +2574,17 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_15vec_term_reason_2__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "package/multitensor.pyx":232
+  /* "package/multitensor.pyx":156
  *     @vec_term_reason.setter
  *     def vec_term_reason(self, vec_term_reason):
  *         self.c_obj.vec_term_reason = vec_term_reason             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_t_1 = __pyx_convert_vector_from_py_char__const___2a_(__pyx_v_vec_term_reason); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 232, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_vector_from_py_char__const___2a_(__pyx_v_vec_term_reason); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 156, __pyx_L1_error)
   __pyx_v_self->c_obj.vec_term_reason = __pyx_t_1;
 
-  /* "package/multitensor.pyx":231
+  /* "package/multitensor.pyx":155
  * 
  *     @vec_term_reason.setter
  *     def vec_term_reason(self, vec_term_reason):             # <<<<<<<<<<<<<<
@@ -3528,7 +2603,7 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_15vec_term_reason_2__
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":235
+/* "package/multitensor.pyx":159
  * 
  *     @property
  *     def duration(self):             # <<<<<<<<<<<<<<
@@ -3558,7 +2633,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8duration___get
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":237
+  /* "package/multitensor.pyx":161
  *     def duration(self):
  *         """Duration (in seconds) of the full run."""
  *         return self.c_obj.duration             # <<<<<<<<<<<<<<
@@ -3566,13 +2641,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8duration___get
  *     @duration.setter
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_obj.duration); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_obj.duration); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":235
+  /* "package/multitensor.pyx":159
  * 
  *     @property
  *     def duration(self):             # <<<<<<<<<<<<<<
@@ -3591,7 +2666,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_8duration___get
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":240
+/* "package/multitensor.pyx":164
  * 
  *     @duration.setter
  *     def duration(self, duration):             # <<<<<<<<<<<<<<
@@ -3621,17 +2696,17 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_8duration_2__set__(st
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
 
-  /* "package/multitensor.pyx":241
+  /* "package/multitensor.pyx":165
  *     @duration.setter
  *     def duration(self, duration):
  *         self.c_obj.duration = duration             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_duration); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 241, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_duration); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 165, __pyx_L1_error)
   __pyx_v_self->c_obj.duration = __pyx_t_1;
 
-  /* "package/multitensor.pyx":240
+  /* "package/multitensor.pyx":164
  * 
  *     @duration.setter
  *     def duration(self, duration):             # <<<<<<<<<<<<<<
@@ -3650,7 +2725,7 @@ static int __pyx_pf_7package_11multitensor_13ReportWrapper_8duration_2__set__(st
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":244
+/* "package/multitensor.pyx":168
  * 
  *     @property
  *     def max_L2(self):             # <<<<<<<<<<<<<<
@@ -3680,7 +2755,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6max_L2___get__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
 
-  /* "package/multitensor.pyx":246
+  /* "package/multitensor.pyx":170
  *     def max_L2(self):
  *         """Maximum likelihood."""
  *         return self.c_obj.max_L2()             # <<<<<<<<<<<<<<
@@ -3688,13 +2763,13 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_6max_L2___get__
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_obj.max_L2()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->c_obj.max_L2()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":244
+  /* "package/multitensor.pyx":168
  * 
  *     @property
  *     def max_L2(self):             # <<<<<<<<<<<<<<
@@ -3747,7 +2822,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper___reduce_cython
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3803,7 +2878,7 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_2__setstate_cyt
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -3826,19 +2901,19 @@ static PyObject *__pyx_pf_7package_11multitensor_13ReportWrapper_2__setstate_cyt
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":275
+/* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7package_11multitensor_4multitensor_factorization[] = "\n    Multitensor factorization algorithm.\n\n    :param str adjacency_filename: Name of the file containing the adjacency data\n    :param int nof_groups: Number of groups\n    :param bool directed: Whether the network is directed (True) or undirected (False)\n    :param bool assortative: If True, assumes an assortative model\n    :param int nof_realizations: Number of realizations\n    :param int max_nof_iterations: Maximum number of iterations in each realization\n    :param int nof_convergences: Number of successive passed convergence criteria\n        for declaring the results converged\n    :param str init_affinity_filename: Name of the file containing the initial affinity data\n    :param dtype weigths_dtype: Type used for the edge weights\n    :returns: 4-tuple containing:\n\n        * the numpy array linking outgoing vertices\n        * the numpy array linking incoming vertices\n        * the numpy array containing the affinity values\n        * the detailed report\n    :rtype: tuple(numpy.array, numpy.array, numpy.array, ReportWrapper)\n    ";
-static PyMethodDef __pyx_mdef_7package_11multitensor_5multitensor_factorization = {"multitensor_factorization", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7package_11multitensor_5multitensor_factorization, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7package_11multitensor_4multitensor_factorization};
-static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7package_11multitensor_1run(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7package_11multitensor_run[] = "\n    Runs the multitensor factorization algorithm.\n\n    :param str adjacency_filename: Name of the file containing the adjacency data\n    :param int nof_groups: Number of groups\n    :param bool directed: Whether the network is directed (True) or undirected (False)\n    :param bool assortative: If True, assumes an assortative model\n    :param int nof_realizations: Number of realizations\n    :param int max_nof_iterations: Maximum number of iterations in each realization\n    :param int nof_convergences: Number of successive passed convergence criteria\n        for declaring the results converged\n    :param str init_affinity_filename: Name of the file containing the initial affinity data\n    :param dtype weigths_dtype: Type used for the edge weights\n    :param int seed: Seed for the random generator (mt19937 with uniform distribution)\n    :returns: 4-tuple containing:\n\n        * the numpy array linking outgoing vertices\n        * the numpy array linking incoming vertices\n        * the numpy array containing the affinity values\n        * the detailed report\n    :rtype: tuple(numpy.array, numpy.array, numpy.array, ReportWrapper)\n    ";
+static PyMethodDef __pyx_mdef_7package_11multitensor_1run = {"run", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7package_11multitensor_1run, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7package_11multitensor_run};
+static PyObject *__pyx_pw_7package_11multitensor_1run(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_adjacency_filename = 0;
   PyObject *__pyx_v_nof_groups = 0;
   PyObject *__pyx_v_directed = 0;
@@ -3848,17 +2923,18 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
   PyObject *__pyx_v_nof_convergences = 0;
   PyObject *__pyx_v_init_affinity_filename = 0;
   PyObject *__pyx_v_weigths_dtype = 0;
+  PyObject *__pyx_v_seed = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("multitensor_factorization (wrapper)", 0);
+  __Pyx_RefNannySetupContext("run (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_adjacency_filename,&__pyx_n_s_nof_groups,&__pyx_n_s_directed,&__pyx_n_s_assortative,&__pyx_n_s_nof_realizations,&__pyx_n_s_max_nof_iterations,&__pyx_n_s_nof_convergences,&__pyx_n_s_init_affinity_filename,&__pyx_n_s_weigths_dtype,0};
-    PyObject* values[9] = {0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_adjacency_filename,&__pyx_n_s_nof_groups,&__pyx_n_s_directed,&__pyx_n_s_assortative,&__pyx_n_s_nof_realizations,&__pyx_n_s_max_nof_iterations,&__pyx_n_s_nof_convergences,&__pyx_n_s_init_affinity_filename,&__pyx_n_s_weigths_dtype,&__pyx_n_s_seed,0};
+    PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
 
-    /* "package/multitensor.pyx":278
+    /* "package/multitensor.pyx":212
  *     adjacency_filename,
  *     nof_groups,
  *     directed=True,             # <<<<<<<<<<<<<<
@@ -3867,7 +2943,7 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
  */
     values[2] = ((PyObject *)Py_True);
 
-    /* "package/multitensor.pyx":279
+    /* "package/multitensor.pyx":213
  *     nof_groups,
  *     directed=True,
  *     assortative=False,             # <<<<<<<<<<<<<<
@@ -3879,19 +2955,30 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
     values[5] = ((PyObject *)__pyx_int_500);
     values[6] = ((PyObject *)__pyx_int_10);
 
-    /* "package/multitensor.pyx":283
+    /* "package/multitensor.pyx":217
  *     max_nof_iterations=500,
  *     nof_convergences=10,
  *     init_affinity_filename=None,             # <<<<<<<<<<<<<<
  *     weigths_dtype=float,
- * ):
+ *     seed=None
  */
     values[7] = ((PyObject *)Py_None);
-    values[8] = __pyx_k__5;
+    values[8] = __pyx_k__3;
+
+    /* "package/multitensor.pyx":219
+ *     init_affinity_filename=None,
+ *     weigths_dtype=float,
+ *     seed=None             # <<<<<<<<<<<<<<
+ * ):
+ *     """
+ */
+    values[9] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
         case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
         CYTHON_FALLTHROUGH;
         case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
@@ -3922,7 +3009,7 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nof_groups)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("multitensor_factorization", 0, 2, 9, 1); __PYX_ERR(0, 275, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("run", 0, 2, 10, 1); __PYX_ERR(0, 209, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3966,12 +3053,20 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_weigths_dtype);
           if (value) { values[8] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  9:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_seed);
+          if (value) { values[9] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "multitensor_factorization") < 0)) __PYX_ERR(0, 275, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "run") < 0)) __PYX_ERR(0, 209, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
+        CYTHON_FALLTHROUGH;
         case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
         CYTHON_FALLTHROUGH;
         case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
@@ -4001,21 +3096,22 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
     __pyx_v_nof_convergences = values[6];
     __pyx_v_init_affinity_filename = values[7];
     __pyx_v_weigths_dtype = values[8];
+    __pyx_v_seed = values[9];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("multitensor_factorization", 0, 2, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 275, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("run", 0, 2, 10, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 209, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("package.multitensor.multitensor_factorization", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("package.multitensor.run", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7package_11multitensor_4multitensor_factorization(__pyx_self, __pyx_v_adjacency_filename, __pyx_v_nof_groups, __pyx_v_directed, __pyx_v_assortative, __pyx_v_nof_realizations, __pyx_v_max_nof_iterations, __pyx_v_nof_convergences, __pyx_v_init_affinity_filename, __pyx_v_weigths_dtype);
+  __pyx_r = __pyx_pf_7package_11multitensor_run(__pyx_self, __pyx_v_adjacency_filename, __pyx_v_nof_groups, __pyx_v_directed, __pyx_v_assortative, __pyx_v_nof_realizations, __pyx_v_max_nof_iterations, __pyx_v_nof_convergences, __pyx_v_init_affinity_filename, __pyx_v_weigths_dtype, __pyx_v_seed);
 
-  /* "package/multitensor.pyx":275
+  /* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
@@ -4024,17 +3120,17 @@ static PyObject *__pyx_pw_7package_11multitensor_5multitensor_factorization(PyOb
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
+static PyObject *__pyx_gb_7package_11multitensor_3run_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-/* "package/multitensor.pyx":340
- *         init_affinity = read_affinity_data(init_affinity_filename)
- *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)             # <<<<<<<<<<<<<<
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- *             [l.ravel() for l in init_affinity]
+/* "package/multitensor.pyx":277
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])             # <<<<<<<<<<<<<<
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
  */
 
-static PyObject *__pyx_pf_7package_11multitensor_25multitensor_factorization_genexpr(PyObject *__pyx_self) {
+static PyObject *__pyx_pf_7package_11multitensor_3run_genexpr(PyObject *__pyx_self) {
   struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr *__pyx_cur_scope;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -4046,15 +3142,15 @@ static PyObject *__pyx_pf_7package_11multitensor_25multitensor_factorization_gen
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 340, __pyx_L1_error)
+    __PYX_ERR(0, 277, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
-  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *) __pyx_self;
+  __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *) __pyx_self;
   __Pyx_INCREF(((PyObject *)__pyx_cur_scope->__pyx_outer_scope));
   __Pyx_GIVEREF(__pyx_cur_scope->__pyx_outer_scope);
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_7package_11multitensor_25multitensor_factorization_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_multitensor_factorization_locals, __pyx_n_s_package_multitensor); if (unlikely(!gen)) __PYX_ERR(0, 340, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_7package_11multitensor_3run_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_run_locals_genexpr, __pyx_n_s_package_multitensor); if (unlikely(!gen)) __PYX_ERR(0, 277, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -4062,7 +3158,7 @@ static PyObject *__pyx_pf_7package_11multitensor_25multitensor_factorization_gen
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_AddTraceback("package.multitensor.multitensor_factorization.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("package.multitensor.run.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
   __Pyx_XGIVEREF(__pyx_r);
@@ -4070,14 +3166,14 @@ static PyObject *__pyx_pf_7package_11multitensor_25multitensor_factorization_gen
   return __pyx_r;
 }
 
-static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value) /* generator body */
+static PyObject *__pyx_gb_7package_11multitensor_3run_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value) /* generator body */
 {
   struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr *__pyx_cur_scope = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct_1_genexpr *)__pyx_generator->closure);
   PyObject *__pyx_r = NULL;
   PyObject *__pyx_t_1 = NULL;
-  Py_ssize_t __pyx_t_2;
-  PyObject *(*__pyx_t_3)(PyObject *);
-  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  Py_ssize_t __pyx_t_3;
+  PyObject *(*__pyx_t_4)(PyObject *);
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
   int __pyx_lineno = 0;
@@ -4093,54 +3189,57 @@ static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2ge
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 340, __pyx_L1_error)
-  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_init_affinity)) { __Pyx_RaiseClosureNameError("init_affinity"); __PYX_ERR(0, 340, __pyx_L1_error) }
-  if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_init_affinity)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_init_affinity)) {
-    __pyx_t_1 = __pyx_cur_scope->__pyx_outer_scope->__pyx_v_init_affinity; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
-    __pyx_t_3 = NULL;
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 277, __pyx_L1_error)
+  if (unlikely(!__pyx_cur_scope->__pyx_outer_scope->__pyx_v_w_data)) { __Pyx_RaiseClosureNameError("w_data"); __PYX_ERR(0, 277, __pyx_L1_error) }
+  __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_w_data, __pyx_tuple__6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
+    __pyx_t_2 = __pyx_t_1; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
+    __pyx_t_4 = NULL;
   } else {
-    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_outer_scope->__pyx_v_init_affinity); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 340, __pyx_L1_error)
+    __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 277, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_4 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 277, __pyx_L1_error)
   }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
-    if (likely(!__pyx_t_3)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
+    if (likely(!__pyx_t_4)) {
+      if (likely(PyList_CheckExact(__pyx_t_2))) {
+        if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 340, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 277, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 340, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
-        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 340, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_1); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 277, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 340, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
     } else {
-      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
-      if (unlikely(!__pyx_t_4)) {
+      __pyx_t_1 = __pyx_t_4(__pyx_t_2);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 340, __pyx_L1_error)
+          else __PYX_ERR(0, 277, __pyx_L1_error)
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_GOTREF(__pyx_t_1);
     }
     __Pyx_XGOTREF(__pyx_cur_scope->__pyx_v_l);
-    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_l, __pyx_t_4);
-    __Pyx_GIVEREF(__pyx_t_4);
-    __pyx_t_4 = 0;
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_numpy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 340, __pyx_L1_error)
+    __Pyx_XDECREF_SET(__pyx_cur_scope->__pyx_v_l, __pyx_t_1);
+    __Pyx_GIVEREF(__pyx_t_1);
+    __pyx_t_1 = 0;
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_numpy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 277, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_diag); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 340, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_diag); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 277, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -4153,17 +3252,17 @@ static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2ge
         __Pyx_DECREF_SET(__pyx_t_6, function);
       }
     }
-    __pyx_t_4 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_5, __pyx_cur_scope->__pyx_v_l) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_cur_scope->__pyx_v_l);
+    __pyx_t_1 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_5, __pyx_cur_scope->__pyx_v_l) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_cur_scope->__pyx_v_l);
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 340, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 277, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_r = __pyx_t_4;
-    __pyx_t_4 = 0;
-    __Pyx_XGIVEREF(__pyx_t_1);
-    __pyx_cur_scope->__pyx_t_0 = __pyx_t_1;
-    __pyx_cur_scope->__pyx_t_1 = __pyx_t_2;
-    __pyx_cur_scope->__pyx_t_2 = __pyx_t_3;
+    __pyx_r = __pyx_t_1;
+    __pyx_t_1 = 0;
+    __Pyx_XGIVEREF(__pyx_t_2);
+    __pyx_cur_scope->__pyx_t_0 = __pyx_t_2;
+    __pyx_cur_scope->__pyx_t_1 = __pyx_t_3;
+    __pyx_cur_scope->__pyx_t_2 = __pyx_t_4;
     __Pyx_XGIVEREF(__pyx_r);
     __Pyx_RefNannyFinishContext();
     __Pyx_Coroutine_ResetAndClearException(__pyx_generator);
@@ -4171,14 +3270,14 @@ static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2ge
     __pyx_generator->resume_label = 1;
     return __pyx_r;
     __pyx_L6_resume_from_yield:;
-    __pyx_t_1 = __pyx_cur_scope->__pyx_t_0;
+    __pyx_t_2 = __pyx_cur_scope->__pyx_t_0;
     __pyx_cur_scope->__pyx_t_0 = 0;
-    __Pyx_XGOTREF(__pyx_t_1);
-    __pyx_t_2 = __pyx_cur_scope->__pyx_t_1;
-    __pyx_t_3 = __pyx_cur_scope->__pyx_t_2;
-    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 340, __pyx_L1_error)
+    __Pyx_XGOTREF(__pyx_t_2);
+    __pyx_t_3 = __pyx_cur_scope->__pyx_t_1;
+    __pyx_t_4 = __pyx_cur_scope->__pyx_t_2;
+    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 277, __pyx_L1_error)
   }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
   /* function exit code */
@@ -4186,7 +3285,7 @@ static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2ge
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_AddTraceback("genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -4201,29 +3300,31 @@ static PyObject *__pyx_gb_7package_11multitensor_25multitensor_factorization_2ge
   return __pyx_r;
 }
 
-/* "package/multitensor.pyx":275
+/* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
 
-static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_adjacency_filename, PyObject *__pyx_v_nof_groups, PyObject *__pyx_v_directed, PyObject *__pyx_v_assortative, PyObject *__pyx_v_nof_realizations, PyObject *__pyx_v_max_nof_iterations, PyObject *__pyx_v_nof_convergences, PyObject *__pyx_v_init_affinity_filename, PyObject *__pyx_v_weigths_dtype) {
-  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *__pyx_cur_scope;
-  PyObject *__pyx_v_A = NULL;
+static PyObject *__pyx_pf_7package_11multitensor_run(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_adjacency_filename, PyObject *__pyx_v_nof_groups, PyObject *__pyx_v_directed, PyObject *__pyx_v_assortative, PyObject *__pyx_v_nof_realizations, PyObject *__pyx_v_max_nof_iterations, PyObject *__pyx_v_nof_convergences, PyObject *__pyx_v_init_affinity_filename, PyObject *__pyx_v_weigths_dtype, PyObject *__pyx_v_seed) {
+  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *__pyx_cur_scope;
+  PyObject *__pyx_v_adj_data = NULL;
   PyObject *__pyx_v_edges_start = NULL;
   PyObject *__pyx_v_edges_end = NULL;
   PyObject *__pyx_v_edges_weights = NULL;
-  size_t __pyx_v_nof_edges;
+  PyObject *__pyx_v_nof_edges = NULL;
+  PyObject *__pyx_v_nof_layers = NULL;
   size_t __pyx_v_nof_vertices;
-  size_t __pyx_v_nof_layers;
   multitensor::tensor::Matrix<__pyx_t_5numpy_float_t>  __pyx_v_c_u;
   multitensor::tensor::Matrix<__pyx_t_5numpy_float_t>  __pyx_v_c_v;
   std::vector<__pyx_t_5numpy_float_t>  __pyx_v_c_affinity;
+  PyObject *__pyx_v_init_affinity = NULL;
   PyObject *__pyx_v_affinity_size = NULL;
   std::vector<__pyx_t_7package_11multitensor_vertex_t>  __pyx_v_labels;
   struct __pyx_obj_7package_11multitensor_ReportWrapper *__pyx_v_report = NULL;
+  multitensor::utils::RandomGenerator<std::mt19937,std::uniform_real_distribution<double>>  *__pyx_v_rng;
   PyObject *__pyx_v_u = NULL;
   PyObject *__pyx_v_v = NULL;
   PyObject *__pyx_v_affinity_ravel = NULL;
@@ -4232,64 +3333,108 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
   PyObject *__pyx_v_l = NULL;
   PyObject *__pyx_v_begin = NULL;
   PyObject *__pyx_v_end = NULL;
-  PyObject *__pyx_7genexpr__pyx_v_l = NULL;
-  PyObject *__pyx_8genexpr2__pyx_v_l = NULL;
-  size_t __pyx_8genexpr3__pyx_v_i;
+  PyObject *__pyx_v_w_l = NULL;
+  PyObject *__pyx_8genexpr1__pyx_v_l = NULL;
+  size_t __pyx_8genexpr2__pyx_v_i;
   size_t __pyx_8genexpr3__pyx_v_j;
   size_t __pyx_8genexpr4__pyx_v_i;
-  size_t __pyx_8genexpr4__pyx_v_j;
+  size_t __pyx_8genexpr5__pyx_v_j;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  Py_ssize_t __pyx_t_6;
-  PyObject *(*__pyx_t_7)(PyObject *);
-  PyObject *__pyx_t_8 = NULL;
-  PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  PyObject *__pyx_t_11 = NULL;
-  size_t __pyx_t_12;
-  std::vector<__pyx_t_7package_11multitensor_vertex_t>  __pyx_t_13;
-  std::vector<__pyx_t_7package_11multitensor_vertex_t>  __pyx_t_14;
-  multitensor::tensor::Matrix<__pyx_t_5numpy_float_t>  __pyx_t_15;
-  int __pyx_t_16;
-  std::vector<__pyx_t_5numpy_float_t>  __pyx_t_17;
+  std::vector<__pyx_t_7package_11multitensor_vertex_t>  __pyx_t_5;
+  std::vector<__pyx_t_7package_11multitensor_vertex_t>  __pyx_t_6;
+  size_t __pyx_t_7;
+  multitensor::tensor::Matrix<__pyx_t_5numpy_float_t>  __pyx_t_8;
+  int __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  PyObject *(*__pyx_t_11)(PyObject *);
+  PyObject *__pyx_t_12 = NULL;
+  PyObject *__pyx_t_13 = NULL;
+  PyObject *__pyx_t_14 = NULL;
+  std::vector<__pyx_t_5numpy_float_t>  __pyx_t_15;
+  time_t __pyx_t_16;
+  multitensor::utils::RandomGenerator<std::mt19937,std::uniform_real_distribution<double>>  *__pyx_t_17;
   int __pyx_t_18;
   int __pyx_t_19;
   std::vector<__pyx_t_5numpy_int_t>  __pyx_t_20;
   size_t __pyx_t_21;
   size_t __pyx_t_22;
-  size_t __pyx_t_23;
-  size_t __pyx_t_24;
-  size_t __pyx_t_25;
-  int __pyx_t_26;
+  multitensor::utils::Report __pyx_t_23;
+  int __pyx_t_24;
+  int __pyx_t_25;
+  char const *__pyx_t_26;
+  PyObject *__pyx_t_27 = NULL;
+  PyObject *__pyx_t_28 = NULL;
+  PyObject *__pyx_t_29 = NULL;
+  PyObject *__pyx_t_30 = NULL;
+  PyObject *__pyx_t_31 = NULL;
+  PyObject *__pyx_t_32 = NULL;
+  size_t __pyx_t_33;
+  size_t __pyx_t_34;
+  size_t __pyx_t_35;
+  int __pyx_t_36;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("multitensor_factorization", 0);
-  __pyx_cur_scope = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)__pyx_tp_new_7package_11multitensor___pyx_scope_struct__multitensor_factorization(__pyx_ptype_7package_11multitensor___pyx_scope_struct__multitensor_factorization, __pyx_empty_tuple, NULL);
+  __Pyx_RefNannySetupContext("run", 0);
+  __pyx_cur_scope = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)__pyx_tp_new_7package_11multitensor___pyx_scope_struct__run(__pyx_ptype_7package_11multitensor___pyx_scope_struct__run, __pyx_empty_tuple, NULL);
   if (unlikely(!__pyx_cur_scope)) {
-    __pyx_cur_scope = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)Py_None);
+    __pyx_cur_scope = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(0, 275, __pyx_L1_error)
+    __PYX_ERR(0, 209, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
+  __Pyx_INCREF(__pyx_v_seed);
 
-  /* "package/multitensor.pyx":308
+  /* "package/multitensor.pyx":244
  *     """
+ *     # Load adjacency file
+ *     adj_data = numpy.loadtxt(adjacency_filename)             # <<<<<<<<<<<<<<
  * 
- *     A = read_adjacency_data(adjacency_filename)             # <<<<<<<<<<<<<<
- *     edges_start = numpy.array(A[0][:, 0].toarray().ravel(), dtype=int)
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)
+ *     edges_start = adj_data[:, 0].astype(int)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_read_adjacency_data); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 308, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_numpy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 244, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_loadtxt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_v_adjacency_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_adjacency_filename);
+  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 244, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_adj_data = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "package/multitensor.pyx":246
+ *     adj_data = numpy.loadtxt(adjacency_filename)
+ * 
+ *     edges_start = adj_data[:, 0].astype(int)             # <<<<<<<<<<<<<<
+ *     edges_end = adj_data[:, 1].astype(int)
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()
+ */
+  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_v_adj_data, __pyx_tuple__7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_astype); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
     __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
     if (likely(__pyx_t_3)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
@@ -4298,50 +3443,72 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
       __Pyx_DECREF_SET(__pyx_t_2, function);
     }
   }
-  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_adjacency_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_adjacency_filename);
+  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, ((PyObject *)(&PyInt_Type))) : __Pyx_PyObject_CallOneArg(__pyx_t_2, ((PyObject *)(&PyInt_Type)));
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 308, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_A = __pyx_t_1;
+  __pyx_v_edges_start = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "package/multitensor.pyx":309
+  /* "package/multitensor.pyx":247
  * 
- *     A = read_adjacency_data(adjacency_filename)
- *     edges_start = numpy.array(A[0][:, 0].toarray().ravel(), dtype=int)             # <<<<<<<<<<<<<<
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)
+ *     edges_start = adj_data[:, 0].astype(int)
+ *     edges_end = adj_data[:, 1].astype(int)             # <<<<<<<<<<<<<<
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_numpy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_adj_data, __pyx_tuple__8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_A, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, ((PyObject *)(&PyInt_Type))) : __Pyx_PyObject_CallOneArg(__pyx_t_3, ((PyObject *)(&PyInt_Type)));
+  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 247, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_v_edges_end = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "package/multitensor.pyx":248
+ *     edges_start = adj_data[:, 0].astype(int)
+ *     edges_end = adj_data[:, 1].astype(int)
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()             # <<<<<<<<<<<<<<
+ * 
+ *     # The underlying C function deduces the number of groups from the
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_v_adj_data, __pyx_tuple__10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_astype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_4, __pyx_tuple__6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_toarray); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_2)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_2);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_4, function);
     }
   }
-  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_3 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_2, __pyx_v_weigths_dtype) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_weigths_dtype);
+  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ravel); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ravel); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -4356,320 +3523,83 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
+  __pyx_v_edges_weights = __pyx_t_1;
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 309, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 309, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_edges_start = __pyx_t_3;
-  __pyx_t_3 = 0;
 
-  /* "package/multitensor.pyx":310
- *     A = read_adjacency_data(adjacency_filename)
- *     edges_start = numpy.array(A[0][:, 0].toarray().ravel(), dtype=int)
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)             # <<<<<<<<<<<<<<
- * 
- *     edges_weights = numpy.concatenate(
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_numpy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_A, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_tuple__7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_toarray); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-    }
-  }
-  __pyx_t_4 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ravel); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-    }
-  }
-  __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 310, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 310, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_edges_end = __pyx_t_4;
-  __pyx_t_4 = 0;
-
-  /* "package/multitensor.pyx":312
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)
- * 
- *     edges_weights = numpy.concatenate(             # <<<<<<<<<<<<<<
- *         [l[:, 2].toarray().ravel().astype(weigths_dtype) for l in A]
- *     )
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_numpy); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 312, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 312, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  { /* enter inner scope */
-
-    /* "package/multitensor.pyx":313
- * 
- *     edges_weights = numpy.concatenate(
- *         [l[:, 2].toarray().ravel().astype(weigths_dtype) for l in A]             # <<<<<<<<<<<<<<
- *     )
- * 
- */
-    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 313, __pyx_L5_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    if (likely(PyList_CheckExact(__pyx_v_A)) || PyTuple_CheckExact(__pyx_v_A)) {
-      __pyx_t_1 = __pyx_v_A; __Pyx_INCREF(__pyx_t_1); __pyx_t_6 = 0;
-      __pyx_t_7 = NULL;
-    } else {
-      __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_A); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 313, __pyx_L5_error)
-    }
-    for (;;) {
-      if (likely(!__pyx_t_7)) {
-        if (likely(PyList_CheckExact(__pyx_t_1))) {
-          if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_1)) break;
-          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_5); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 313, __pyx_L5_error)
-          #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 313, __pyx_L5_error)
-          __Pyx_GOTREF(__pyx_t_5);
-          #endif
-        } else {
-          if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
-          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_5); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 313, __pyx_L5_error)
-          #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 313, __pyx_L5_error)
-          __Pyx_GOTREF(__pyx_t_5);
-          #endif
-        }
-      } else {
-        __pyx_t_5 = __pyx_t_7(__pyx_t_1);
-        if (unlikely(!__pyx_t_5)) {
-          PyObject* exc_type = PyErr_Occurred();
-          if (exc_type) {
-            if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 313, __pyx_L5_error)
-          }
-          break;
-        }
-        __Pyx_GOTREF(__pyx_t_5);
-      }
-      __Pyx_XDECREF_SET(__pyx_7genexpr__pyx_v_l, __pyx_t_5);
-      __pyx_t_5 = 0;
-      __pyx_t_10 = __Pyx_PyObject_GetItem(__pyx_7genexpr__pyx_v_l, __pyx_tuple__8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_10);
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_toarray); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_11);
-      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-      __pyx_t_10 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_11))) {
-        __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_11);
-        if (likely(__pyx_t_10)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
-          __Pyx_INCREF(__pyx_t_10);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_11, function);
-        }
-      }
-      __pyx_t_9 = (__pyx_t_10) ? __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_t_10) : __Pyx_PyObject_CallNoArg(__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-      if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_9);
-      __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_ravel); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_11);
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __pyx_t_9 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_11))) {
-        __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_11);
-        if (likely(__pyx_t_9)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
-          __Pyx_INCREF(__pyx_t_9);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_11, function);
-        }
-      }
-      __pyx_t_8 = (__pyx_t_9) ? __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_t_9) : __Pyx_PyObject_CallNoArg(__pyx_t_11);
-      __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-      if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_astype); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_11);
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_11))) {
-        __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_11);
-        if (likely(__pyx_t_8)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
-          __Pyx_INCREF(__pyx_t_8);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_11, function);
-        }
-      }
-      __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_11, __pyx_t_8, __pyx_v_weigths_dtype) : __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_v_weigths_dtype);
-      __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_GOTREF(__pyx_t_5);
-      __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 313, __pyx_L5_error)
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_l); __pyx_7genexpr__pyx_v_l = 0;
-    goto __pyx_L8_exit_scope;
-    __pyx_L5_error:;
-    __Pyx_XDECREF(__pyx_7genexpr__pyx_v_l); __pyx_7genexpr__pyx_v_l = 0;
-    goto __pyx_L1_error;
-    __pyx_L8_exit_scope:;
-  } /* exit inner scope */
-  __pyx_t_1 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_1)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_1);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-    }
-  }
-  __pyx_t_4 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_1, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 312, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_v_edges_weights = __pyx_t_4;
-  __pyx_t_4 = 0;
-
-  /* "package/multitensor.pyx":321
+  /* "package/multitensor.pyx":255
  *     # explicit parameter. This implies that we have to repeat the math
  *     # done in C function in reverse.
- *     cdef size_t nof_edges = edges_start.size             # <<<<<<<<<<<<<<
+ *     nof_edges = edges_start.size             # <<<<<<<<<<<<<<
+ *     nof_layers = edges_weights.size // nof_edges
+ *     cdef size_t nof_vertices = get_num_vertices[vertex_t](
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_edges_start, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 255, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_nof_edges = __pyx_t_1;
+  __pyx_t_1 = 0;
+
+  /* "package/multitensor.pyx":256
+ *     # done in C function in reverse.
+ *     nof_edges = edges_start.size
+ *     nof_layers = edges_weights.size // nof_edges             # <<<<<<<<<<<<<<
  *     cdef size_t nof_vertices = get_num_vertices[vertex_t](
  *         < const vector[vertex_t] & > edges_start,
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_edges_start, __pyx_n_s_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 321, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_edges_weights, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = PyNumber_FloorDivide(__pyx_t_1, __pyx_v_nof_edges); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 256, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_nof_edges = __pyx_t_12;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_nof_layers = __pyx_t_4;
+  __pyx_t_4 = 0;
 
-  /* "package/multitensor.pyx":323
- *     cdef size_t nof_edges = edges_start.size
+  /* "package/multitensor.pyx":258
+ *     nof_layers = edges_weights.size // nof_edges
  *     cdef size_t nof_vertices = get_num_vertices[vertex_t](
  *         < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
  *         < const vector[vertex_t] & > edges_end)
- *     cdef size_t nof_layers = edges_weights.size / nof_edges
+ * 
  */
-  __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 323, __pyx_L1_error)
+  __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 258, __pyx_L1_error)
 
-  /* "package/multitensor.pyx":324
+  /* "package/multitensor.pyx":259
  *     cdef size_t nof_vertices = get_num_vertices[vertex_t](
  *         < const vector[vertex_t] & > edges_start,
  *         < const vector[vertex_t] & > edges_end)             # <<<<<<<<<<<<<<
- *     cdef size_t nof_layers = edges_weights.size / nof_edges
  * 
+ *     # Preallocate the output matrices.
  */
-  __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 324, __pyx_L1_error)
+  __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 259, __pyx_L1_error)
 
-  /* "package/multitensor.pyx":322
- *     # done in C function in reverse.
- *     cdef size_t nof_edges = edges_start.size
+  /* "package/multitensor.pyx":257
+ *     nof_edges = edges_start.size
+ *     nof_layers = edges_weights.size // nof_edges
  *     cdef size_t nof_vertices = get_num_vertices[vertex_t](             # <<<<<<<<<<<<<<
  *         < const vector[vertex_t] & > edges_start,
  *         < const vector[vertex_t] & > edges_end)
  */
-  __pyx_v_nof_vertices = multitensor::utils::get_num_vertices<__pyx_t_7package_11multitensor_vertex_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)));
+  __pyx_v_nof_vertices = multitensor::utils::get_num_vertices<__pyx_t_7package_11multitensor_vertex_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)));
 
-  /* "package/multitensor.pyx":325
- *         < const vector[vertex_t] & > edges_start,
- *         < const vector[vertex_t] & > edges_end)
- *     cdef size_t nof_layers = edges_weights.size / nof_edges             # <<<<<<<<<<<<<<
- * 
- *     # Preallocate the output matrices.
- */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_edges_weights, __pyx_n_s_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 325, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyInt_FromSize_t(__pyx_v_nof_edges); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 325, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyNumber_Divide(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 325, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 325, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_nof_layers = __pyx_t_12;
-
-  /* "package/multitensor.pyx":328
+  /* "package/multitensor.pyx":262
  * 
  *     # Preallocate the output matrices.
  *     cdef Matrix[numpy.float_t] c_u = Matrix[numpy.float_t](nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
  *     cdef Matrix[numpy.float_t] c_v = Matrix[numpy.float_t](0, 0)
  * 
  */
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 328, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 262, __pyx_L1_error)
   try {
-    __pyx_t_15 = multitensor::tensor::Matrix<__pyx_t_5numpy_float_t> (__pyx_v_nof_vertices, __pyx_t_12);
+    __pyx_t_8 = multitensor::tensor::Matrix<__pyx_t_5numpy_float_t> (__pyx_v_nof_vertices, __pyx_t_7);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 328, __pyx_L1_error)
+    __PYX_ERR(0, 262, __pyx_L1_error)
   }
-  __pyx_v_c_u = __pyx_t_15;
+  __pyx_v_c_u = __pyx_t_8;
 
-  /* "package/multitensor.pyx":329
+  /* "package/multitensor.pyx":263
  *     # Preallocate the output matrices.
  *     cdef Matrix[numpy.float_t] c_u = Matrix[numpy.float_t](nof_vertices, nof_groups)
  *     cdef Matrix[numpy.float_t] c_v = Matrix[numpy.float_t](0, 0)             # <<<<<<<<<<<<<<
@@ -4677,251 +3607,276 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
  *     # Preallocate the affinity vector depending on the
  */
   try {
-    __pyx_t_15 = multitensor::tensor::Matrix<__pyx_t_5numpy_float_t> (0, 0);
+    __pyx_t_8 = multitensor::tensor::Matrix<__pyx_t_5numpy_float_t> (0, 0);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 329, __pyx_L1_error)
+    __PYX_ERR(0, 263, __pyx_L1_error)
   }
-  __pyx_v_c_v = __pyx_t_15;
+  __pyx_v_c_v = __pyx_t_8;
 
-  /* "package/multitensor.pyx":336
+  /* "package/multitensor.pyx":270
  * 
  *     # Initialize the affinity vector
  *     if init_affinity_filename:             # <<<<<<<<<<<<<<
  *         # read the affinity file
- *         init_affinity = read_affinity_data(init_affinity_filename)
+ *         w_data = numpy.loadtxt(init_affinity_filename)
  */
-  __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 336, __pyx_L1_error)
-  if (__pyx_t_16) {
+  __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 270, __pyx_L1_error)
+  if (__pyx_t_9) {
 
-    /* "package/multitensor.pyx":338
+    /* "package/multitensor.pyx":272
  *     if init_affinity_filename:
  *         # read the affinity file
- *         init_affinity = read_affinity_data(init_affinity_filename)             # <<<<<<<<<<<<<<
+ *         w_data = numpy.loadtxt(init_affinity_filename)             # <<<<<<<<<<<<<<
+ * 
  *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_read_affinity_data); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 338, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-      if (likely(__pyx_t_4)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-        __Pyx_INCREF(__pyx_t_4);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_2, function);
-      }
-    }
-    __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_4, __pyx_v_init_affinity_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_init_affinity_filename);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 338, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_numpy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 272, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_loadtxt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __Pyx_GIVEREF(__pyx_t_3);
-    __pyx_cur_scope->__pyx_v_init_affinity = __pyx_t_3;
-    __pyx_t_3 = 0;
-
-    /* "package/multitensor.pyx":339
- *         # read the affinity file
- *         init_affinity = read_affinity_data(init_affinity_filename)
- *         if assortative:             # <<<<<<<<<<<<<<
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- */
-    __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 339, __pyx_L1_error)
-    if (__pyx_t_16) {
-
-      /* "package/multitensor.pyx":340
- *         init_affinity = read_affinity_data(init_affinity_filename)
- *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)             # <<<<<<<<<<<<<<
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- *             [l.ravel() for l in init_affinity]
- */
-      __pyx_t_3 = __pyx_pf_7package_11multitensor_25multitensor_factorization_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 340, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_GOTREF(__pyx_cur_scope->__pyx_v_init_affinity);
-      __Pyx_DECREF_SET(__pyx_cur_scope->__pyx_v_init_affinity, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_3);
-      __pyx_t_3 = 0;
-
-      /* "package/multitensor.pyx":339
- *         # read the affinity file
- *         init_affinity = read_affinity_data(init_affinity_filename)
- *         if assortative:             # <<<<<<<<<<<<<<
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- */
-    }
-
-    /* "package/multitensor.pyx":341
- *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(             # <<<<<<<<<<<<<<
- *             [l.ravel() for l in init_affinity]
- *         )
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_numpy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 341, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 341, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    { /* enter inner scope */
-
-      /* "package/multitensor.pyx":342
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(
- *             [l.ravel() for l in init_affinity]             # <<<<<<<<<<<<<<
- *         )
- *     else:
- */
-      __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 342, __pyx_L13_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      if (likely(PyList_CheckExact(__pyx_cur_scope->__pyx_v_init_affinity)) || PyTuple_CheckExact(__pyx_cur_scope->__pyx_v_init_affinity)) {
-        __pyx_t_1 = __pyx_cur_scope->__pyx_v_init_affinity; __Pyx_INCREF(__pyx_t_1); __pyx_t_6 = 0;
-        __pyx_t_7 = NULL;
-      } else {
-        __pyx_t_6 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_cur_scope->__pyx_v_init_affinity); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 342, __pyx_L13_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __pyx_t_7 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 342, __pyx_L13_error)
-      }
-      for (;;) {
-        if (likely(!__pyx_t_7)) {
-          if (likely(PyList_CheckExact(__pyx_t_1))) {
-            if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_1)) break;
-            #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_5 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_5); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 342, __pyx_L13_error)
-            #else
-            __pyx_t_5 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 342, __pyx_L13_error)
-            __Pyx_GOTREF(__pyx_t_5);
-            #endif
-          } else {
-            if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
-            #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_6); __Pyx_INCREF(__pyx_t_5); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 342, __pyx_L13_error)
-            #else
-            __pyx_t_5 = PySequence_ITEM(__pyx_t_1, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 342, __pyx_L13_error)
-            __Pyx_GOTREF(__pyx_t_5);
-            #endif
-          }
-        } else {
-          __pyx_t_5 = __pyx_t_7(__pyx_t_1);
-          if (unlikely(!__pyx_t_5)) {
-            PyObject* exc_type = PyErr_Occurred();
-            if (exc_type) {
-              if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-              else __PYX_ERR(0, 342, __pyx_L13_error)
-            }
-            break;
-          }
-          __Pyx_GOTREF(__pyx_t_5);
-        }
-        __Pyx_XDECREF_SET(__pyx_8genexpr2__pyx_v_l, __pyx_t_5);
-        __pyx_t_5 = 0;
-        __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_8genexpr2__pyx_v_l, __pyx_n_s_ravel); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 342, __pyx_L13_error)
-        __Pyx_GOTREF(__pyx_t_11);
-        __pyx_t_8 = NULL;
-        if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_11))) {
-          __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_11);
-          if (likely(__pyx_t_8)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
-            __Pyx_INCREF(__pyx_t_8);
-            __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_11, function);
-          }
-        }
-        __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_t_8) : __Pyx_PyObject_CallNoArg(__pyx_t_11);
-        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 342, __pyx_L13_error)
-        __Pyx_GOTREF(__pyx_t_5);
-        __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 342, __pyx_L13_error)
-        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      }
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_XDECREF(__pyx_8genexpr2__pyx_v_l); __pyx_8genexpr2__pyx_v_l = 0;
-      goto __pyx_L16_exit_scope;
-      __pyx_L13_error:;
-      __Pyx_XDECREF(__pyx_8genexpr2__pyx_v_l); __pyx_8genexpr2__pyx_v_l = 0;
-      goto __pyx_L1_error;
-      __pyx_L16_exit_scope:;
-    } /* exit inner scope */
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_1 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_4);
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+      __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_3);
       if (likely(__pyx_t_1)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
         __Pyx_INCREF(__pyx_t_1);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_4, function);
+        __Pyx_DECREF_SET(__pyx_t_3, function);
       }
     }
-    __pyx_t_3 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_1, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2);
+    __pyx_t_4 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_v_init_affinity_filename) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_init_affinity_filename);
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 341, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "package/multitensor.pyx":341
- *         if assortative:
- *             init_affinity = (numpy.diag(l) for l in init_affinity)
- *         c_affinity = < vector[numpy.float_t] > numpy.concatenate(             # <<<<<<<<<<<<<<
- *             [l.ravel() for l in init_affinity]
- *         )
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 341, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 272, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_c_affinity = ((std::vector<__pyx_t_5numpy_float_t> )__pyx_t_17);
+    __Pyx_GIVEREF(__pyx_t_4);
+    __pyx_cur_scope->__pyx_v_w_data = __pyx_t_4;
+    __pyx_t_4 = 0;
 
-    /* "package/multitensor.pyx":336
+    /* "package/multitensor.pyx":274
+ *         w_data = numpy.loadtxt(init_affinity_filename)
+ * 
+ *         if assortative:             # <<<<<<<<<<<<<<
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ */
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 274, __pyx_L1_error)
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":275
+ * 
+ *         if assortative:
+ *             init_affinity = w_data[:, 1:].ravel()             # <<<<<<<<<<<<<<
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])
+ */
+      __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_cur_scope->__pyx_v_w_data, __pyx_tuple__6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 275, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_ravel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 275, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_3 = NULL;
+      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
+        __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_1);
+        if (likely(__pyx_t_3)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+          __Pyx_INCREF(__pyx_t_3);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_1, function);
+        }
+      }
+      __pyx_t_4 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_1);
+      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 275, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_v_init_affinity = __pyx_t_4;
+      __pyx_t_4 = 0;
+
+      /* "package/multitensor.pyx":274
+ *         w_data = numpy.loadtxt(init_affinity_filename)
+ * 
+ *         if assortative:             # <<<<<<<<<<<<<<
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ */
+      goto __pyx_L4;
+    }
+
+    /* "package/multitensor.pyx":277
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])             # <<<<<<<<<<<<<<
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
+ */
+    /*else*/ {
+      __pyx_t_4 = __pyx_pf_7package_11multitensor_3run_genexpr(((PyObject*)__pyx_cur_scope)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 277, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_v_init_affinity = __pyx_t_4;
+      __pyx_t_4 = 0;
+
+      /* "package/multitensor.pyx":278
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])             # <<<<<<<<<<<<<<
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
+ *     else:
+ */
+      __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_numpy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 278, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 278, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      { /* enter inner scope */
+        __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 278, __pyx_L7_error)
+        __Pyx_GOTREF(__pyx_t_1);
+        if (likely(PyList_CheckExact(__pyx_v_init_affinity)) || PyTuple_CheckExact(__pyx_v_init_affinity)) {
+          __pyx_t_2 = __pyx_v_init_affinity; __Pyx_INCREF(__pyx_t_2); __pyx_t_10 = 0;
+          __pyx_t_11 = NULL;
+        } else {
+          __pyx_t_10 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_v_init_affinity); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L7_error)
+          __Pyx_GOTREF(__pyx_t_2);
+          __pyx_t_11 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 278, __pyx_L7_error)
+        }
+        for (;;) {
+          if (likely(!__pyx_t_11)) {
+            if (likely(PyList_CheckExact(__pyx_t_2))) {
+              if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_2)) break;
+              #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+              __pyx_t_12 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_12); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 278, __pyx_L7_error)
+              #else
+              __pyx_t_12 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 278, __pyx_L7_error)
+              __Pyx_GOTREF(__pyx_t_12);
+              #endif
+            } else {
+              if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+              #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+              __pyx_t_12 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_12); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 278, __pyx_L7_error)
+              #else
+              __pyx_t_12 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 278, __pyx_L7_error)
+              __Pyx_GOTREF(__pyx_t_12);
+              #endif
+            }
+          } else {
+            __pyx_t_12 = __pyx_t_11(__pyx_t_2);
+            if (unlikely(!__pyx_t_12)) {
+              PyObject* exc_type = PyErr_Occurred();
+              if (exc_type) {
+                if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+                else __PYX_ERR(0, 278, __pyx_L7_error)
+              }
+              break;
+            }
+            __Pyx_GOTREF(__pyx_t_12);
+          }
+          __Pyx_XDECREF_SET(__pyx_8genexpr1__pyx_v_l, __pyx_t_12);
+          __pyx_t_12 = 0;
+          __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_8genexpr1__pyx_v_l, __pyx_n_s_ravel); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 278, __pyx_L7_error)
+          __Pyx_GOTREF(__pyx_t_13);
+          __pyx_t_14 = NULL;
+          if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_13))) {
+            __pyx_t_14 = PyMethod_GET_SELF(__pyx_t_13);
+            if (likely(__pyx_t_14)) {
+              PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_13);
+              __Pyx_INCREF(__pyx_t_14);
+              __Pyx_INCREF(function);
+              __Pyx_DECREF_SET(__pyx_t_13, function);
+            }
+          }
+          __pyx_t_12 = (__pyx_t_14) ? __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_14) : __Pyx_PyObject_CallNoArg(__pyx_t_13);
+          __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
+          if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 278, __pyx_L7_error)
+          __Pyx_GOTREF(__pyx_t_12);
+          __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+          if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_12))) __PYX_ERR(0, 278, __pyx_L7_error)
+          __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+        }
+        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_XDECREF(__pyx_8genexpr1__pyx_v_l); __pyx_8genexpr1__pyx_v_l = 0;
+        goto __pyx_L10_exit_scope;
+        __pyx_L7_error:;
+        __Pyx_XDECREF(__pyx_8genexpr1__pyx_v_l); __pyx_8genexpr1__pyx_v_l = 0;
+        goto __pyx_L1_error;
+        __pyx_L10_exit_scope:;
+      } /* exit inner scope */
+      __pyx_t_2 = NULL;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+        __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+        if (likely(__pyx_t_2)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+          __Pyx_INCREF(__pyx_t_2);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_3, function);
+        }
+      }
+      __pyx_t_4 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_1);
+      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 278, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_DECREF_SET(__pyx_v_init_affinity, __pyx_t_4);
+      __pyx_t_4 = 0;
+    }
+    __pyx_L4:;
+
+    /* "package/multitensor.pyx":279
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])
+ *         c_affinity = < vector[numpy.float_t] > init_affinity             # <<<<<<<<<<<<<<
+ *     else:
+ *         if assortative:
+ */
+    __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_init_affinity); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 279, __pyx_L1_error)
+    __pyx_v_c_affinity = ((std::vector<__pyx_t_5numpy_float_t> )__pyx_t_15);
+
+    /* "package/multitensor.pyx":270
  * 
  *     # Initialize the affinity vector
  *     if init_affinity_filename:             # <<<<<<<<<<<<<<
  *         # read the affinity file
- *         init_affinity = read_affinity_data(init_affinity_filename)
+ *         w_data = numpy.loadtxt(init_affinity_filename)
  */
-    goto __pyx_L9;
+    goto __pyx_L3;
   }
 
-  /* "package/multitensor.pyx":345
- *         )
+  /* "package/multitensor.pyx":281
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
  *     else:
  *         if assortative:             # <<<<<<<<<<<<<<
  *             affinity_size = nof_groups * nof_layers
  *         else:
  */
   /*else*/ {
-    __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 345, __pyx_L1_error)
-    if (__pyx_t_16) {
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 281, __pyx_L1_error)
+    if (__pyx_t_9) {
 
-      /* "package/multitensor.pyx":346
+      /* "package/multitensor.pyx":282
  *     else:
  *         if assortative:
  *             affinity_size = nof_groups * nof_layers             # <<<<<<<<<<<<<<
  *         else:
  *             affinity_size = nof_groups * nof_groups * nof_layers
  */
-      __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_nof_layers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 346, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Multiply(__pyx_v_nof_groups, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 346, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Multiply(__pyx_v_nof_groups, __pyx_v_nof_layers); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 282, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_v_affinity_size = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "package/multitensor.pyx":345
- *         )
+      /* "package/multitensor.pyx":281
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
  *     else:
  *         if assortative:             # <<<<<<<<<<<<<<
  *             affinity_size = nof_groups * nof_layers
  *         else:
  */
-      goto __pyx_L17;
+      goto __pyx_L11;
     }
 
-    /* "package/multitensor.pyx":348
+    /* "package/multitensor.pyx":284
  *             affinity_size = nof_groups * nof_layers
  *         else:
  *             affinity_size = nof_groups * nof_groups * nof_layers             # <<<<<<<<<<<<<<
@@ -4929,38 +3884,35 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
  * 
  */
     /*else*/ {
-      __pyx_t_4 = PyNumber_Multiply(__pyx_v_nof_groups, __pyx_v_nof_groups); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 348, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Multiply(__pyx_v_nof_groups, __pyx_v_nof_groups); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 284, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_nof_layers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 348, __pyx_L1_error)
+      __pyx_t_3 = PyNumber_Multiply(__pyx_t_4, __pyx_v_nof_layers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 284, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_2 = PyNumber_Multiply(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_v_affinity_size = __pyx_t_2;
-      __pyx_t_2 = 0;
+      __pyx_v_affinity_size = __pyx_t_3;
+      __pyx_t_3 = 0;
     }
-    __pyx_L17:;
+    __pyx_L11:;
 
-    /* "package/multitensor.pyx":349
+    /* "package/multitensor.pyx":285
  *         else:
  *             affinity_size = nof_groups * nof_groups * nof_layers
  *         c_affinity = vector[numpy.float_t]( < size_t > affinity_size)             # <<<<<<<<<<<<<<
  * 
  *     # Create an empty label vector. Not sure why we need this :)
  */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_affinity_size); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 349, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_affinity_size); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 285, __pyx_L1_error)
     try {
-      __pyx_t_17 = std::vector<__pyx_t_5numpy_float_t> (((size_t)__pyx_t_12));
+      __pyx_t_15 = std::vector<__pyx_t_5numpy_float_t> (((size_t)__pyx_t_7));
     } catch(...) {
       __Pyx_CppExn2PyErr();
-      __PYX_ERR(0, 349, __pyx_L1_error)
+      __PYX_ERR(0, 285, __pyx_L1_error)
     }
-    __pyx_v_c_affinity = __pyx_t_17;
+    __pyx_v_c_affinity = __pyx_t_15;
   }
-  __pyx_L9:;
+  __pyx_L3:;
 
-  /* "package/multitensor.pyx":352
+  /* "package/multitensor.pyx":288
  * 
  *     # Create an empty label vector. Not sure why we need this :)
  *     cdef vector[vertex_t] labels = vector[vertex_t](nof_vertices)             # <<<<<<<<<<<<<<
@@ -4968,1972 +3920,2318 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
  *     # Detailed report
  */
   try {
-    __pyx_t_14 = std::vector<__pyx_t_7package_11multitensor_vertex_t> (__pyx_v_nof_vertices);
+    __pyx_t_6 = std::vector<__pyx_t_7package_11multitensor_vertex_t> (__pyx_v_nof_vertices);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 352, __pyx_L1_error)
+    __PYX_ERR(0, 288, __pyx_L1_error)
   }
-  __pyx_v_labels = __pyx_t_14;
+  __pyx_v_labels = __pyx_t_6;
 
-  /* "package/multitensor.pyx":355
+  /* "package/multitensor.pyx":291
  * 
  *     # Detailed report
  *     report = ReportWrapper()             # <<<<<<<<<<<<<<
  * 
+ *     # Random generator
+ */
+  __pyx_t_3 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_7package_11multitensor_ReportWrapper)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_v_report = ((struct __pyx_obj_7package_11multitensor_ReportWrapper *)__pyx_t_3);
+  __pyx_t_3 = 0;
+
+  /* "package/multitensor.pyx":294
+ * 
+ *     # Random generator
+ *     seed = seed if seed is not None else time(NULL)             # <<<<<<<<<<<<<<
+ * 
+ *     # Cannot stack-allocate C++ objects with constructor arguments in cython
+ */
+  __pyx_t_9 = (__pyx_v_seed != Py_None);
+  if ((__pyx_t_9 != 0)) {
+    __Pyx_INCREF(__pyx_v_seed);
+    __pyx_t_3 = __pyx_v_seed;
+  } else {
+    __pyx_t_4 = __Pyx_PyInt_From_time_t(time(NULL)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 294, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_3 = __pyx_t_4;
+    __pyx_t_4 = 0;
+  }
+  __Pyx_DECREF_SET(__pyx_v_seed, __pyx_t_3);
+  __pyx_t_3 = 0;
+
+  /* "package/multitensor.pyx":301
+ *     # So here we use a pointer
+ *     cdef RandomGenerator[mt19937, uniform_real_distribution] * rng = \
+ *         new RandomGenerator[mt19937, uniform_real_distribution](seed)             # <<<<<<<<<<<<<<
+ * 
  *     # The code below reproduces the switch case from MultiTensor.hpp
  */
-  __pyx_t_2 = __Pyx_PyObject_CallNoArg(((PyObject *)__pyx_ptype_7package_11multitensor_ReportWrapper)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 355, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_v_report = ((struct __pyx_obj_7package_11multitensor_ReportWrapper *)__pyx_t_2);
-  __pyx_t_2 = 0;
+  __pyx_t_16 = __Pyx_PyInt_As_time_t(__pyx_v_seed); if (unlikely((__pyx_t_16 == ((time_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
+  try {
+    __pyx_t_17 = new multitensor::utils::RandomGenerator<std::mt19937,std::uniform_real_distribution<double>> (__pyx_t_16);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 301, __pyx_L1_error)
+  }
+  __pyx_v_rng = __pyx_t_17;
 
-  /* "package/multitensor.pyx":360
+  /* "package/multitensor.pyx":306
  *     # (starting on line 175 as of moment of writing). This is done for
  *     # the case of weight_t being an int.
- *     if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *     try:             # <<<<<<<<<<<<<<
+ *         if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:
+ *             # case 0: undirected + non-assortative + w random
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L19_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 360, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L19_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 360, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L19_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 360, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L19_bool_binop_done:;
-  if (__pyx_t_16) {
+  /*try:*/ {
 
-    /* "package/multitensor.pyx":369
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 369, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":370
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 370, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":371
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 371, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":372
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 372, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":362
- *     if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":360
- *     # (starting on line 175 as of moment of writing). This is done for
+    /* "package/multitensor.pyx":307
  *     # the case of weight_t being an int.
- *     if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *     try:
+ *         if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
  */
-  }
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L16_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 307, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L16_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 307, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L16_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 307, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L16_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":376
- *         )
+      /* "package/multitensor.pyx":316
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 316, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":317
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 317, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":318
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 318, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":319
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 319, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 319, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 319, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":315
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 315, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":309
+ *         if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":307
+ *     # the case of weight_t being an int.
+ *     try:
+ *         if weigths_dtype is int and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    }
+
+    /* "package/multitensor.pyx":323
+ *             )
  * 
- *     if weigths_dtype is int and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is int and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L24_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 376, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L24_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 376, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L24_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 376, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L24_bool_binop_done:;
-  if (__pyx_t_16) {
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L21_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 323, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L21_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 323, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L21_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 323, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L21_bool_binop_done:;
+    if (__pyx_t_9) {
 
-    /* "package/multitensor.pyx":378
- *     if weigths_dtype is int and directed and not assortative and not init_affinity_filename:
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
+      /* "package/multitensor.pyx":325
+ *         if weigths_dtype is int and directed and not assortative and not init_affinity_filename:
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
  */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 378, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 325, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
 
-    /* "package/multitensor.pyx":386
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
+      /* "package/multitensor.pyx":333
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
  */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 386, __pyx_L1_error)
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 333, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":387
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
+      /* "package/multitensor.pyx":334
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
  */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 387, __pyx_L1_error)
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":388
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
+      /* "package/multitensor.pyx":335
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
  */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 388, __pyx_L1_error)
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 335, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":336
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 336, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 336, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 336, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":332
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 332, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":326
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":323
+ *             )
+ * 
+ *         if weigths_dtype is int and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ */
+    }
+
+    /* "package/multitensor.pyx":340
+ *             )
+ * 
+ *         if weigths_dtype is int and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L26_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 340, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L26_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 340, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L26_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 340, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L26_bool_binop_done:;
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":349
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 349, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":350
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 350, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":351
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 351, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":352
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 352, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 352, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 352, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":348
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 348, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":342
+ *         if weigths_dtype is int and not directed and assortative and not init_affinity_filename:
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":340
+ *             )
+ * 
+ *         if weigths_dtype is int and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    }
+
+    /* "package/multitensor.pyx":356
+ *             )
+ * 
+ *         if weigths_dtype is int and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ */
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L31_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 356, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L31_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 356, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L31_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 356, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L31_bool_binop_done:;
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":358
+ *         if weigths_dtype is int and directed and assortative and not init_affinity_filename:
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 358, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":366
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 366, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":367
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 367, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":368
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 368, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":369
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 369, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 369, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 369, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":365
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 365, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":359
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":356
+ *             )
+ * 
+ *         if weigths_dtype is int and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ */
+    }
+
+    /* "package/multitensor.pyx":373
+ *             )
+ * 
+ *         if weigths_dtype is int and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L36_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 373, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L36_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 373, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L36_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 373, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L36_bool_binop_done:;
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":382
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 382, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":383
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 383, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":384
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 384, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":385
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 385, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 385, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 385, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":381
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 381, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":375
+ *         if weigths_dtype is int and not directed and not assortative and init_affinity_filename:
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":373
+ *             )
+ * 
+ *         if weigths_dtype is int and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    }
 
     /* "package/multitensor.pyx":389
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 389, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":379
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":376
- *         )
+ *             )
  * 
- *     if weigths_dtype is int and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is int and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L41_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 389, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L41_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 389, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L41_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 389, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L41_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":393
- *         )
+      /* "package/multitensor.pyx":391
+ *         if weigths_dtype is int and directed and not assortative and init_affinity_filename:
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 391, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":399
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 399, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":400
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 400, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":401
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 401, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":402
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":398
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 398, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":392
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":389
+ *             )
  * 
- *     if weigths_dtype is int and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is int and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L29_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 393, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L29_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 393, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L29_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 393, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L29_bool_binop_done:;
-  if (__pyx_t_16) {
+    }
 
-    /* "package/multitensor.pyx":402
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 402, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":403
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 403, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":404
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 404, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":405
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 405, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 405, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 405, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":395
- *     if weigths_dtype is int and not directed and assortative and not init_affinity_filename:
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":393
- *         )
+    /* "package/multitensor.pyx":406
+ *             )
  * 
- *     if weigths_dtype is int and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is int and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L46_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 406, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L46_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 406, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L46_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 406, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L46_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":409
- *         )
+      /* "package/multitensor.pyx":415
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 415, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":416
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 416, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":417
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 417, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":418
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 418, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 418, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 418, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":414
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 414, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":408
+ *         if weigths_dtype is int and not directed and assortative and init_affinity_filename:
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":406
+ *             )
  * 
- *     if weigths_dtype is int and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is int and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L34_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 409, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L34_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 409, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L34_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 409, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L34_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":411
- *     if weigths_dtype is int and directed and assortative and not init_affinity_filename:
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 411, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":419
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 419, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":420
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 420, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":421
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 421, __pyx_L1_error)
+    }
 
     /* "package/multitensor.pyx":422
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 422, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 422, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 422, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":412
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":409
- *         )
+ *             )
  * 
- *     if weigths_dtype is int and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is int and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L51_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 422, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L51_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 422, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L51_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 422, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L51_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":426
- *         )
+      /* "package/multitensor.pyx":424
+ *         if weigths_dtype is int and directed and assortative and init_affinity_filename:
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 424, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":432
+ *                 numpy.int_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 432, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":433
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 433, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":434
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 434, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":435
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.int_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 435, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 435, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 435, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":431
+ *                 vertex_t,
+ *                 numpy.int_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 431, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":425
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":422
+ *             )
  * 
- *     if weigths_dtype is int and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is int and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L39_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 426, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L39_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 426, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L39_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 426, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L39_bool_binop_done:;
-  if (__pyx_t_16) {
+    }
 
-    /* "package/multitensor.pyx":435
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
+    /* "package/multitensor.pyx":443
+ *         # the implementation for every type variant. This is the same
+ *         # switch case repeated for floating-piont weight_t.
+ *         if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
  */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 435, __pyx_L1_error)
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L56_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 443, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L56_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 443, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L56_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 443, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L56_bool_binop_done:;
+    if (__pyx_t_9) {
 
-    /* "package/multitensor.pyx":436
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
+      /* "package/multitensor.pyx":452
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
  */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 436, __pyx_L1_error)
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 452, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":437
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
+      /* "package/multitensor.pyx":453
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
  */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 437, __pyx_L1_error)
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 453, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":438
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
+      /* "package/multitensor.pyx":454
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
  */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 438, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 438, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 438, __pyx_L1_error)
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 454, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":428
- *     if weigths_dtype is int and not directed and not assortative and init_affinity_filename:
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             SymmetricTensor[numpy.float_t],
+      /* "package/multitensor.pyx":455
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
  */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":426
- *         )
- * 
- *     if weigths_dtype is int and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
+      /* "package/multitensor.pyx":451
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
  */
-  }
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 451, __pyx_L13_error)
+      }
 
-  /* "package/multitensor.pyx":442
- *         )
- * 
- *     if weigths_dtype is int and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
+      /* "package/multitensor.pyx":445
+ *         if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 SymmetricTensor[numpy.float_t],
  */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L44_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 442, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L44_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 442, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L44_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 442, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L44_bool_binop_done:;
-  if (__pyx_t_16) {
+      __pyx_v_report->c_obj = __pyx_t_23;
 
-    /* "package/multitensor.pyx":444
- *     if weigths_dtype is int and directed and not assortative and init_affinity_filename:
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
+      /* "package/multitensor.pyx":443
+ *         # the implementation for every type variant. This is the same
+ *         # switch case repeated for floating-piont weight_t.
+ *         if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 0: undirected + non-assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
  */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 444, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":452
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 452, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":453
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 453, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":454
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 454, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":455
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":445
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":442
- *         )
- * 
- *     if weigths_dtype is int and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- */
-  }
-
-  /* "package/multitensor.pyx":459
- *         )
- * 
- *     if weigths_dtype is int and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
- */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L49_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 459, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L49_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 459, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L49_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 459, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L49_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":468
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 468, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":469
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 469, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":470
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 470, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":471
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 471, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 471, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 471, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":461
- *     if weigths_dtype is int and not directed and assortative and init_affinity_filename:
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
+    }
 
     /* "package/multitensor.pyx":459
- *         )
+ *             )
  * 
- *     if weigths_dtype is int and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is float and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  }
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L61_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 459, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L61_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 459, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L61_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 459, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L61_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":475
- *         )
+      /* "package/multitensor.pyx":461
+ *         if weigths_dtype is float and directed and not assortative and not init_affinity_filename:
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 461, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":469
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 469, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":470
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 470, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":471
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 471, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":472
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 472, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":468
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 468, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":462
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":459
+ *             )
  * 
- *     if weigths_dtype is int and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 1: directed + non-assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyInt_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L54_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 475, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L54_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 475, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L54_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 475, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L54_bool_binop_done:;
-  if (__pyx_t_16) {
+    }
 
-    /* "package/multitensor.pyx":477
- *     if weigths_dtype is int and directed and assortative and init_affinity_filename:
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 477, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":485
- *             numpy.int_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 485, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":486
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 486, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":487
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_20 = __pyx_convert_vector_from_py___pyx_t_5numpy_int_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 487, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":488
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.int_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":478
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_int_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_int_t>  const &)((std::vector<__pyx_t_5numpy_int_t>  const &)__pyx_t_20)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":475
- *         )
+    /* "package/multitensor.pyx":476
+ *             )
  * 
- *     if weigths_dtype is int and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L66_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 476, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L66_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 476, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L66_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 476, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L66_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":496
- *     # the implementation for every type variant. This is the same
- *     # switch case repeated for floating-piont weight_t.
- *     if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+      /* "package/multitensor.pyx":485
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L59_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 496, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L59_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 496, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L59_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 496, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L59_bool_binop_done:;
-  if (__pyx_t_16) {
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 485, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":505
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
+      /* "package/multitensor.pyx":486
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
  */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L1_error)
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 486, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":506
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
+      /* "package/multitensor.pyx":487
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
  */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 506, __pyx_L1_error)
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 487, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":507
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
+      /* "package/multitensor.pyx":488
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
  */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 507, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 488, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":508
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
+      /* "package/multitensor.pyx":484
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
  */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 508, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 508, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 508, __pyx_L1_error)
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 484, __pyx_L13_error)
+      }
 
-    /* "package/multitensor.pyx":498
- *     if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             SymmetricTensor[numpy.float_t],
+      /* "package/multitensor.pyx":478
+ *         if weigths_dtype is float and not directed and assortative and not init_affinity_filename:
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 DiagonalTensor[numpy.float_t],
  */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
+      __pyx_v_report->c_obj = __pyx_t_23;
 
-    /* "package/multitensor.pyx":496
- *     # the implementation for every type variant. This is the same
- *     # switch case repeated for floating-piont weight_t.
- *     if weigths_dtype is float and not directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 0: undirected + non-assortative + w random
- *         report.c_obj = c_multitensor_factorization[
- */
-  }
-
-  /* "package/multitensor.pyx":512
- *         )
+      /* "package/multitensor.pyx":476
+ *             )
  * 
- *     if weigths_dtype is float and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 2: undirected + assortative + w random
+ *             report.c_obj = c_multitensor_factorization[
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L64_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 512, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L64_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 512, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L64_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 512, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L64_bool_binop_done:;
-  if (__pyx_t_16) {
+    }
 
-    /* "package/multitensor.pyx":514
- *     if weigths_dtype is float and directed and not assortative and not init_affinity_filename:
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
+    /* "package/multitensor.pyx":492
+ *             )
+ * 
+ *         if weigths_dtype is float and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 514, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L71_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 492, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L71_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 492, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L71_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 492, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L71_bool_binop_done:;
+    if (__pyx_t_9) {
 
-    /* "package/multitensor.pyx":522
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
+      /* "package/multitensor.pyx":494
+ *         if weigths_dtype is float and directed and assortative and not init_affinity_filename:
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
  */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 522, __pyx_L1_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 494, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
 
-    /* "package/multitensor.pyx":523
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
+      /* "package/multitensor.pyx":502
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
  */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 523, __pyx_L1_error)
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 502, __pyx_L13_error)
 
-    /* "package/multitensor.pyx":524
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
+      /* "package/multitensor.pyx":503
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
  */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 524, __pyx_L1_error)
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 503, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":504
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 504, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":505
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 505, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":501
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 501, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":495
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":492
+ *             )
+ * 
+ *         if weigths_dtype is float and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 3: directed + assortative + w random
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ */
+    }
+
+    /* "package/multitensor.pyx":509
+ *             )
+ * 
+ *         if weigths_dtype is float and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_19 = (__pyx_t_18 != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L76_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 509, __pyx_L13_error)
+    __pyx_t_18 = ((!__pyx_t_19) != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L76_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 509, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L76_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 509, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L76_bool_binop_done:;
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":518
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 518, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":519
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 519, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":520
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 520, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":521
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 521, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 521, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 521, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":517
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 517, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":511
+ *         if weigths_dtype is float and not directed and not assortative and init_affinity_filename:
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":509
+ *             )
+ * 
+ *         if weigths_dtype is float and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 4: undirected + non-assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
+ */
+    }
 
     /* "package/multitensor.pyx":525
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 525, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":515
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":512
- *         )
+ *             )
  * 
- *     if weigths_dtype is float and directed and not assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 1: directed + non-assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L81_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 525, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L81_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 525, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L81_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 525, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L81_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":529
- *         )
+      /* "package/multitensor.pyx":527
+ *         if weigths_dtype is float and directed and not assortative and init_affinity_filename:
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 527, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":535
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 535, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":536
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 536, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":537
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 537, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":538
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 538, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 538, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 538, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":534
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 534, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":528
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 SymmetricTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":525
+ *             )
  * 
- *     if weigths_dtype is float and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is float and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 5: directed + non-assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L69_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 529, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L69_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 529, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L69_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 529, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L69_bool_binop_done:;
-  if (__pyx_t_16) {
+    }
 
-    /* "package/multitensor.pyx":538
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 538, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":539
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 539, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":540
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 540, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":541
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 541, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 541, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 541, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":531
- *     if weigths_dtype is float and not directed and assortative and not init_affinity_filename:
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":529
- *         )
+    /* "package/multitensor.pyx":542
+ *             )
  * 
- *     if weigths_dtype is float and not directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 2: undirected + assortative + w random
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is float and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L86_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 542, __pyx_L13_error)
+    __pyx_t_19 = ((!__pyx_t_18) != 0);
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L86_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 542, __pyx_L13_error)
+    if (__pyx_t_19) {
+    } else {
+      __pyx_t_9 = __pyx_t_19;
+      goto __pyx_L86_bool_binop_done;
+    }
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 542, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_19;
+    __pyx_L86_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":545
- *         )
+      /* "package/multitensor.pyx":551
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 551, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":552
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 552, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":553
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 553, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":554
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 554, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 554, __pyx_L13_error)
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 554, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":550
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_7, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 550, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":544
+ *         if weigths_dtype is float and not directed and assortative and init_affinity_filename:
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 undirectedS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":542
+ *             )
  * 
- *     if weigths_dtype is float and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 6: undirected + assortative + w from file
+ *             report.c_obj = c_multitensor_factorization[
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L74_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 545, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L74_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 545, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L74_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 545, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L74_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":547
- *     if weigths_dtype is float and directed and assortative and not init_affinity_filename:
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 547, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":555
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 555, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":556
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 556, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":557
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 557, __pyx_L1_error)
+    }
 
     /* "package/multitensor.pyx":558
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 558, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 558, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 558, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":548
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_random,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":545
- *         )
+ *             )
  * 
- *     if weigths_dtype is float and directed and assortative and not init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 3: directed + assortative + w random
- *         c_v.resize(nof_vertices, nof_groups)
+ *         if weigths_dtype is float and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  }
+    __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
+    __pyx_t_18 = (__pyx_t_19 != 0);
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L91_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 558, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L91_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 558, __pyx_L13_error)
+    if (__pyx_t_18) {
+    } else {
+      __pyx_t_9 = __pyx_t_18;
+      goto __pyx_L91_bool_binop_done;
+    }
+    __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 558, __pyx_L13_error)
+    __pyx_t_9 = __pyx_t_18;
+    __pyx_L91_bool_binop_done:;
+    if (__pyx_t_9) {
 
-  /* "package/multitensor.pyx":562
- *         )
+      /* "package/multitensor.pyx":560
+ *         if weigths_dtype is float and directed and assortative and init_affinity_filename:
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v             # <<<<<<<<<<<<<<
+ *             report.c_obj = c_multitensor_factorization[
+ *                 bidirectionalS,
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 560, __pyx_L13_error)
+      __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
+
+      /* "package/multitensor.pyx":568
+ *                 numpy.float_t
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ */
+      __pyx_t_5 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 568, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":569
+ *             ](
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ */
+      __pyx_t_6 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 569, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":570
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
+ *                 nof_realizations, max_nof_iterations, nof_convergences,
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ */
+      __pyx_t_15 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 570, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":571
+ *                 < const vector[vertex_t] & > edges_end,
+ *                 < const vector[numpy.float_t] & > edges_weights,
+ *                 nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
+ *                 labels, c_u, c_v, c_affinity, deref(rng)
+ *             )
+ */
+      __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 571, __pyx_L13_error)
+      __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 571, __pyx_L13_error)
+      __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_7 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 571, __pyx_L13_error)
+
+      /* "package/multitensor.pyx":567
+ *                 vertex_t,
+ *                 numpy.float_t
+ *             ](             # <<<<<<<<<<<<<<
+ *                 < const vector[vertex_t] & > edges_start,
+ *                 < const vector[vertex_t] & > edges_end,
+ */
+      try {
+        __pyx_t_23 = multitensor::multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_5)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_6)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_15)), __pyx_t_22, __pyx_t_21, __pyx_t_7, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity, (*__pyx_v_rng));
+      } catch(...) {
+        try { throw; } catch(const std::exception& exn) {PyErr_SetString(__pyx_builtin_RuntimeError, exn.what());} catch(...) { PyErr_SetNone(__pyx_builtin_RuntimeError); }
+        __PYX_ERR(0, 567, __pyx_L13_error)
+      }
+
+      /* "package/multitensor.pyx":561
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
+ *             report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
+ *                 bidirectionalS,
+ *                 DiagonalTensor[numpy.float_t],
+ */
+      __pyx_v_report->c_obj = __pyx_t_23;
+
+      /* "package/multitensor.pyx":558
+ *             )
  * 
- *     if weigths_dtype is float and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
+ *         if weigths_dtype is float and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
+ *             # case 7: directed + assortative + w from file
+ *             c_v.resize(nof_vertices, nof_groups)  # we need v
  */
-  __pyx_t_18 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_19 = (__pyx_t_18 != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L79_bool_binop_done;
+    }
   }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 562, __pyx_L1_error)
-  __pyx_t_18 = ((!__pyx_t_19) != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L79_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 562, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L79_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 562, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L79_bool_binop_done:;
-  if (__pyx_t_16) {
 
-    /* "package/multitensor.pyx":571
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 571, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":572
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 572, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":573
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 573, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":574
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 574, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 574, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 574, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":564
- *     if weigths_dtype is float and not directed and not assortative and init_affinity_filename:
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":562
- *         )
+  /* "package/multitensor.pyx":576
+ *     finally:
+ *         # delete pointers
+ *         del rng             # <<<<<<<<<<<<<<
  * 
- *     if weigths_dtype is float and not directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 4: undirected + non-assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
+ *     # U and V outputs
  */
+  /*finally:*/ {
+    /*normal exit:*/{
+      delete __pyx_v_rng;
+      goto __pyx_L14;
+    }
+    __pyx_L13_error:;
+    /*exception exit:*/{
+      __Pyx_PyThreadState_declare
+      __Pyx_PyThreadState_assign
+      __pyx_t_27 = 0; __pyx_t_28 = 0; __pyx_t_29 = 0; __pyx_t_30 = 0; __pyx_t_31 = 0; __pyx_t_32 = 0;
+      __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
+      __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
+      __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
+      __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+      if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_30, &__pyx_t_31, &__pyx_t_32);
+      if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_27, &__pyx_t_28, &__pyx_t_29) < 0)) __Pyx_ErrFetch(&__pyx_t_27, &__pyx_t_28, &__pyx_t_29);
+      __Pyx_XGOTREF(__pyx_t_27);
+      __Pyx_XGOTREF(__pyx_t_28);
+      __Pyx_XGOTREF(__pyx_t_29);
+      __Pyx_XGOTREF(__pyx_t_30);
+      __Pyx_XGOTREF(__pyx_t_31);
+      __Pyx_XGOTREF(__pyx_t_32);
+      __pyx_t_24 = __pyx_lineno; __pyx_t_25 = __pyx_clineno; __pyx_t_26 = __pyx_filename;
+      {
+        delete __pyx_v_rng;
+      }
+      if (PY_MAJOR_VERSION >= 3) {
+        __Pyx_XGIVEREF(__pyx_t_30);
+        __Pyx_XGIVEREF(__pyx_t_31);
+        __Pyx_XGIVEREF(__pyx_t_32);
+        __Pyx_ExceptionReset(__pyx_t_30, __pyx_t_31, __pyx_t_32);
+      }
+      __Pyx_XGIVEREF(__pyx_t_27);
+      __Pyx_XGIVEREF(__pyx_t_28);
+      __Pyx_XGIVEREF(__pyx_t_29);
+      __Pyx_ErrRestore(__pyx_t_27, __pyx_t_28, __pyx_t_29);
+      __pyx_t_27 = 0; __pyx_t_28 = 0; __pyx_t_29 = 0; __pyx_t_30 = 0; __pyx_t_31 = 0; __pyx_t_32 = 0;
+      __pyx_lineno = __pyx_t_24; __pyx_clineno = __pyx_t_25; __pyx_filename = __pyx_t_26;
+      goto __pyx_L1_error;
+    }
+    __pyx_L14:;
   }
 
-  /* "package/multitensor.pyx":578
- *         )
- * 
- *     if weigths_dtype is float and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L84_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 578, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L84_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 578, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L84_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 578, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L84_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":580
- *     if weigths_dtype is float and directed and not assortative and init_affinity_filename:
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 580, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":588
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 588, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":589
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 589, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":590
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 590, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":591
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 591, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 591, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 591, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":581
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             SymmetricTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::SymmetricTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":578
- *         )
- * 
- *     if weigths_dtype is float and directed and not assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 5: directed + non-assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- */
-  }
-
-  /* "package/multitensor.pyx":595
- *         )
- * 
- *     if weigths_dtype is float and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
- */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L89_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 595, __pyx_L1_error)
-  __pyx_t_19 = ((!__pyx_t_18) != 0);
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L89_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 595, __pyx_L1_error)
-  if (__pyx_t_19) {
-  } else {
-    __pyx_t_16 = __pyx_t_19;
-    goto __pyx_L89_bool_binop_done;
-  }
-  __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_19 < 0)) __PYX_ERR(0, 595, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_19;
-  __pyx_L89_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":604
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 604, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":605
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 605, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":606
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 606, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":607
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 607, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 607, __pyx_L1_error)
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 607, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":597
- *     if weigths_dtype is float and not directed and assortative and init_affinity_filename:
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             undirectedS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::undirectedS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_12, __pyx_t_21, __pyx_t_22, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":595
- *         )
- * 
- *     if weigths_dtype is float and not directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 6: undirected + assortative + w from file
- *         report.c_obj = c_multitensor_factorization[
- */
-  }
-
-  /* "package/multitensor.pyx":611
- *         )
- * 
- *     if weigths_dtype is float and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- */
-  __pyx_t_19 = (__pyx_v_weigths_dtype == ((PyObject *)(&PyFloat_Type)));
-  __pyx_t_18 = (__pyx_t_19 != 0);
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L94_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 611, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L94_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 611, __pyx_L1_error)
-  if (__pyx_t_18) {
-  } else {
-    __pyx_t_16 = __pyx_t_18;
-    goto __pyx_L94_bool_binop_done;
-  }
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_init_affinity_filename); if (unlikely(__pyx_t_18 < 0)) __PYX_ERR(0, 611, __pyx_L1_error)
-  __pyx_t_16 = __pyx_t_18;
-  __pyx_L94_bool_binop_done:;
-  if (__pyx_t_16) {
-
-    /* "package/multitensor.pyx":613
- *     if weigths_dtype is float and directed and assortative and init_affinity_filename:
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)             # <<<<<<<<<<<<<<
- *         report.c_obj = c_multitensor_factorization[
- *             bidirectionalS,
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_groups); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 613, __pyx_L1_error)
-    __pyx_v_c_v.resize(__pyx_v_nof_vertices, __pyx_t_22);
-
-    /* "package/multitensor.pyx":621
- *             numpy.float_t
- *         ](
- *             < const vector[vertex_t] & > edges_start,             # <<<<<<<<<<<<<<
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- */
-    __pyx_t_13 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_start); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 621, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":622
- *         ](
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,             # <<<<<<<<<<<<<<
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,
- */
-    __pyx_t_14 = __pyx_convert_vector_from_py___pyx_t_7package_11multitensor_vertex_t(__pyx_v_edges_end); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 622, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":623
- *             < const vector[vertex_t] & > edges_start,
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,             # <<<<<<<<<<<<<<
- *             nof_realizations, max_nof_iterations, nof_convergences,
- *             labels, c_u, c_v, c_affinity
- */
-    __pyx_t_17 = __pyx_convert_vector_from_py___pyx_t_5numpy_float_t(__pyx_v_edges_weights); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 623, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":624
- *             < const vector[vertex_t] & > edges_end,
- *             < const vector[numpy.float_t] & > edges_weights,
- *             nof_realizations, max_nof_iterations, nof_convergences,             # <<<<<<<<<<<<<<
- *             labels, c_u, c_v, c_affinity
- *         )
- */
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_v_nof_realizations); if (unlikely((__pyx_t_22 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 624, __pyx_L1_error)
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_v_max_nof_iterations); if (unlikely((__pyx_t_21 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 624, __pyx_L1_error)
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_nof_convergences); if (unlikely((__pyx_t_12 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 624, __pyx_L1_error)
-
-    /* "package/multitensor.pyx":614
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- *         report.c_obj = c_multitensor_factorization[             # <<<<<<<<<<<<<<
- *             bidirectionalS,
- *             DiagonalTensor[numpy.float_t],
- */
-    __pyx_v_report->c_obj = multitensor_factorization<struct boost::bidirectionalS,multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> ,multitensor::initialization::init_symmetric_tensor_from_initial<multitensor::tensor::DiagonalTensor<__pyx_t_5numpy_float_t> > ,__pyx_t_7package_11multitensor_vertex_t,__pyx_t_5numpy_float_t>(((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_13)), ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)((std::vector<__pyx_t_7package_11multitensor_vertex_t>  const &)__pyx_t_14)), ((std::vector<__pyx_t_5numpy_float_t>  const &)((std::vector<__pyx_t_5numpy_float_t>  const &)__pyx_t_17)), __pyx_t_22, __pyx_t_21, __pyx_t_12, ((std::vector<__pyx_t_7package_11multitensor_vertex_t>  &)__pyx_v_labels), __pyx_v_c_u, __pyx_v_c_v, __pyx_v_c_affinity);
-
-    /* "package/multitensor.pyx":611
- *         )
- * 
- *     if weigths_dtype is float and directed and assortative and init_affinity_filename:             # <<<<<<<<<<<<<<
- *         # case 7: directed + assortative + w from file
- *         c_v.resize(nof_vertices, nof_groups)
- */
-  }
-
-  /* "package/multitensor.pyx":629
+  /* "package/multitensor.pyx":579
  * 
  *     # U and V outputs
  *     u = numpy.array(             # <<<<<<<<<<<<<<
- *         [c_u(i, j) for i in range(c_u.get_nrows()) for j in range(c_u.get_ncols())]
- *     ).reshape((c_u.get_nrows(), c_u.get_ncols()))
+ *         [[labels[i]] + [c_u(i, j) for j in range(c_u.get_ncols())] for i in range(c_u.get_nrows())]
+ *     )
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_numpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 629, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_numpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 629, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   { /* enter inner scope */
 
-    /* "package/multitensor.pyx":630
+    /* "package/multitensor.pyx":580
  *     # U and V outputs
  *     u = numpy.array(
- *         [c_u(i, j) for i in range(c_u.get_nrows()) for j in range(c_u.get_ncols())]             # <<<<<<<<<<<<<<
- *     ).reshape((c_u.get_nrows(), c_u.get_ncols()))
- *     v = numpy.array(
+ *         [[labels[i]] + [c_u(i, j) for j in range(c_u.get_ncols())] for i in range(c_u.get_nrows())]             # <<<<<<<<<<<<<<
+ *     )
+ *     # V is None if undirected
  */
-    __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 630, __pyx_L1_error)
+    __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 580, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_12 = __pyx_v_c_u.get_nrows();
-    __pyx_t_21 = __pyx_t_12;
+    __pyx_t_7 = __pyx_v_c_u.get_nrows();
+    __pyx_t_21 = __pyx_t_7;
     for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
-      __pyx_8genexpr3__pyx_v_i = __pyx_t_22;
-      __pyx_t_23 = __pyx_v_c_u.get_ncols();
-      __pyx_t_24 = __pyx_t_23;
-      for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
-        __pyx_8genexpr3__pyx_v_j = __pyx_t_25;
-        __pyx_t_5 = PyFloat_FromDouble(__pyx_v_c_u(__pyx_8genexpr3__pyx_v_i, __pyx_8genexpr3__pyx_v_j)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 630, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_5);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 630, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      }
+      __pyx_8genexpr2__pyx_v_i = __pyx_t_22;
+      __pyx_t_2 = __Pyx_PyInt_From_npy_long((__pyx_v_labels[__pyx_8genexpr2__pyx_v_i])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 580, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_12 = PyList_New(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 580, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_12);
+      __Pyx_GIVEREF(__pyx_t_2);
+      PyList_SET_ITEM(__pyx_t_12, 0, __pyx_t_2);
+      __pyx_t_2 = 0;
+      { /* enter inner scope */
+        __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 580, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        __pyx_t_33 = __pyx_v_c_u.get_ncols();
+        __pyx_t_34 = __pyx_t_33;
+        for (__pyx_t_35 = 0; __pyx_t_35 < __pyx_t_34; __pyx_t_35+=1) {
+          __pyx_8genexpr3__pyx_v_j = __pyx_t_35;
+          __pyx_t_13 = PyFloat_FromDouble(__pyx_v_c_u(__pyx_8genexpr2__pyx_v_i, __pyx_8genexpr3__pyx_v_j)); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 580, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_13);
+          if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_13))) __PYX_ERR(0, 580, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+        }
+      } /* exit inner scope */
+      __pyx_t_13 = PyNumber_Add(__pyx_t_12, __pyx_t_2); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 580, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_13);
+      __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_13))) __PYX_ERR(0, 580, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
   } /* exit inner scope */
-  __pyx_t_5 = NULL;
+  __pyx_t_13 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_5)) {
+    __pyx_t_13 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_13)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_13);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_1, function);
     }
   }
-  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_5, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_3 = (__pyx_t_13) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_13, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 629, __pyx_L1_error)
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "package/multitensor.pyx":631
- *     u = numpy.array(
- *         [c_u(i, j) for i in range(c_u.get_nrows()) for j in range(c_u.get_ncols())]
- *     ).reshape((c_u.get_nrows(), c_u.get_ncols()))             # <<<<<<<<<<<<<<
- *     v = numpy.array(
- *         [c_v(i, j) for i in range(c_v.get_nrows()) for j in range(c_v.get_ncols())]
- */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 631, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_c_u.get_nrows()); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 631, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t(__pyx_v_c_u.get_ncols()); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 631, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 631, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_4);
+  __pyx_v_u = __pyx_t_3;
   __pyx_t_3 = 0;
-  __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_1);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_1, function);
-    }
-  }
-  __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 631, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_u = __pyx_t_2;
-  __pyx_t_2 = 0;
 
-  /* "package/multitensor.pyx":632
- *         [c_u(i, j) for i in range(c_u.get_nrows()) for j in range(c_u.get_ncols())]
- *     ).reshape((c_u.get_nrows(), c_u.get_ncols()))
- *     v = numpy.array(             # <<<<<<<<<<<<<<
- *         [c_v(i, j) for i in range(c_v.get_nrows()) for j in range(c_v.get_ncols())]
- *     ).reshape((c_v.get_nrows(), c_v.get_ncols()))
+  /* "package/multitensor.pyx":583
+ *     )
+ *     # V is None if undirected
+ *     v = None             # <<<<<<<<<<<<<<
+ *     if directed:
+ *         v = numpy.array(
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_numpy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 632, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 632, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  { /* enter inner scope */
+  __Pyx_INCREF(Py_None);
+  __pyx_v_v = Py_None;
 
-    /* "package/multitensor.pyx":633
- *     ).reshape((c_u.get_nrows(), c_u.get_ncols()))
- *     v = numpy.array(
- *         [c_v(i, j) for i in range(c_v.get_nrows()) for j in range(c_v.get_ncols())]             # <<<<<<<<<<<<<<
- *     ).reshape((c_v.get_nrows(), c_v.get_ncols()))
+  /* "package/multitensor.pyx":584
+ *     # V is None if undirected
+ *     v = None
+ *     if directed:             # <<<<<<<<<<<<<<
+ *         v = numpy.array(
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]
+ */
+  __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_directed); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 584, __pyx_L1_error)
+  if (__pyx_t_9) {
+
+    /* "package/multitensor.pyx":585
+ *     v = None
+ *     if directed:
+ *         v = numpy.array(             # <<<<<<<<<<<<<<
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]
+ *              for i in range(c_v.get_nrows())]
+ */
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_numpy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 585, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 585, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    { /* enter inner scope */
+
+      /* "package/multitensor.pyx":586
+ *     if directed:
+ *         v = numpy.array(
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]             # <<<<<<<<<<<<<<
+ *              for i in range(c_v.get_nrows())]
+ *         )
+ */
+      __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 586, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+
+      /* "package/multitensor.pyx":587
+ *         v = numpy.array(
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]
+ *              for i in range(c_v.get_nrows())]             # <<<<<<<<<<<<<<
+ *         )
  * 
  */
-    __pyx_t_5 = PyList_New(0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 633, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_12 = __pyx_v_c_v.get_nrows();
-    __pyx_t_21 = __pyx_t_12;
-    for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
-      __pyx_8genexpr4__pyx_v_i = __pyx_t_22;
-      __pyx_t_23 = __pyx_v_c_v.get_ncols();
-      __pyx_t_24 = __pyx_t_23;
-      for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
-        __pyx_8genexpr4__pyx_v_j = __pyx_t_25;
-        __pyx_t_3 = PyFloat_FromDouble(__pyx_v_c_v(__pyx_8genexpr4__pyx_v_i, __pyx_8genexpr4__pyx_v_j)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 633, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_5, (PyObject*)__pyx_t_3))) __PYX_ERR(0, 633, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_7 = __pyx_v_c_v.get_nrows();
+      __pyx_t_21 = __pyx_t_7;
+      for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
+        __pyx_8genexpr4__pyx_v_i = __pyx_t_22;
+
+        /* "package/multitensor.pyx":586
+ *     if directed:
+ *         v = numpy.array(
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]             # <<<<<<<<<<<<<<
+ *              for i in range(c_v.get_nrows())]
+ *         )
+ */
+        __pyx_t_13 = __Pyx_PyInt_From_npy_long((__pyx_v_labels[__pyx_8genexpr4__pyx_v_i])); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 586, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_13);
+        __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 586, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        __Pyx_GIVEREF(__pyx_t_13);
+        PyList_SET_ITEM(__pyx_t_2, 0, __pyx_t_13);
+        __pyx_t_13 = 0;
+        { /* enter inner scope */
+          __pyx_t_13 = PyList_New(0); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 586, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_13);
+          __pyx_t_33 = __pyx_v_c_v.get_ncols();
+          __pyx_t_34 = __pyx_t_33;
+          for (__pyx_t_35 = 0; __pyx_t_35 < __pyx_t_34; __pyx_t_35+=1) {
+            __pyx_8genexpr5__pyx_v_j = __pyx_t_35;
+            __pyx_t_12 = PyFloat_FromDouble(__pyx_v_c_v(__pyx_8genexpr4__pyx_v_i, __pyx_8genexpr5__pyx_v_j)); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 586, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_12);
+            if (unlikely(__Pyx_ListComp_Append(__pyx_t_13, (PyObject*)__pyx_t_12))) __PYX_ERR(0, 586, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+          }
+        } /* exit inner scope */
+        __pyx_t_12 = PyNumber_Add(__pyx_t_2, __pyx_t_13); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 586, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_12);
+        __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_12))) __PYX_ERR(0, 586, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+      }
+    } /* exit inner scope */
+    __pyx_t_12 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+      __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_4);
+      if (likely(__pyx_t_12)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+        __Pyx_INCREF(__pyx_t_12);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_4, function);
       }
     }
-  } /* exit inner scope */
-  __pyx_t_3 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_3)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_3);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
-  }
-  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_3, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 632, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_3 = (__pyx_t_12) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_12, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_1);
+    __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 585, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF_SET(__pyx_v_v, __pyx_t_3);
+    __pyx_t_3 = 0;
 
-  /* "package/multitensor.pyx":634
- *     v = numpy.array(
- *         [c_v(i, j) for i in range(c_v.get_nrows()) for j in range(c_v.get_ncols())]
- *     ).reshape((c_v.get_nrows(), c_v.get_ncols()))             # <<<<<<<<<<<<<<
- * 
- *     # Affinity output
+    /* "package/multitensor.pyx":584
+ *     # V is None if undirected
+ *     v = None
+ *     if directed:             # <<<<<<<<<<<<<<
+ *         v = numpy.array(
+ *             [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 634, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_v_c_v.get_nrows()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 634, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_FromSize_t(__pyx_v_c_v.get_ncols()); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 634, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 634, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_5);
-  __pyx_t_1 = 0;
-  __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
   }
-  __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 634, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_v_v = __pyx_t_2;
-  __pyx_t_2 = 0;
 
-  /* "package/multitensor.pyx":640
- *     # by the function read_affinity_data
- *     # i.e. a list of arrays
+  /* "package/multitensor.pyx":592
+ *     # Affinity output
+ *     # We return a list of arrays
  *     affinity_ravel = numpy.array(             # <<<<<<<<<<<<<<
  *         c_affinity
  *     )
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_numpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 640, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_numpy); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 592, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 640, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 592, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "package/multitensor.pyx":641
- *     # i.e. a list of arrays
+  /* "package/multitensor.pyx":593
+ *     # We return a list of arrays
  *     affinity_ravel = numpy.array(
  *         c_affinity             # <<<<<<<<<<<<<<
  *     )
  *     num_vals = affinity_ravel.size // nof_layers
  */
-  __pyx_t_4 = __pyx_convert_vector_to_py___pyx_t_5numpy_float_t(__pyx_v_c_affinity); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 641, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_vector_to_py___pyx_t_5numpy_float_t(__pyx_v_c_affinity); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_5);
+  __pyx_t_12 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
+    __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_1);
+    if (likely(__pyx_t_12)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_12);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __Pyx_DECREF_SET(__pyx_t_1, function);
     }
   }
-  __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_5, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_3 = (__pyx_t_12) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_12, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 640, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_affinity_ravel = __pyx_t_2;
-  __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 592, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_affinity_ravel = __pyx_t_3;
+  __pyx_t_3 = 0;
 
-  /* "package/multitensor.pyx":643
+  /* "package/multitensor.pyx":595
  *         c_affinity
  *     )
  *     num_vals = affinity_ravel.size // nof_layers             # <<<<<<<<<<<<<<
  *     affinity = []
- *     for l in range(nof_layers):
+ *     # The data is transposed (rows are enumerated first)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_affinity_ravel, __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 643, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_nof_layers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 643, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_affinity_ravel, __pyx_n_s_size); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 595, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyNumber_FloorDivide(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 643, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyNumber_FloorDivide(__pyx_t_3, __pyx_v_nof_layers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 595, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_num_vals = __pyx_t_4;
-  __pyx_t_4 = 0;
+  __pyx_v_num_vals = __pyx_t_1;
+  __pyx_t_1 = 0;
 
-  /* "package/multitensor.pyx":644
+  /* "package/multitensor.pyx":596
  *     )
  *     num_vals = affinity_ravel.size // nof_layers
  *     affinity = []             # <<<<<<<<<<<<<<
- *     for l in range(nof_layers):
- *         begin = l * num_vals
+ *     # The data is transposed (rows are enumerated first)
+ *     # but we want to go through the columns for a given row
  */
-  __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 644, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_v_affinity = ((PyObject*)__pyx_t_4);
-  __pyx_t_4 = 0;
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 596, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_affinity = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "package/multitensor.pyx":645
- *     num_vals = affinity_ravel.size // nof_layers
- *     affinity = []
+  /* "package/multitensor.pyx":599
+ *     # The data is transposed (rows are enumerated first)
+ *     # but we want to go through the columns for a given row
  *     for l in range(nof_layers):             # <<<<<<<<<<<<<<
  *         begin = l * num_vals
  *         end = (l + 1) * num_vals
  */
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t(__pyx_v_nof_layers); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 645, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (likely(PyList_CheckExact(__pyx_t_3)) || PyTuple_CheckExact(__pyx_t_3)) {
-    __pyx_t_4 = __pyx_t_3; __Pyx_INCREF(__pyx_t_4); __pyx_t_6 = 0;
-    __pyx_t_7 = NULL;
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_nof_layers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 599, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
+    __pyx_t_3 = __pyx_t_1; __Pyx_INCREF(__pyx_t_3); __pyx_t_10 = 0;
+    __pyx_t_11 = NULL;
   } else {
-    __pyx_t_6 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 645, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 645, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 599, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_11 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 599, __pyx_L1_error)
   }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
-    if (likely(!__pyx_t_7)) {
-      if (likely(PyList_CheckExact(__pyx_t_4))) {
-        if (__pyx_t_6 >= PyList_GET_SIZE(__pyx_t_4)) break;
+    if (likely(!__pyx_t_11)) {
+      if (likely(PyList_CheckExact(__pyx_t_3))) {
+        if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 645, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 599, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 645, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 599, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
-        if (__pyx_t_6 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+        if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_6); __Pyx_INCREF(__pyx_t_3); __pyx_t_6++; if (unlikely(0 < 0)) __PYX_ERR(0, 645, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_10); __Pyx_INCREF(__pyx_t_1); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 599, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_4, __pyx_t_6); __pyx_t_6++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 645, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_3, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 599, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
     } else {
-      __pyx_t_3 = __pyx_t_7(__pyx_t_4);
-      if (unlikely(!__pyx_t_3)) {
+      __pyx_t_1 = __pyx_t_11(__pyx_t_3);
+      if (unlikely(!__pyx_t_1)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 645, __pyx_L1_error)
+          else __PYX_ERR(0, 599, __pyx_L1_error)
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_GOTREF(__pyx_t_1);
     }
-    __Pyx_XDECREF_SET(__pyx_v_l, __pyx_t_3);
-    __pyx_t_3 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_l, __pyx_t_1);
+    __pyx_t_1 = 0;
 
-    /* "package/multitensor.pyx":646
- *     affinity = []
+    /* "package/multitensor.pyx":600
+ *     # but we want to go through the columns for a given row
  *     for l in range(nof_layers):
  *         begin = l * num_vals             # <<<<<<<<<<<<<<
  *         end = (l + 1) * num_vals
- *         affinity.append(
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
  */
-    __pyx_t_3 = PyNumber_Multiply(__pyx_v_l, __pyx_v_num_vals); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 646, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_XDECREF_SET(__pyx_v_begin, __pyx_t_3);
-    __pyx_t_3 = 0;
+    __pyx_t_1 = PyNumber_Multiply(__pyx_v_l, __pyx_v_num_vals); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 600, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_XDECREF_SET(__pyx_v_begin, __pyx_t_1);
+    __pyx_t_1 = 0;
 
-    /* "package/multitensor.pyx":647
+    /* "package/multitensor.pyx":601
  *     for l in range(nof_layers):
  *         begin = l * num_vals
  *         end = (l + 1) * num_vals             # <<<<<<<<<<<<<<
- *         affinity.append(
- *             numpy.array(affinity_ravel[begin:end]).reshape((-1, nof_groups))
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
+ *         if assortative:
  */
-    __pyx_t_3 = __Pyx_PyInt_AddObjC(__pyx_v_l, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 647, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_t_3, __pyx_v_num_vals); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 647, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_end, __pyx_t_2);
-    __pyx_t_2 = 0;
-
-    /* "package/multitensor.pyx":649
- *         end = (l + 1) * num_vals
- *         affinity.append(
- *             numpy.array(affinity_ravel[begin:end]).reshape((-1, nof_groups))             # <<<<<<<<<<<<<<
- *         )
- *     return u, v, affinity, report
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_numpy); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_AddObjC(__pyx_v_l, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 601, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_GetSlice(__pyx_v_affinity_ravel, 0, 0, &__pyx_v_begin, &__pyx_v_end, NULL, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_11 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
-      __pyx_t_11 = PyMethod_GET_SELF(__pyx_t_1);
-      if (likely(__pyx_t_11)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-        __Pyx_INCREF(__pyx_t_11);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_1, function);
-      }
-    }
-    __pyx_t_3 = (__pyx_t_11) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_11, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_5);
-    __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PyNumber_Multiply(__pyx_t_1, __pyx_v_num_vals); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 601, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_reshape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_int_neg_1);
-    __Pyx_GIVEREF(__pyx_int_neg_1);
-    PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_int_neg_1);
-    __Pyx_INCREF(__pyx_v_nof_groups);
-    __Pyx_GIVEREF(__pyx_v_nof_groups);
-    PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_nof_groups);
-    __pyx_t_5 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
-      __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_1);
-      if (likely(__pyx_t_5)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-        __Pyx_INCREF(__pyx_t_5);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_1, function);
-      }
-    }
-    __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_5, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3);
-    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 649, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_end, __pyx_t_4);
+    __pyx_t_4 = 0;
 
-    /* "package/multitensor.pyx":648
+    /* "package/multitensor.pyx":602
  *         begin = l * num_vals
  *         end = (l + 1) * num_vals
- *         affinity.append(             # <<<<<<<<<<<<<<
- *             numpy.array(affinity_ravel[begin:end]).reshape((-1, nof_groups))
- *         )
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T             # <<<<<<<<<<<<<<
+ *         if assortative:
+ *             w_l = w_l.ravel()
  */
-    __pyx_t_26 = __Pyx_PyList_Append(__pyx_v_affinity, __pyx_t_2); if (unlikely(__pyx_t_26 == ((int)-1))) __PYX_ERR(0, 648, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_v_affinity_ravel, 0, 0, &__pyx_v_begin, &__pyx_v_end, NULL, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 602, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 602, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_12);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 602, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_INCREF(__pyx_int_neg_1);
+    __Pyx_GIVEREF(__pyx_int_neg_1);
+    PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_int_neg_1);
+    __Pyx_INCREF(__pyx_v_nof_groups);
+    __Pyx_GIVEREF(__pyx_v_nof_groups);
+    PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_nof_groups);
+    __pyx_t_13 = NULL;
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_12))) {
+      __pyx_t_13 = PyMethod_GET_SELF(__pyx_t_12);
+      if (likely(__pyx_t_13)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_12);
+        __Pyx_INCREF(__pyx_t_13);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_12, function);
+      }
+    }
+    __pyx_t_4 = (__pyx_t_13) ? __Pyx_PyObject_Call2Args(__pyx_t_12, __pyx_t_13, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_1);
+    __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 602, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+    __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_T); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 602, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_12);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_w_l, __pyx_t_12);
+    __pyx_t_12 = 0;
 
-    /* "package/multitensor.pyx":645
- *     num_vals = affinity_ravel.size // nof_layers
- *     affinity = []
+    /* "package/multitensor.pyx":603
+ *         end = (l + 1) * num_vals
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
+ *         if assortative:             # <<<<<<<<<<<<<<
+ *             w_l = w_l.ravel()
+ *         affinity.append(w_l)
+ */
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_assortative); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 603, __pyx_L1_error)
+    if (__pyx_t_9) {
+
+      /* "package/multitensor.pyx":604
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
+ *         if assortative:
+ *             w_l = w_l.ravel()             # <<<<<<<<<<<<<<
+ *         affinity.append(w_l)
+ *     return u, v, affinity, report
+ */
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_w_l, __pyx_n_s_ravel); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 604, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_1 = NULL;
+      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
+        __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_4);
+        if (likely(__pyx_t_1)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+          __Pyx_INCREF(__pyx_t_1);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_4, function);
+        }
+      }
+      __pyx_t_12 = (__pyx_t_1) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_1) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+      __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+      if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 604, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_12);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_DECREF_SET(__pyx_v_w_l, __pyx_t_12);
+      __pyx_t_12 = 0;
+
+      /* "package/multitensor.pyx":603
+ *         end = (l + 1) * num_vals
+ *         w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
+ *         if assortative:             # <<<<<<<<<<<<<<
+ *             w_l = w_l.ravel()
+ *         affinity.append(w_l)
+ */
+    }
+
+    /* "package/multitensor.pyx":605
+ *         if assortative:
+ *             w_l = w_l.ravel()
+ *         affinity.append(w_l)             # <<<<<<<<<<<<<<
+ *     return u, v, affinity, report
+ */
+    __pyx_t_36 = __Pyx_PyList_Append(__pyx_v_affinity, __pyx_v_w_l); if (unlikely(__pyx_t_36 == ((int)-1))) __PYX_ERR(0, 605, __pyx_L1_error)
+
+    /* "package/multitensor.pyx":599
+ *     # The data is transposed (rows are enumerated first)
+ *     # but we want to go through the columns for a given row
  *     for l in range(nof_layers):             # <<<<<<<<<<<<<<
  *         begin = l * num_vals
  *         end = (l + 1) * num_vals
  */
   }
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "package/multitensor.pyx":651
- *             numpy.array(affinity_ravel[begin:end]).reshape((-1, nof_groups))
- *         )
+  /* "package/multitensor.pyx":606
+ *             w_l = w_l.ravel()
+ *         affinity.append(w_l)
  *     return u, v, affinity, report             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyTuple_New(4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 651, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_3 = PyTuple_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 606, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_v_u);
   __Pyx_GIVEREF(__pyx_v_u);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_u);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_u);
   __Pyx_INCREF(__pyx_v_v);
   __Pyx_GIVEREF(__pyx_v_v);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_v);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_v);
   __Pyx_INCREF(__pyx_v_affinity);
   __Pyx_GIVEREF(__pyx_v_affinity);
-  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_v_affinity);
+  PyTuple_SET_ITEM(__pyx_t_3, 2, __pyx_v_affinity);
   __Pyx_INCREF(((PyObject *)__pyx_v_report));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_report));
-  PyTuple_SET_ITEM(__pyx_t_4, 3, ((PyObject *)__pyx_v_report));
-  __pyx_r = __pyx_t_4;
-  __pyx_t_4 = 0;
+  PyTuple_SET_ITEM(__pyx_t_3, 3, ((PyObject *)__pyx_v_report));
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "package/multitensor.pyx":275
+  /* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
@@ -6944,18 +6242,19 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
-  __Pyx_XDECREF(__pyx_t_11);
-  __Pyx_AddTraceback("package.multitensor.multitensor_factorization", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_XDECREF(__pyx_t_12);
+  __Pyx_XDECREF(__pyx_t_13);
+  __Pyx_XDECREF(__pyx_t_14);
+  __Pyx_AddTraceback("package.multitensor.run", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_A);
+  __Pyx_XDECREF(__pyx_v_adj_data);
   __Pyx_XDECREF(__pyx_v_edges_start);
   __Pyx_XDECREF(__pyx_v_edges_end);
   __Pyx_XDECREF(__pyx_v_edges_weights);
+  __Pyx_XDECREF(__pyx_v_nof_edges);
+  __Pyx_XDECREF(__pyx_v_nof_layers);
+  __Pyx_XDECREF(__pyx_v_init_affinity);
   __Pyx_XDECREF(__pyx_v_affinity_size);
   __Pyx_XDECREF((PyObject *)__pyx_v_report);
   __Pyx_XDECREF(__pyx_v_u);
@@ -6966,8 +6265,9 @@ static PyObject *__pyx_pf_7package_11multitensor_4multitensor_factorization(CYTH
   __Pyx_XDECREF(__pyx_v_l);
   __Pyx_XDECREF(__pyx_v_begin);
   __Pyx_XDECREF(__pyx_v_end);
-  __Pyx_XDECREF(__pyx_7genexpr__pyx_v_l);
-  __Pyx_XDECREF(__pyx_8genexpr2__pyx_v_l);
+  __Pyx_XDECREF(__pyx_v_w_l);
+  __Pyx_XDECREF(__pyx_8genexpr1__pyx_v_l);
+  __Pyx_XDECREF(__pyx_v_seed);
   __Pyx_DECREF(((PyObject *)__pyx_cur_scope));
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -7506,7 +6806,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 884, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 884, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -7638,7 +6938,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 890, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 890, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -7770,7 +7070,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  * 
  * cdef extern from *:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 896, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 896, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -8969,14 +8269,14 @@ static PyTypeObject __pyx_type_7package_11multitensor_ReportWrapper = {
   #endif
 };
 
-static struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *__pyx_freelist_7package_11multitensor___pyx_scope_struct__multitensor_factorization[8];
-static int __pyx_freecount_7package_11multitensor___pyx_scope_struct__multitensor_factorization = 0;
+static struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *__pyx_freelist_7package_11multitensor___pyx_scope_struct__run[8];
+static int __pyx_freecount_7package_11multitensor___pyx_scope_struct__run = 0;
 
-static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct__multitensor_factorization(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct__run(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
   PyObject *o;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_7package_11multitensor___pyx_scope_struct__multitensor_factorization > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization)))) {
-    o = (PyObject*)__pyx_freelist_7package_11multitensor___pyx_scope_struct__multitensor_factorization[--__pyx_freecount_7package_11multitensor___pyx_scope_struct__multitensor_factorization];
-    memset(o, 0, sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization));
+  if (CYTHON_COMPILING_IN_CPYTHON && likely((__pyx_freecount_7package_11multitensor___pyx_scope_struct__run > 0) & (t->tp_basicsize == sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run)))) {
+    o = (PyObject*)__pyx_freelist_7package_11multitensor___pyx_scope_struct__run[--__pyx_freecount_7package_11multitensor___pyx_scope_struct__run];
+    memset(o, 0, sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run));
     (void) PyObject_INIT(o, t);
     PyObject_GC_Track(o);
   } else {
@@ -8986,41 +8286,41 @@ static PyObject *__pyx_tp_new_7package_11multitensor___pyx_scope_struct__multite
   return o;
 }
 
-static void __pyx_tp_dealloc_7package_11multitensor___pyx_scope_struct__multitensor_factorization(PyObject *o) {
-  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)o;
+static void __pyx_tp_dealloc_7package_11multitensor___pyx_scope_struct__run(PyObject *o) {
+  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)o;
   PyObject_GC_UnTrack(o);
-  Py_CLEAR(p->__pyx_v_init_affinity);
-  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_7package_11multitensor___pyx_scope_struct__multitensor_factorization < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization)))) {
-    __pyx_freelist_7package_11multitensor___pyx_scope_struct__multitensor_factorization[__pyx_freecount_7package_11multitensor___pyx_scope_struct__multitensor_factorization++] = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)o);
+  Py_CLEAR(p->__pyx_v_w_data);
+  if (CYTHON_COMPILING_IN_CPYTHON && ((__pyx_freecount_7package_11multitensor___pyx_scope_struct__run < 8) & (Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run)))) {
+    __pyx_freelist_7package_11multitensor___pyx_scope_struct__run[__pyx_freecount_7package_11multitensor___pyx_scope_struct__run++] = ((struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)o);
   } else {
     (*Py_TYPE(o)->tp_free)(o);
   }
 }
 
-static int __pyx_tp_traverse_7package_11multitensor___pyx_scope_struct__multitensor_factorization(PyObject *o, visitproc v, void *a) {
+static int __pyx_tp_traverse_7package_11multitensor___pyx_scope_struct__run(PyObject *o, visitproc v, void *a) {
   int e;
-  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)o;
-  if (p->__pyx_v_init_affinity) {
-    e = (*v)(p->__pyx_v_init_affinity, a); if (e) return e;
+  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)o;
+  if (p->__pyx_v_w_data) {
+    e = (*v)(p->__pyx_v_w_data, a); if (e) return e;
   }
   return 0;
 }
 
-static int __pyx_tp_clear_7package_11multitensor___pyx_scope_struct__multitensor_factorization(PyObject *o) {
+static int __pyx_tp_clear_7package_11multitensor___pyx_scope_struct__run(PyObject *o) {
   PyObject* tmp;
-  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization *)o;
-  tmp = ((PyObject*)p->__pyx_v_init_affinity);
-  p->__pyx_v_init_affinity = Py_None; Py_INCREF(Py_None);
+  struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *p = (struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run *)o;
+  tmp = ((PyObject*)p->__pyx_v_w_data);
+  p->__pyx_v_w_data = Py_None; Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   return 0;
 }
 
-static PyTypeObject __pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization = {
+static PyTypeObject __pyx_type_7package_11multitensor___pyx_scope_struct__run = {
   PyVarObject_HEAD_INIT(0, 0)
-  "package.multitensor.__pyx_scope_struct__multitensor_factorization", /*tp_name*/
-  sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__multitensor_factorization), /*tp_basicsize*/
+  "package.multitensor.__pyx_scope_struct__run", /*tp_name*/
+  sizeof(struct __pyx_obj_7package_11multitensor___pyx_scope_struct__run), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_7package_11multitensor___pyx_scope_struct__multitensor_factorization, /*tp_dealloc*/
+  __pyx_tp_dealloc_7package_11multitensor___pyx_scope_struct__run, /*tp_dealloc*/
   #if PY_VERSION_HEX < 0x030800b4
   0, /*tp_print*/
   #endif
@@ -9047,8 +8347,8 @@ static PyTypeObject __pyx_type_7package_11multitensor___pyx_scope_struct__multit
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC, /*tp_flags*/
   0, /*tp_doc*/
-  __pyx_tp_traverse_7package_11multitensor___pyx_scope_struct__multitensor_factorization, /*tp_traverse*/
-  __pyx_tp_clear_7package_11multitensor___pyx_scope_struct__multitensor_factorization, /*tp_clear*/
+  __pyx_tp_traverse_7package_11multitensor___pyx_scope_struct__run, /*tp_traverse*/
+  __pyx_tp_clear_7package_11multitensor___pyx_scope_struct__run, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
@@ -9063,7 +8363,7 @@ static PyTypeObject __pyx_type_7package_11multitensor___pyx_scope_struct__multit
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_7package_11multitensor___pyx_scope_struct__multitensor_factorization, /*tp_new*/
+  __pyx_tp_new_7package_11multitensor___pyx_scope_struct__run, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -9244,12 +8544,13 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_n_s_A, __pyx_k_A, sizeof(__pyx_k_A), 0, 0, 1, 1},
-  {&__pyx_kp_u_Cannot_use_scipy_sparse_matrix_f, __pyx_k_Cannot_use_scipy_sparse_matrix_f, sizeof(__pyx_k_Cannot_use_scipy_sparse_matrix_f), 0, 1, 0, 0},
   {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
   {&__pyx_n_s_ReportWrapper, __pyx_k_ReportWrapper, sizeof(__pyx_k_ReportWrapper), 0, 0, 1, 1},
+  {&__pyx_n_s_RuntimeError, __pyx_k_RuntimeError, sizeof(__pyx_k_RuntimeError), 0, 0, 1, 1},
+  {&__pyx_n_s_T, __pyx_k_T, sizeof(__pyx_k_T), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_kp_s_Users_jpassy_Work_Projects_RGs, __pyx_k_Users_jpassy_Work_Projects_RGs, sizeof(__pyx_k_Users_jpassy_Work_Projects_RGs), 0, 0, 1, 0},
+  {&__pyx_n_s_adj_data, __pyx_k_adj_data, sizeof(__pyx_k_adj_data), 0, 0, 1, 1},
   {&__pyx_n_s_adjacency_filename, __pyx_k_adjacency_filename, sizeof(__pyx_k_adjacency_filename), 0, 0, 1, 1},
   {&__pyx_n_s_affinity, __pyx_k_affinity, sizeof(__pyx_k_affinity), 0, 0, 1, 1},
   {&__pyx_n_s_affinity_ravel, __pyx_k_affinity_ravel, sizeof(__pyx_k_affinity_ravel), 0, 0, 1, 1},
@@ -9265,17 +8566,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_concatenate, __pyx_k_concatenate, sizeof(__pyx_k_concatenate), 0, 0, 1, 1},
-  {&__pyx_n_s_csr_matrix, __pyx_k_csr_matrix, sizeof(__pyx_k_csr_matrix), 0, 0, 1, 1},
-  {&__pyx_n_s_data, __pyx_k_data, sizeof(__pyx_k_data), 0, 0, 1, 1},
   {&__pyx_n_s_diag, __pyx_k_diag, sizeof(__pyx_k_diag), 0, 0, 1, 1},
   {&__pyx_n_s_directed, __pyx_k_directed, sizeof(__pyx_k_directed), 0, 0, 1, 1},
-  {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
-  {&__pyx_n_s_e, __pyx_k_e, sizeof(__pyx_k_e), 0, 0, 1, 1},
   {&__pyx_n_s_edges_end, __pyx_k_edges_end, sizeof(__pyx_k_edges_end), 0, 0, 1, 1},
   {&__pyx_n_s_edges_start, __pyx_k_edges_start, sizeof(__pyx_k_edges_start), 0, 0, 1, 1},
   {&__pyx_n_s_edges_weights, __pyx_k_edges_weights, sizeof(__pyx_k_edges_weights), 0, 0, 1, 1},
   {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
-  {&__pyx_n_s_filename, __pyx_k_filename, sizeof(__pyx_k_filename), 0, 0, 1, 1},
   {&__pyx_n_s_genexpr, __pyx_k_genexpr, sizeof(__pyx_k_genexpr), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
@@ -9289,8 +8585,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_logging, __pyx_k_logging, sizeof(__pyx_k_logging), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_max_nof_iterations, __pyx_k_max_nof_iterations, sizeof(__pyx_k_max_nof_iterations), 0, 0, 1, 1},
-  {&__pyx_n_s_multitensor_factorization, __pyx_k_multitensor_factorization, sizeof(__pyx_k_multitensor_factorization), 0, 0, 1, 1},
-  {&__pyx_n_s_multitensor_factorization_locals, __pyx_k_multitensor_factorization_locals, sizeof(__pyx_k_multitensor_factorization_locals), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_nof_convergences, __pyx_k_nof_convergences, sizeof(__pyx_k_nof_convergences), 0, 0, 1, 1},
   {&__pyx_n_s_nof_edges, __pyx_k_nof_edges, sizeof(__pyx_k_nof_edges), 0, 0, 1, 1},
@@ -9298,43 +8592,40 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_nof_layers, __pyx_k_nof_layers, sizeof(__pyx_k_nof_layers), 0, 0, 1, 1},
   {&__pyx_n_s_nof_realizations, __pyx_k_nof_realizations, sizeof(__pyx_k_nof_realizations), 0, 0, 1, 1},
   {&__pyx_n_s_nof_vertices, __pyx_k_nof_vertices, sizeof(__pyx_k_nof_vertices), 0, 0, 1, 1},
-  {&__pyx_n_s_num_groups, __pyx_k_num_groups, sizeof(__pyx_k_num_groups), 0, 0, 1, 1},
-  {&__pyx_n_s_num_layers, __pyx_k_num_layers, sizeof(__pyx_k_num_layers), 0, 0, 1, 1},
   {&__pyx_n_s_num_vals, __pyx_k_num_vals, sizeof(__pyx_k_num_vals), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_kp_u_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 1, 0, 0},
   {&__pyx_kp_u_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 1, 0, 0},
-  {&__pyx_kp_u_of_the_adjacency_data_Using_num, __pyx_k_of_the_adjacency_data_Using_num, sizeof(__pyx_k_of_the_adjacency_data_Using_num), 0, 1, 0, 0},
   {&__pyx_n_s_package_multitensor, __pyx_k_package_multitensor, sizeof(__pyx_k_package_multitensor), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_ravel, __pyx_k_ravel, sizeof(__pyx_k_ravel), 0, 0, 1, 1},
-  {&__pyx_n_s_read_adjacency_data, __pyx_k_read_adjacency_data, sizeof(__pyx_k_read_adjacency_data), 0, 0, 1, 1},
-  {&__pyx_n_s_read_affinity_data, __pyx_k_read_affinity_data, sizeof(__pyx_k_read_affinity_data), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
   {&__pyx_n_s_report, __pyx_k_report, sizeof(__pyx_k_report), 0, 0, 1, 1},
   {&__pyx_n_s_reshape, __pyx_k_reshape, sizeof(__pyx_k_reshape), 0, 0, 1, 1},
-  {&__pyx_n_s_scipy_sparse, __pyx_k_scipy_sparse, sizeof(__pyx_k_scipy_sparse), 0, 0, 1, 1},
+  {&__pyx_n_s_rng, __pyx_k_rng, sizeof(__pyx_k_rng), 0, 0, 1, 1},
+  {&__pyx_n_s_run, __pyx_k_run, sizeof(__pyx_k_run), 0, 0, 1, 1},
+  {&__pyx_n_s_run_locals_genexpr, __pyx_k_run_locals_genexpr, sizeof(__pyx_k_run_locals_genexpr), 0, 0, 1, 1},
+  {&__pyx_n_s_seed, __pyx_k_seed, sizeof(__pyx_k_seed), 0, 0, 1, 1},
   {&__pyx_kp_s_self_c_obj_cannot_be_converted_t, __pyx_k_self_c_obj_cannot_be_converted_t, sizeof(__pyx_k_self_c_obj_cannot_be_converted_t), 0, 0, 1, 0},
   {&__pyx_n_s_send, __pyx_k_send, sizeof(__pyx_k_send), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
-  {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
   {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_throw, __pyx_k_throw, sizeof(__pyx_k_throw), 0, 0, 1, 1},
-  {&__pyx_n_s_toarray, __pyx_k_toarray, sizeof(__pyx_k_toarray), 0, 0, 1, 1},
   {&__pyx_n_s_u, __pyx_k_u, sizeof(__pyx_k_u), 0, 0, 1, 1},
-  {&__pyx_n_s_use_sparse, __pyx_k_use_sparse, sizeof(__pyx_k_use_sparse), 0, 0, 1, 1},
   {&__pyx_n_s_v, __pyx_k_v, sizeof(__pyx_k_v), 0, 0, 1, 1},
-  {&__pyx_n_s_warning, __pyx_k_warning, sizeof(__pyx_k_warning), 0, 0, 1, 1},
+  {&__pyx_n_s_w_data, __pyx_k_w_data, sizeof(__pyx_k_w_data), 0, 0, 1, 1},
+  {&__pyx_n_s_w_l, __pyx_k_w_l, sizeof(__pyx_k_w_l), 0, 0, 1, 1},
   {&__pyx_n_s_weigths_dtype, __pyx_k_weigths_dtype, sizeof(__pyx_k_weigths_dtype), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 107, __pyx_L1_error)
+  __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(0, 206, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 599, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(2, 884, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -9345,79 +8636,77 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "package/multitensor.pyx":109
- *     for l in range(num_layers):
- *         if not use_sparse:
- *             A.append(data[:, [0, 1, l + 2]])             # <<<<<<<<<<<<<<
- *         else:
- *             try:
- */
-  __pyx_slice_ = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice_)) __PYX_ERR(0, 109, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice_);
-  __Pyx_GIVEREF(__pyx_slice_);
-
-  /* "package/multitensor.pyx":143
- *     A = []
- *     for l in range(num_layers):
- *         A.append(numpy.diag(data[l, 1:]))             # <<<<<<<<<<<<<<
- *     return A
- * 
- */
-  __pyx_slice__2 = PySlice_New(__pyx_int_1, Py_None, Py_None); if (unlikely(!__pyx_slice__2)) __PYX_ERR(0, 143, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__2);
-  __Pyx_GIVEREF(__pyx_slice__2);
-
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_self_c_obj_cannot_be_converted_t); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__3);
-  __Pyx_GIVEREF(__pyx_tuple__3);
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_self_c_obj_cannot_be_converted_t); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
 
   /* "(tree fragment)":4
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.c_obj cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_self_c_obj_cannot_be_converted_t); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(1, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__4);
-  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_self_c_obj_cannot_be_converted_t); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "package/multitensor.pyx":309
- * 
- *     A = read_adjacency_data(adjacency_filename)
- *     edges_start = numpy.array(A[0][:, 0].toarray().ravel(), dtype=int)             # <<<<<<<<<<<<<<
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)
- * 
+  /* "package/multitensor.pyx":277
+ *             init_affinity = w_data[:, 1:].ravel()
+ *         else:
+ *             init_affinity = (numpy.diag(l) for l in w_data[:, 1:])             # <<<<<<<<<<<<<<
+ *             init_affinity = numpy.concatenate([l.ravel() for l in init_affinity])
+ *         c_affinity = < vector[numpy.float_t] > init_affinity
  */
-  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_slice_, __pyx_int_0); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 277, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__4);
+  __Pyx_GIVEREF(__pyx_slice__4);
+  __pyx_slice__5 = PySlice_New(__pyx_int_1, Py_None, Py_None); if (unlikely(!__pyx_slice__5)) __PYX_ERR(0, 277, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__5);
+  __Pyx_GIVEREF(__pyx_slice__5);
+  __pyx_tuple__6 = PyTuple_Pack(2, __pyx_slice__4, __pyx_slice__5); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 277, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "package/multitensor.pyx":310
- *     A = read_adjacency_data(adjacency_filename)
- *     edges_start = numpy.array(A[0][:, 0].toarray().ravel(), dtype=int)
- *     edges_end = numpy.array(A[0][:, 1].toarray().ravel(), dtype=int)             # <<<<<<<<<<<<<<
+  /* "package/multitensor.pyx":246
+ *     adj_data = numpy.loadtxt(adjacency_filename)
  * 
- *     edges_weights = numpy.concatenate(
+ *     edges_start = adj_data[:, 0].astype(int)             # <<<<<<<<<<<<<<
+ *     edges_end = adj_data[:, 1].astype(int)
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()
  */
-  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_slice_, __pyx_int_1); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 310, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(2, __pyx_slice__4, __pyx_int_0); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "package/multitensor.pyx":313
+  /* "package/multitensor.pyx":247
  * 
- *     edges_weights = numpy.concatenate(
- *         [l[:, 2].toarray().ravel().astype(weigths_dtype) for l in A]             # <<<<<<<<<<<<<<
- *     )
+ *     edges_start = adj_data[:, 0].astype(int)
+ *     edges_end = adj_data[:, 1].astype(int)             # <<<<<<<<<<<<<<
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()
  * 
  */
-  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_slice_, __pyx_int_2); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 313, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_slice__4, __pyx_int_1); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 247, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
+
+  /* "package/multitensor.pyx":248
+ *     edges_start = adj_data[:, 0].astype(int)
+ *     edges_end = adj_data[:, 1].astype(int)
+ *     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()             # <<<<<<<<<<<<<<
+ * 
+ *     # The underlying C function deduces the number of groups from the
+ */
+  __pyx_slice__9 = PySlice_New(__pyx_int_2, Py_None, Py_None); if (unlikely(!__pyx_slice__9)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__9);
+  __Pyx_GIVEREF(__pyx_slice__9);
+  __pyx_tuple__10 = PyTuple_Pack(2, __pyx_slice__4, __pyx_slice__9); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 248, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
 
   /* "../../../../../Softwares/envs/multitensor/lib/python3.7/site-packages/numpy/__init__.pxd":884
  *         __pyx_import_array()
@@ -9426,9 +8715,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_u_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(2, 884, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_u_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(2, 884, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
 
   /* "../../../../../Softwares/envs/multitensor/lib/python3.7/site-packages/numpy/__init__.pxd":890
  *         _import_umath()
@@ -9437,45 +8726,21 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_u_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 890, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_u_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 890, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "package/multitensor.pyx":82
+  /* "package/multitensor.pyx":209
  * 
  * 
- * def read_adjacency_data(filename, use_sparse=True):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the adjacency matrix data into arrays.
- */
-  __pyx_tuple__11 = PyTuple_Pack(7, __pyx_n_s_filename, __pyx_n_s_use_sparse, __pyx_n_s_data, __pyx_n_s_num_layers, __pyx_n_s_A, __pyx_n_s_l, __pyx_n_s_e); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 82, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
-  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(2, 0, 7, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_jpassy_Work_Projects_RGs, __pyx_n_s_read_adjacency_data, 82, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 82, __pyx_L1_error)
-
-  /* "package/multitensor.pyx":123
- * 
- * 
- * def read_affinity_data(filename):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the affinity matrix data into arrays.
- */
-  __pyx_tuple__13 = PyTuple_Pack(6, __pyx_n_s_filename, __pyx_n_s_data, __pyx_n_s_num_layers, __pyx_n_s_num_groups, __pyx_n_s_A, __pyx_n_s_l); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 123, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
-  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(1, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_jpassy_Work_Projects_RGs, __pyx_n_s_read_affinity_data, 123, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 123, __pyx_L1_error)
-
-  /* "package/multitensor.pyx":275
- * 
- * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
-  __pyx_tuple__15 = PyTuple_Pack(39, __pyx_n_s_adjacency_filename, __pyx_n_s_nof_groups, __pyx_n_s_directed, __pyx_n_s_assortative, __pyx_n_s_nof_realizations, __pyx_n_s_max_nof_iterations, __pyx_n_s_nof_convergences, __pyx_n_s_init_affinity_filename, __pyx_n_s_weigths_dtype, __pyx_n_s_A, __pyx_n_s_edges_start, __pyx_n_s_edges_end, __pyx_n_s_edges_weights, __pyx_n_s_nof_edges, __pyx_n_s_nof_vertices, __pyx_n_s_nof_layers, __pyx_n_s_c_u, __pyx_n_s_c_v, __pyx_n_s_c_affinity, __pyx_n_s_init_affinity, __pyx_n_s_affinity_size, __pyx_n_s_labels, __pyx_n_s_report, __pyx_n_s_u, __pyx_n_s_v, __pyx_n_s_affinity_ravel, __pyx_n_s_num_vals, __pyx_n_s_affinity, __pyx_n_s_l, __pyx_n_s_begin, __pyx_n_s_end, __pyx_n_s_l, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_l, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_i, __pyx_n_s_j); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 275, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__15);
-  __Pyx_GIVEREF(__pyx_tuple__15);
-  __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(9, 0, 39, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_jpassy_Work_Projects_RGs, __pyx_n_s_multitensor_factorization, 275, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 275, __pyx_L1_error)
+  __pyx_tuple__13 = PyTuple_Pack(42, __pyx_n_s_adjacency_filename, __pyx_n_s_nof_groups, __pyx_n_s_directed, __pyx_n_s_assortative, __pyx_n_s_nof_realizations, __pyx_n_s_max_nof_iterations, __pyx_n_s_nof_convergences, __pyx_n_s_init_affinity_filename, __pyx_n_s_weigths_dtype, __pyx_n_s_seed, __pyx_n_s_adj_data, __pyx_n_s_edges_start, __pyx_n_s_edges_end, __pyx_n_s_edges_weights, __pyx_n_s_nof_edges, __pyx_n_s_nof_layers, __pyx_n_s_nof_vertices, __pyx_n_s_c_u, __pyx_n_s_c_v, __pyx_n_s_c_affinity, __pyx_n_s_w_data, __pyx_n_s_init_affinity, __pyx_n_s_affinity_size, __pyx_n_s_labels, __pyx_n_s_report, __pyx_n_s_rng, __pyx_n_s_u, __pyx_n_s_v, __pyx_n_s_affinity_ravel, __pyx_n_s_num_vals, __pyx_n_s_affinity, __pyx_n_s_l, __pyx_n_s_begin, __pyx_n_s_end, __pyx_n_s_w_l, __pyx_n_s_genexpr, __pyx_n_s_genexpr, __pyx_n_s_l, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_i, __pyx_n_s_j); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(10, 0, 42, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_Users_jpassy_Work_Projects_RGs, __pyx_n_s_run, 209, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -9535,25 +8800,25 @@ static int __Pyx_modinit_type_init_code(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_7package_11multitensor_ReportWrapper.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_7package_11multitensor_ReportWrapper.tp_dictoffset && __pyx_type_7package_11multitensor_ReportWrapper.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_7package_11multitensor_ReportWrapper.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_ReportWrapper, (PyObject *)&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_ReportWrapper, (PyObject *)&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7package_11multitensor_ReportWrapper) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
   __pyx_ptype_7package_11multitensor_ReportWrapper = &__pyx_type_7package_11multitensor_ReportWrapper;
-  if (PyType_Ready(&__pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization) < 0) __PYX_ERR(0, 275, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_7package_11multitensor___pyx_scope_struct__run) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
-  __pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization.tp_print = 0;
+  __pyx_type_7package_11multitensor___pyx_scope_struct__run.tp_print = 0;
   #endif
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization.tp_dictoffset && __pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization.tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_7package_11multitensor___pyx_scope_struct__run.tp_dictoffset && __pyx_type_7package_11multitensor___pyx_scope_struct__run.tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_type_7package_11multitensor___pyx_scope_struct__run.tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
   }
-  __pyx_ptype_7package_11multitensor___pyx_scope_struct__multitensor_factorization = &__pyx_type_7package_11multitensor___pyx_scope_struct__multitensor_factorization;
-  if (PyType_Ready(&__pyx_type_7package_11multitensor___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 340, __pyx_L1_error)
+  __pyx_ptype_7package_11multitensor___pyx_scope_struct__run = &__pyx_type_7package_11multitensor___pyx_scope_struct__run;
+  if (PyType_Ready(&__pyx_type_7package_11multitensor___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 277, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_7package_11multitensor___pyx_scope_struct_1_genexpr.tp_print = 0;
   #endif
@@ -9719,7 +8984,6 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_multitensor(PyObject *__pyx_pyinit
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -9827,107 +9091,62 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "package/multitensor.pyx":14
- * from libcpp.string cimport string
- * from libcpp.vector cimport vector
- * import logging             # <<<<<<<<<<<<<<
+  /* "package/multitensor.pyx":20
+ * from cython.operator cimport dereference as deref
  * 
+ * import logging             # <<<<<<<<<<<<<<
  * import numpy
+ * cimport numpy
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_1) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_1) < 0) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "package/multitensor.pyx":16
- * import logging
+  /* "package/multitensor.pyx":21
  * 
+ * import logging
  * import numpy             # <<<<<<<<<<<<<<
  * cimport numpy
- * from scipy.sparse import csr_matrix
+ * 
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_numpy, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_numpy, __pyx_t_1) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "package/multitensor.pyx":18
- * import numpy
- * cimport numpy
- * from scipy.sparse import csr_matrix             # <<<<<<<<<<<<<<
- * 
- * # 0 - Imports
- */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_n_s_csr_matrix);
-  __Pyx_GIVEREF(__pyx_n_s_csr_matrix);
-  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_csr_matrix);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_scipy_sparse, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_csr_matrix); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_csr_matrix, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "package/multitensor.pyx":82
- * 
- * 
- * def read_adjacency_data(filename, use_sparse=True):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the adjacency matrix data into arrays.
- */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7package_11multitensor_1read_adjacency_data, NULL, __pyx_n_s_package_multitensor); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_adjacency_data, __pyx_t_2) < 0) __PYX_ERR(0, 82, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "package/multitensor.pyx":123
- * 
- * 
- * def read_affinity_data(filename):             # <<<<<<<<<<<<<<
- *     """
- *     Loads the affinity matrix data into arrays.
- */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7package_11multitensor_3read_affinity_data, NULL, __pyx_n_s_package_multitensor); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_affinity_data, __pyx_t_2) < 0) __PYX_ERR(0, 123, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "package/multitensor.pyx":284
+  /* "package/multitensor.pyx":218
  *     nof_convergences=10,
  *     init_affinity_filename=None,
  *     weigths_dtype=float,             # <<<<<<<<<<<<<<
+ *     seed=None
  * ):
- *     """
  */
   __Pyx_INCREF(((PyObject *)(&PyFloat_Type)));
-  __pyx_k__5 = ((PyObject *)(&PyFloat_Type));
+  __pyx_k__3 = ((PyObject *)(&PyFloat_Type));
   __Pyx_GIVEREF((&PyFloat_Type));
 
-  /* "package/multitensor.pyx":275
+  /* "package/multitensor.pyx":209
  * 
  * 
- * def multitensor_factorization(             # <<<<<<<<<<<<<<
+ * def run(             # <<<<<<<<<<<<<<
  *     adjacency_filename,
  *     nof_groups,
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7package_11multitensor_5multitensor_factorization, NULL, __pyx_n_s_package_multitensor); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 275, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_multitensor_factorization, __pyx_t_2) < 0) __PYX_ERR(0, 275, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7package_11multitensor_1run, NULL, __pyx_n_s_package_multitensor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_run, __pyx_t_1) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "package/multitensor.pyx":1
  * # Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems             # <<<<<<<<<<<<<<
  * # Distributed under the GNU GPL license version 3
  * # See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "vector.to_py":60
  * 
@@ -9942,7 +9161,6 @@ if (!__Pyx_RefNanny) {
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init package.multitensor", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -10006,6 +9224,235 @@ static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
 #endif
     }
     return result;
+}
+
+/* PyObjectCall */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
+    PyObject *result;
+    ternaryfunc call = func->ob_type->tp_call;
+    if (unlikely(!call))
+        return PyObject_Call(func, arg, kw);
+    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
+        return NULL;
+    result = (*call)(func, arg, kw);
+    Py_LeaveRecursiveCall();
+    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
+        PyErr_SetString(
+            PyExc_SystemError,
+            "NULL result without error in PyObject_Call");
+    }
+    return result;
+}
+#endif
+
+/* PyErrFetchRestore */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    tmp_type = tstate->curexc_type;
+    tmp_value = tstate->curexc_value;
+    tmp_tb = tstate->curexc_traceback;
+    tstate->curexc_type = type;
+    tstate->curexc_value = value;
+    tstate->curexc_traceback = tb;
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+}
+static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
+}
+#endif
+
+/* RaiseException */
+#if PY_MAJOR_VERSION < 3
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb,
+                        CYTHON_UNUSED PyObject *cause) {
+    __Pyx_PyThreadState_declare
+    Py_XINCREF(type);
+    if (!value || value == Py_None)
+        value = NULL;
+    else
+        Py_INCREF(value);
+    if (!tb || tb == Py_None)
+        tb = NULL;
+    else {
+        Py_INCREF(tb);
+        if (!PyTraceBack_Check(tb)) {
+            PyErr_SetString(PyExc_TypeError,
+                "raise: arg 3 must be a traceback or None");
+            goto raise_error;
+        }
+    }
+    if (PyType_Check(type)) {
+#if CYTHON_COMPILING_IN_PYPY
+        if (!value) {
+            Py_INCREF(Py_None);
+            value = Py_None;
+        }
+#endif
+        PyErr_NormalizeException(&type, &value, &tb);
+    } else {
+        if (value) {
+            PyErr_SetString(PyExc_TypeError,
+                "instance exception may not have a separate value");
+            goto raise_error;
+        }
+        value = type;
+        type = (PyObject*) Py_TYPE(type);
+        Py_INCREF(type);
+        if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) {
+            PyErr_SetString(PyExc_TypeError,
+                "raise: exception class must be a subclass of BaseException");
+            goto raise_error;
+        }
+    }
+    __Pyx_PyThreadState_assign
+    __Pyx_ErrRestore(type, value, tb);
+    return;
+raise_error:
+    Py_XDECREF(value);
+    Py_XDECREF(type);
+    Py_XDECREF(tb);
+    return;
+}
+#else
+static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
+    PyObject* owned_instance = NULL;
+    if (tb == Py_None) {
+        tb = 0;
+    } else if (tb && !PyTraceBack_Check(tb)) {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: arg 3 must be a traceback or None");
+        goto bad;
+    }
+    if (value == Py_None)
+        value = 0;
+    if (PyExceptionInstance_Check(type)) {
+        if (value) {
+            PyErr_SetString(PyExc_TypeError,
+                "instance exception may not have a separate value");
+            goto bad;
+        }
+        value = type;
+        type = (PyObject*) Py_TYPE(value);
+    } else if (PyExceptionClass_Check(type)) {
+        PyObject *instance_class = NULL;
+        if (value && PyExceptionInstance_Check(value)) {
+            instance_class = (PyObject*) Py_TYPE(value);
+            if (instance_class != type) {
+                int is_subclass = PyObject_IsSubclass(instance_class, type);
+                if (!is_subclass) {
+                    instance_class = NULL;
+                } else if (unlikely(is_subclass == -1)) {
+                    goto bad;
+                } else {
+                    type = instance_class;
+                }
+            }
+        }
+        if (!instance_class) {
+            PyObject *args;
+            if (!value)
+                args = PyTuple_New(0);
+            else if (PyTuple_Check(value)) {
+                Py_INCREF(value);
+                args = value;
+            } else
+                args = PyTuple_Pack(1, value);
+            if (!args)
+                goto bad;
+            owned_instance = PyObject_Call(type, args, NULL);
+            Py_DECREF(args);
+            if (!owned_instance)
+                goto bad;
+            value = owned_instance;
+            if (!PyExceptionInstance_Check(value)) {
+                PyErr_Format(PyExc_TypeError,
+                             "calling %R should have returned an instance of "
+                             "BaseException, not %R",
+                             type, Py_TYPE(value));
+                goto bad;
+            }
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError,
+            "raise: exception class must be a subclass of BaseException");
+        goto bad;
+    }
+    if (cause) {
+        PyObject *fixed_cause;
+        if (cause == Py_None) {
+            fixed_cause = NULL;
+        } else if (PyExceptionClass_Check(cause)) {
+            fixed_cause = PyObject_CallObject(cause, NULL);
+            if (fixed_cause == NULL)
+                goto bad;
+        } else if (PyExceptionInstance_Check(cause)) {
+            fixed_cause = cause;
+            Py_INCREF(fixed_cause);
+        } else {
+            PyErr_SetString(PyExc_TypeError,
+                            "exception causes must derive from "
+                            "BaseException");
+            goto bad;
+        }
+        PyException_SetCause(value, fixed_cause);
+    }
+    PyErr_SetObject(type, value);
+    if (tb) {
+#if CYTHON_COMPILING_IN_PYPY
+        PyObject *tmp_type, *tmp_value, *tmp_tb;
+        PyErr_Fetch(&tmp_type, &tmp_value, &tmp_tb);
+        Py_INCREF(tb);
+        PyErr_Restore(tmp_type, tmp_value, tb);
+        Py_XDECREF(tmp_tb);
+#else
+        PyThreadState *tstate = __Pyx_PyThreadState_Current;
+        PyObject* tmp_tb = tstate->curexc_traceback;
+        if (tb != tmp_tb) {
+            Py_INCREF(tb);
+            tstate->curexc_traceback = tb;
+            Py_XDECREF(tmp_tb);
+        }
+#endif
+    }
+bad:
+    Py_XDECREF(owned_instance);
+    return;
+}
+#endif
+
+/* RaiseArgTupleInvalid */
+static void __Pyx_RaiseArgtupleInvalid(
+    const char* func_name,
+    int exact,
+    Py_ssize_t num_min,
+    Py_ssize_t num_max,
+    Py_ssize_t num_found)
+{
+    Py_ssize_t num_expected;
+    const char *more_or_less;
+    if (num_found < num_min) {
+        num_expected = num_min;
+        more_or_less = "at least";
+    } else {
+        num_expected = num_max;
+        more_or_less = "at most";
+    }
+    if (exact) {
+        more_or_less = "exactly";
+    }
+    PyErr_Format(PyExc_TypeError,
+                 "%.200s() takes %.8s %" CYTHON_FORMAT_SSIZE_T "d positional argument%.1s (%" CYTHON_FORMAT_SSIZE_T "d given)",
+                 func_name, more_or_less, num_expected,
+                 (num_expected == 1) ? "" : "s", num_found);
 }
 
 /* RaiseDoubleKeywords */
@@ -10124,31 +9571,126 @@ bad:
     return -1;
 }
 
-/* RaiseArgTupleInvalid */
-static void __Pyx_RaiseArgtupleInvalid(
-    const char* func_name,
-    int exact,
-    Py_ssize_t num_min,
-    Py_ssize_t num_max,
-    Py_ssize_t num_found)
-{
-    Py_ssize_t num_expected;
-    const char *more_or_less;
-    if (num_found < num_min) {
-        num_expected = num_min;
-        more_or_less = "at least";
-    } else {
-        num_expected = num_max;
-        more_or_less = "at most";
-    }
-    if (exact) {
-        more_or_less = "exactly";
-    }
-    PyErr_Format(PyExc_TypeError,
-                 "%.200s() takes %.8s %" CYTHON_FORMAT_SSIZE_T "d positional argument%.1s (%" CYTHON_FORMAT_SSIZE_T "d given)",
-                 func_name, more_or_less, num_expected,
-                 (num_expected == 1) ? "" : "s", num_found);
+/* None */
+static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname) {
+    PyErr_Format(PyExc_NameError, "free variable '%s' referenced before assignment in enclosing scope", varname);
 }
+
+/* GetItemInt */
+static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
+    PyObject *r;
+    if (!j) return NULL;
+    r = PyObject_GetItem(o, j);
+    Py_DECREF(j);
+    return r;
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyList_GET_SIZE(o);
+    }
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyList_GET_SIZE(o)))) {
+        PyObject *r = PyList_GET_ITEM(o, wrapped_i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
+                                                              CYTHON_NCP_UNUSED int wraparound,
+                                                              CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+    Py_ssize_t wrapped_i = i;
+    if (wraparound & unlikely(i < 0)) {
+        wrapped_i += PyTuple_GET_SIZE(o);
+    }
+    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyTuple_GET_SIZE(o)))) {
+        PyObject *r = PyTuple_GET_ITEM(o, wrapped_i);
+        Py_INCREF(r);
+        return r;
+    }
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+#else
+    return PySequence_GetItem(o, i);
+#endif
+}
+static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
+                                                     CYTHON_NCP_UNUSED int wraparound,
+                                                     CYTHON_NCP_UNUSED int boundscheck) {
+#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS && CYTHON_USE_TYPE_SLOTS
+    if (is_list || PyList_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
+        if ((!boundscheck) || (likely(__Pyx_is_valid_index(n, PyList_GET_SIZE(o))))) {
+            PyObject *r = PyList_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    }
+    else if (PyTuple_CheckExact(o)) {
+        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
+        if ((!boundscheck) || likely(__Pyx_is_valid_index(n, PyTuple_GET_SIZE(o)))) {
+            PyObject *r = PyTuple_GET_ITEM(o, n);
+            Py_INCREF(r);
+            return r;
+        }
+    } else {
+        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
+        if (likely(m && m->sq_item)) {
+            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
+                Py_ssize_t l = m->sq_length(o);
+                if (likely(l >= 0)) {
+                    i += l;
+                } else {
+                    if (!PyErr_ExceptionMatches(PyExc_OverflowError))
+                        return NULL;
+                    PyErr_Clear();
+                }
+            }
+            return m->sq_item(o, i);
+        }
+    }
+#else
+    if (is_list || PySequence_Check(o)) {
+        return PySequence_GetItem(o, i);
+    }
+#endif
+    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+}
+
+/* ObjectGetItem */
+#if CYTHON_USE_TYPE_SLOTS
+static PyObject *__Pyx_PyObject_GetIndex(PyObject *obj, PyObject* index) {
+    PyObject *runerr;
+    Py_ssize_t key_value;
+    PySequenceMethods *m = Py_TYPE(obj)->tp_as_sequence;
+    if (unlikely(!(m && m->sq_item))) {
+        PyErr_Format(PyExc_TypeError, "'%.200s' object is not subscriptable", Py_TYPE(obj)->tp_name);
+        return NULL;
+    }
+    key_value = __Pyx_PyIndex_AsSsize_t(index);
+    if (likely(key_value != -1 || !(runerr = PyErr_Occurred()))) {
+        return __Pyx_GetItemInt_Fast(obj, key_value, 0, 1, 1);
+    }
+    if (PyErr_GivenExceptionMatches(runerr, PyExc_OverflowError)) {
+        PyErr_Clear();
+        PyErr_Format(PyExc_IndexError, "cannot fit '%.200s' into an index-sized integer", Py_TYPE(index)->tp_name);
+    }
+    return NULL;
+}
+static PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key) {
+    PyMappingMethods *m = Py_TYPE(obj)->tp_as_mapping;
+    if (likely(m && m->mp_subscript)) {
+        return m->mp_subscript(obj, key);
+    }
+    return __Pyx_PyObject_GetIndex(obj, key);
+}
+#endif
 
 /* PyDictVersioning */
 #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
@@ -10353,26 +9895,6 @@ done:
 #endif
 #endif
 
-/* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
-    PyObject *result;
-    ternaryfunc call = func->ob_type->tp_call;
-    if (unlikely(!call))
-        return PyObject_Call(func, arg, kw);
-    if (unlikely(Py_EnterRecursiveCall((char*)" while calling a Python object")))
-        return NULL;
-    result = (*call)(func, arg, kw);
-    Py_LeaveRecursiveCall();
-    if (unlikely(!result) && unlikely(!PyErr_Occurred())) {
-        PyErr_SetString(
-            PyExc_SystemError,
-            "NULL result without error in PyObject_Call");
-    }
-    return result;
-}
-#endif
-
 /* PyObjectCall2Args */
 static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
     PyObject *args, *result = NULL;
@@ -10462,216 +9984,192 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
-/* PyIntBinop */
-#if !CYTHON_COMPILING_IN_PYPY
-static PyObject* __Pyx_PyInt_SubtractObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED long intval, int inplace, int zerodivision_check) {
-    (void)inplace;
-    (void)zerodivision_check;
-    #if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_CheckExact(op1))) {
-        const long b = intval;
-        long x;
-        long a = PyInt_AS_LONG(op1);
-            x = (long)((unsigned long)a - b);
-            if (likely((x^a) >= 0 || (x^~b) >= 0))
-                return PyInt_FromLong(x);
-            return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
+/* PyObjectCallNoArg */
+#if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
+#if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCall(func, NULL, 0);
     }
-    #endif
-    #if CYTHON_USE_PYLONG_INTERNALS
-    if (likely(PyLong_CheckExact(op1))) {
-        const long b = intval;
-        long a, x;
-#ifdef HAVE_LONG_LONG
-        const PY_LONG_LONG llb = intval;
-        PY_LONG_LONG lla, llx;
 #endif
-        const digit* digits = ((PyLongObject*)op1)->ob_digit;
-        const Py_ssize_t size = Py_SIZE(op1);
-        if (likely(__Pyx_sst_abs(size) <= 1)) {
-            a = likely(size) ? digits[0] : 0;
-            if (size == -1) a = -a;
-        } else {
-            switch (size) {
-                case -2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
+#ifdef __Pyx_CyFunction_USED
+    if (likely(PyCFunction_Check(func) || __Pyx_CyFunction_Check(func)))
+#else
+    if (likely(PyCFunction_Check(func)))
 #endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 2:
-                    if (8 * sizeof(long) - 1 > 2 * PyLong_SHIFT) {
-                        a = (long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 2 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                case -3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 3:
-                    if (8 * sizeof(long) - 1 > 3 * PyLong_SHIFT) {
-                        a = (long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 3 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                case -4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = -(PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                case 4:
-                    if (8 * sizeof(long) - 1 > 4 * PyLong_SHIFT) {
-                        a = (long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0]));
-                        break;
-#ifdef HAVE_LONG_LONG
-                    } else if (8 * sizeof(PY_LONG_LONG) - 1 > 4 * PyLong_SHIFT) {
-                        lla = (PY_LONG_LONG) (((((((((unsigned PY_LONG_LONG)digits[3]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[2]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[1]) << PyLong_SHIFT) | (unsigned PY_LONG_LONG)digits[0]));
-                        goto long_long;
-#endif
-                    }
-                    CYTHON_FALLTHROUGH;
-                default: return PyLong_Type.tp_as_number->nb_subtract(op1, op2);
-            }
+    {
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
+            return __Pyx_PyObject_CallMethO(func, NULL);
         }
-                x = a - b;
-            return PyLong_FromLong(x);
-#ifdef HAVE_LONG_LONG
-        long_long:
-                llx = lla - llb;
-            return PyLong_FromLongLong(llx);
-#endif
-        
-        
     }
-    #endif
-    if (PyFloat_CheckExact(op1)) {
-        const long b = intval;
-        double a = PyFloat_AS_DOUBLE(op1);
-            double result;
-            PyFPE_START_PROTECT("subtract", return NULL)
-            result = ((double)a) - (double)b;
-            PyFPE_END_PROTECT(result)
-            return PyFloat_FromDouble(result);
-    }
-    return (inplace ? PyNumber_InPlaceSubtract : PyNumber_Subtract)(op1, op2);
+    return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
 }
 #endif
 
-/* GetItemInt */
-static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
-    PyObject *r;
-    if (!j) return NULL;
-    r = PyObject_GetItem(o, j);
-    Py_DECREF(j);
-    return r;
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_List_Fast(PyObject *o, Py_ssize_t i,
-                                                              CYTHON_NCP_UNUSED int wraparound,
-                                                              CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    Py_ssize_t wrapped_i = i;
-    if (wraparound & unlikely(i < 0)) {
-        wrapped_i += PyList_GET_SIZE(o);
-    }
-    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyList_GET_SIZE(o)))) {
-        PyObject *r = PyList_GET_ITEM(o, wrapped_i);
-        Py_INCREF(r);
-        return r;
-    }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+/* GetException */
+#if CYTHON_FAST_THREAD_STATE
+static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb)
 #else
-    return PySequence_GetItem(o, i);
+static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb)
 #endif
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Tuple_Fast(PyObject *o, Py_ssize_t i,
-                                                              CYTHON_NCP_UNUSED int wraparound,
-                                                              CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    Py_ssize_t wrapped_i = i;
-    if (wraparound & unlikely(i < 0)) {
-        wrapped_i += PyTuple_GET_SIZE(o);
-    }
-    if ((!boundscheck) || likely(__Pyx_is_valid_index(wrapped_i, PyTuple_GET_SIZE(o)))) {
-        PyObject *r = PyTuple_GET_ITEM(o, wrapped_i);
-        Py_INCREF(r);
-        return r;
-    }
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+{
+    PyObject *local_type, *local_value, *local_tb;
+#if CYTHON_FAST_THREAD_STATE
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    local_type = tstate->curexc_type;
+    local_value = tstate->curexc_value;
+    local_tb = tstate->curexc_traceback;
+    tstate->curexc_type = 0;
+    tstate->curexc_value = 0;
+    tstate->curexc_traceback = 0;
 #else
-    return PySequence_GetItem(o, i);
+    PyErr_Fetch(&local_type, &local_value, &local_tb);
 #endif
-}
-static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, int is_list,
-                                                     CYTHON_NCP_UNUSED int wraparound,
-                                                     CYTHON_NCP_UNUSED int boundscheck) {
-#if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS && CYTHON_USE_TYPE_SLOTS
-    if (is_list || PyList_CheckExact(o)) {
-        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyList_GET_SIZE(o);
-        if ((!boundscheck) || (likely(__Pyx_is_valid_index(n, PyList_GET_SIZE(o))))) {
-            PyObject *r = PyList_GET_ITEM(o, n);
-            Py_INCREF(r);
-            return r;
-        }
-    }
-    else if (PyTuple_CheckExact(o)) {
-        Py_ssize_t n = ((!wraparound) | likely(i >= 0)) ? i : i + PyTuple_GET_SIZE(o);
-        if ((!boundscheck) || likely(__Pyx_is_valid_index(n, PyTuple_GET_SIZE(o)))) {
-            PyObject *r = PyTuple_GET_ITEM(o, n);
-            Py_INCREF(r);
-            return r;
-        }
-    } else {
-        PySequenceMethods *m = Py_TYPE(o)->tp_as_sequence;
-        if (likely(m && m->sq_item)) {
-            if (wraparound && unlikely(i < 0) && likely(m->sq_length)) {
-                Py_ssize_t l = m->sq_length(o);
-                if (likely(l >= 0)) {
-                    i += l;
-                } else {
-                    if (!PyErr_ExceptionMatches(PyExc_OverflowError))
-                        return NULL;
-                    PyErr_Clear();
-                }
-            }
-            return m->sq_item(o, i);
-        }
-    }
+    PyErr_NormalizeException(&local_type, &local_value, &local_tb);
+#if CYTHON_FAST_THREAD_STATE
+    if (unlikely(tstate->curexc_type))
 #else
-    if (is_list || PySequence_Check(o)) {
-        return PySequence_GetItem(o, i);
-    }
+    if (unlikely(PyErr_Occurred()))
 #endif
-    return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
+        goto bad;
+    #if PY_MAJOR_VERSION >= 3
+    if (local_tb) {
+        if (unlikely(PyException_SetTraceback(local_value, local_tb) < 0))
+            goto bad;
+    }
+    #endif
+    Py_XINCREF(local_tb);
+    Py_XINCREF(local_type);
+    Py_XINCREF(local_value);
+    *type = local_type;
+    *value = local_value;
+    *tb = local_tb;
+#if CYTHON_FAST_THREAD_STATE
+    #if CYTHON_USE_EXC_INFO_STACK
+    {
+        _PyErr_StackItem *exc_info = tstate->exc_info;
+        tmp_type = exc_info->exc_type;
+        tmp_value = exc_info->exc_value;
+        tmp_tb = exc_info->exc_traceback;
+        exc_info->exc_type = local_type;
+        exc_info->exc_value = local_value;
+        exc_info->exc_traceback = local_tb;
+    }
+    #else
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = local_type;
+    tstate->exc_value = local_value;
+    tstate->exc_traceback = local_tb;
+    #endif
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+#else
+    PyErr_SetExcInfo(local_type, local_value, local_tb);
+#endif
+    return 0;
+bad:
+    *type = 0;
+    *value = 0;
+    *tb = 0;
+    Py_XDECREF(local_type);
+    Py_XDECREF(local_value);
+    Py_XDECREF(local_tb);
+    return -1;
 }
+
+/* SwapException */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    #if CYTHON_USE_EXC_INFO_STACK
+    _PyErr_StackItem *exc_info = tstate->exc_info;
+    tmp_type = exc_info->exc_type;
+    tmp_value = exc_info->exc_value;
+    tmp_tb = exc_info->exc_traceback;
+    exc_info->exc_type = *type;
+    exc_info->exc_value = *value;
+    exc_info->exc_traceback = *tb;
+    #else
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = *type;
+    tstate->exc_value = *value;
+    tstate->exc_traceback = *tb;
+    #endif
+    *type = tmp_type;
+    *value = tmp_value;
+    *tb = tmp_tb;
+}
+#else
+static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    PyErr_GetExcInfo(&tmp_type, &tmp_value, &tmp_tb);
+    PyErr_SetExcInfo(*type, *value, *tb);
+    *type = tmp_type;
+    *value = tmp_value;
+    *tb = tmp_tb;
+}
+#endif
+
+/* GetTopmostException */
+#if CYTHON_USE_EXC_INFO_STACK
+static _PyErr_StackItem *
+__Pyx_PyErr_GetTopmostException(PyThreadState *tstate)
+{
+    _PyErr_StackItem *exc_info = tstate->exc_info;
+    while ((exc_info->exc_type == NULL || exc_info->exc_type == Py_None) &&
+           exc_info->previous_item != NULL)
+    {
+        exc_info = exc_info->previous_item;
+    }
+    return exc_info;
+}
+#endif
+
+/* SaveResetException */
+#if CYTHON_FAST_THREAD_STATE
+static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
+    #if CYTHON_USE_EXC_INFO_STACK
+    _PyErr_StackItem *exc_info = __Pyx_PyErr_GetTopmostException(tstate);
+    *type = exc_info->exc_type;
+    *value = exc_info->exc_value;
+    *tb = exc_info->exc_traceback;
+    #else
+    *type = tstate->exc_type;
+    *value = tstate->exc_value;
+    *tb = tstate->exc_traceback;
+    #endif
+    Py_XINCREF(*type);
+    Py_XINCREF(*value);
+    Py_XINCREF(*tb);
+}
+static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
+    PyObject *tmp_type, *tmp_value, *tmp_tb;
+    #if CYTHON_USE_EXC_INFO_STACK
+    _PyErr_StackItem *exc_info = tstate->exc_info;
+    tmp_type = exc_info->exc_type;
+    tmp_value = exc_info->exc_value;
+    tmp_tb = exc_info->exc_traceback;
+    exc_info->exc_type = type;
+    exc_info->exc_value = value;
+    exc_info->exc_traceback = tb;
+    #else
+    tmp_type = tstate->exc_type;
+    tmp_value = tstate->exc_value;
+    tmp_tb = tstate->exc_traceback;
+    tstate->exc_type = type;
+    tstate->exc_value = value;
+    tstate->exc_traceback = tb;
+    #endif
+    Py_XDECREF(tmp_type);
+    Py_XDECREF(tmp_value);
+    Py_XDECREF(tmp_tb);
+}
+#endif
 
 /* PyIntBinop */
 #if !CYTHON_COMPILING_IN_PYPY
@@ -10797,497 +10295,6 @@ static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED
 }
 #endif
 
-/* ObjectGetItem */
-#if CYTHON_USE_TYPE_SLOTS
-static PyObject *__Pyx_PyObject_GetIndex(PyObject *obj, PyObject* index) {
-    PyObject *runerr;
-    Py_ssize_t key_value;
-    PySequenceMethods *m = Py_TYPE(obj)->tp_as_sequence;
-    if (unlikely(!(m && m->sq_item))) {
-        PyErr_Format(PyExc_TypeError, "'%.200s' object is not subscriptable", Py_TYPE(obj)->tp_name);
-        return NULL;
-    }
-    key_value = __Pyx_PyIndex_AsSsize_t(index);
-    if (likely(key_value != -1 || !(runerr = PyErr_Occurred()))) {
-        return __Pyx_GetItemInt_Fast(obj, key_value, 0, 1, 1);
-    }
-    if (PyErr_GivenExceptionMatches(runerr, PyExc_OverflowError)) {
-        PyErr_Clear();
-        PyErr_Format(PyExc_IndexError, "cannot fit '%.200s' into an index-sized integer", Py_TYPE(index)->tp_name);
-    }
-    return NULL;
-}
-static PyObject *__Pyx_PyObject_GetItem(PyObject *obj, PyObject* key) {
-    PyMappingMethods *m = Py_TYPE(obj)->tp_as_mapping;
-    if (likely(m && m->mp_subscript)) {
-        return m->mp_subscript(obj, key);
-    }
-    return __Pyx_PyObject_GetIndex(obj, key);
-}
-#endif
-
-/* GetTopmostException */
-#if CYTHON_USE_EXC_INFO_STACK
-static _PyErr_StackItem *
-__Pyx_PyErr_GetTopmostException(PyThreadState *tstate)
-{
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    while ((exc_info->exc_type == NULL || exc_info->exc_type == Py_None) &&
-           exc_info->previous_item != NULL)
-    {
-        exc_info = exc_info->previous_item;
-    }
-    return exc_info;
-}
-#endif
-
-/* SaveResetException */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx__ExceptionSave(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    #if CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = __Pyx_PyErr_GetTopmostException(tstate);
-    *type = exc_info->exc_type;
-    *value = exc_info->exc_value;
-    *tb = exc_info->exc_traceback;
-    #else
-    *type = tstate->exc_type;
-    *value = tstate->exc_value;
-    *tb = tstate->exc_traceback;
-    #endif
-    Py_XINCREF(*type);
-    Py_XINCREF(*value);
-    Py_XINCREF(*tb);
-}
-static CYTHON_INLINE void __Pyx__ExceptionReset(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    #if CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    tmp_type = exc_info->exc_type;
-    tmp_value = exc_info->exc_value;
-    tmp_tb = exc_info->exc_traceback;
-    exc_info->exc_type = type;
-    exc_info->exc_value = value;
-    exc_info->exc_traceback = tb;
-    #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = type;
-    tstate->exc_value = value;
-    tstate->exc_traceback = tb;
-    #endif
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-}
-#endif
-
-/* PyErrExceptionMatches */
-#if CYTHON_FAST_THREAD_STATE
-static int __Pyx_PyErr_ExceptionMatchesTuple(PyObject *exc_type, PyObject *tuple) {
-    Py_ssize_t i, n;
-    n = PyTuple_GET_SIZE(tuple);
-#if PY_MAJOR_VERSION >= 3
-    for (i=0; i<n; i++) {
-        if (exc_type == PyTuple_GET_ITEM(tuple, i)) return 1;
-    }
-#endif
-    for (i=0; i<n; i++) {
-        if (__Pyx_PyErr_GivenExceptionMatches(exc_type, PyTuple_GET_ITEM(tuple, i))) return 1;
-    }
-    return 0;
-}
-static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err) {
-    PyObject *exc_type = tstate->curexc_type;
-    if (exc_type == err) return 1;
-    if (unlikely(!exc_type)) return 0;
-    if (unlikely(PyTuple_Check(err)))
-        return __Pyx_PyErr_ExceptionMatchesTuple(exc_type, err);
-    return __Pyx_PyErr_GivenExceptionMatches(exc_type, err);
-}
-#endif
-
-/* GetException */
-#if CYTHON_FAST_THREAD_STATE
-static int __Pyx__GetException(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb)
-#else
-static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb)
-#endif
-{
-    PyObject *local_type, *local_value, *local_tb;
-#if CYTHON_FAST_THREAD_STATE
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    local_type = tstate->curexc_type;
-    local_value = tstate->curexc_value;
-    local_tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-#else
-    PyErr_Fetch(&local_type, &local_value, &local_tb);
-#endif
-    PyErr_NormalizeException(&local_type, &local_value, &local_tb);
-#if CYTHON_FAST_THREAD_STATE
-    if (unlikely(tstate->curexc_type))
-#else
-    if (unlikely(PyErr_Occurred()))
-#endif
-        goto bad;
-    #if PY_MAJOR_VERSION >= 3
-    if (local_tb) {
-        if (unlikely(PyException_SetTraceback(local_value, local_tb) < 0))
-            goto bad;
-    }
-    #endif
-    Py_XINCREF(local_tb);
-    Py_XINCREF(local_type);
-    Py_XINCREF(local_value);
-    *type = local_type;
-    *value = local_value;
-    *tb = local_tb;
-#if CYTHON_FAST_THREAD_STATE
-    #if CYTHON_USE_EXC_INFO_STACK
-    {
-        _PyErr_StackItem *exc_info = tstate->exc_info;
-        tmp_type = exc_info->exc_type;
-        tmp_value = exc_info->exc_value;
-        tmp_tb = exc_info->exc_traceback;
-        exc_info->exc_type = local_type;
-        exc_info->exc_value = local_value;
-        exc_info->exc_traceback = local_tb;
-    }
-    #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = local_type;
-    tstate->exc_value = local_value;
-    tstate->exc_traceback = local_tb;
-    #endif
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-#else
-    PyErr_SetExcInfo(local_type, local_value, local_tb);
-#endif
-    return 0;
-bad:
-    *type = 0;
-    *value = 0;
-    *tb = 0;
-    Py_XDECREF(local_type);
-    Py_XDECREF(local_value);
-    Py_XDECREF(local_tb);
-    return -1;
-}
-
-/* JoinPyUnicode */
-static PyObject* __Pyx_PyUnicode_Join(PyObject* value_tuple, Py_ssize_t value_count, Py_ssize_t result_ulength,
-                                      CYTHON_UNUSED Py_UCS4 max_char) {
-#if CYTHON_USE_UNICODE_INTERNALS && CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    PyObject *result_uval;
-    int result_ukind;
-    Py_ssize_t i, char_pos;
-    void *result_udata;
-#if CYTHON_PEP393_ENABLED
-    result_uval = PyUnicode_New(result_ulength, max_char);
-    if (unlikely(!result_uval)) return NULL;
-    result_ukind = (max_char <= 255) ? PyUnicode_1BYTE_KIND : (max_char <= 65535) ? PyUnicode_2BYTE_KIND : PyUnicode_4BYTE_KIND;
-    result_udata = PyUnicode_DATA(result_uval);
-#else
-    result_uval = PyUnicode_FromUnicode(NULL, result_ulength);
-    if (unlikely(!result_uval)) return NULL;
-    result_ukind = sizeof(Py_UNICODE);
-    result_udata = PyUnicode_AS_UNICODE(result_uval);
-#endif
-    char_pos = 0;
-    for (i=0; i < value_count; i++) {
-        int ukind;
-        Py_ssize_t ulength;
-        void *udata;
-        PyObject *uval = PyTuple_GET_ITEM(value_tuple, i);
-        if (unlikely(__Pyx_PyUnicode_READY(uval)))
-            goto bad;
-        ulength = __Pyx_PyUnicode_GET_LENGTH(uval);
-        if (unlikely(!ulength))
-            continue;
-        if (unlikely(char_pos + ulength < 0))
-            goto overflow;
-        ukind = __Pyx_PyUnicode_KIND(uval);
-        udata = __Pyx_PyUnicode_DATA(uval);
-        if (!CYTHON_PEP393_ENABLED || ukind == result_ukind) {
-            memcpy((char *)result_udata + char_pos * result_ukind, udata, (size_t) (ulength * result_ukind));
-        } else {
-            #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030300F0 || defined(_PyUnicode_FastCopyCharacters)
-            _PyUnicode_FastCopyCharacters(result_uval, char_pos, uval, 0, ulength);
-            #else
-            Py_ssize_t j;
-            for (j=0; j < ulength; j++) {
-                Py_UCS4 uchar = __Pyx_PyUnicode_READ(ukind, udata, j);
-                __Pyx_PyUnicode_WRITE(result_ukind, result_udata, char_pos+j, uchar);
-            }
-            #endif
-        }
-        char_pos += ulength;
-    }
-    return result_uval;
-overflow:
-    PyErr_SetString(PyExc_OverflowError, "join() result is too long for a Python string");
-bad:
-    Py_DECREF(result_uval);
-    return NULL;
-#else
-    result_ulength++;
-    value_count++;
-    return PyUnicode_Join(__pyx_empty_unicode, value_tuple);
-#endif
-}
-
-/* PyErrFetchRestore */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    tmp_type = tstate->curexc_type;
-    tmp_value = tstate->curexc_value;
-    tmp_tb = tstate->curexc_traceback;
-    tstate->curexc_type = type;
-    tstate->curexc_value = value;
-    tstate->curexc_traceback = tb;
-    Py_XDECREF(tmp_type);
-    Py_XDECREF(tmp_value);
-    Py_XDECREF(tmp_tb);
-}
-static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    *type = tstate->curexc_type;
-    *value = tstate->curexc_value;
-    *tb = tstate->curexc_traceback;
-    tstate->curexc_type = 0;
-    tstate->curexc_value = 0;
-    tstate->curexc_traceback = 0;
-}
-#endif
-
-/* SwapException */
-#if CYTHON_FAST_THREAD_STATE
-static CYTHON_INLINE void __Pyx__ExceptionSwap(PyThreadState *tstate, PyObject **type, PyObject **value, PyObject **tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    #if CYTHON_USE_EXC_INFO_STACK
-    _PyErr_StackItem *exc_info = tstate->exc_info;
-    tmp_type = exc_info->exc_type;
-    tmp_value = exc_info->exc_value;
-    tmp_tb = exc_info->exc_traceback;
-    exc_info->exc_type = *type;
-    exc_info->exc_value = *value;
-    exc_info->exc_traceback = *tb;
-    #else
-    tmp_type = tstate->exc_type;
-    tmp_value = tstate->exc_value;
-    tmp_tb = tstate->exc_traceback;
-    tstate->exc_type = *type;
-    tstate->exc_value = *value;
-    tstate->exc_traceback = *tb;
-    #endif
-    *type = tmp_type;
-    *value = tmp_value;
-    *tb = tmp_tb;
-}
-#else
-static CYTHON_INLINE void __Pyx_ExceptionSwap(PyObject **type, PyObject **value, PyObject **tb) {
-    PyObject *tmp_type, *tmp_value, *tmp_tb;
-    PyErr_GetExcInfo(&tmp_type, &tmp_value, &tmp_tb);
-    PyErr_SetExcInfo(*type, *value, *tb);
-    *type = tmp_type;
-    *value = tmp_value;
-    *tb = tmp_tb;
-}
-#endif
-
-/* RaiseException */
-#if PY_MAJOR_VERSION < 3
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb,
-                        CYTHON_UNUSED PyObject *cause) {
-    __Pyx_PyThreadState_declare
-    Py_XINCREF(type);
-    if (!value || value == Py_None)
-        value = NULL;
-    else
-        Py_INCREF(value);
-    if (!tb || tb == Py_None)
-        tb = NULL;
-    else {
-        Py_INCREF(tb);
-        if (!PyTraceBack_Check(tb)) {
-            PyErr_SetString(PyExc_TypeError,
-                "raise: arg 3 must be a traceback or None");
-            goto raise_error;
-        }
-    }
-    if (PyType_Check(type)) {
-#if CYTHON_COMPILING_IN_PYPY
-        if (!value) {
-            Py_INCREF(Py_None);
-            value = Py_None;
-        }
-#endif
-        PyErr_NormalizeException(&type, &value, &tb);
-    } else {
-        if (value) {
-            PyErr_SetString(PyExc_TypeError,
-                "instance exception may not have a separate value");
-            goto raise_error;
-        }
-        value = type;
-        type = (PyObject*) Py_TYPE(type);
-        Py_INCREF(type);
-        if (!PyType_IsSubtype((PyTypeObject *)type, (PyTypeObject *)PyExc_BaseException)) {
-            PyErr_SetString(PyExc_TypeError,
-                "raise: exception class must be a subclass of BaseException");
-            goto raise_error;
-        }
-    }
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrRestore(type, value, tb);
-    return;
-raise_error:
-    Py_XDECREF(value);
-    Py_XDECREF(type);
-    Py_XDECREF(tb);
-    return;
-}
-#else
-static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause) {
-    PyObject* owned_instance = NULL;
-    if (tb == Py_None) {
-        tb = 0;
-    } else if (tb && !PyTraceBack_Check(tb)) {
-        PyErr_SetString(PyExc_TypeError,
-            "raise: arg 3 must be a traceback or None");
-        goto bad;
-    }
-    if (value == Py_None)
-        value = 0;
-    if (PyExceptionInstance_Check(type)) {
-        if (value) {
-            PyErr_SetString(PyExc_TypeError,
-                "instance exception may not have a separate value");
-            goto bad;
-        }
-        value = type;
-        type = (PyObject*) Py_TYPE(value);
-    } else if (PyExceptionClass_Check(type)) {
-        PyObject *instance_class = NULL;
-        if (value && PyExceptionInstance_Check(value)) {
-            instance_class = (PyObject*) Py_TYPE(value);
-            if (instance_class != type) {
-                int is_subclass = PyObject_IsSubclass(instance_class, type);
-                if (!is_subclass) {
-                    instance_class = NULL;
-                } else if (unlikely(is_subclass == -1)) {
-                    goto bad;
-                } else {
-                    type = instance_class;
-                }
-            }
-        }
-        if (!instance_class) {
-            PyObject *args;
-            if (!value)
-                args = PyTuple_New(0);
-            else if (PyTuple_Check(value)) {
-                Py_INCREF(value);
-                args = value;
-            } else
-                args = PyTuple_Pack(1, value);
-            if (!args)
-                goto bad;
-            owned_instance = PyObject_Call(type, args, NULL);
-            Py_DECREF(args);
-            if (!owned_instance)
-                goto bad;
-            value = owned_instance;
-            if (!PyExceptionInstance_Check(value)) {
-                PyErr_Format(PyExc_TypeError,
-                             "calling %R should have returned an instance of "
-                             "BaseException, not %R",
-                             type, Py_TYPE(value));
-                goto bad;
-            }
-        }
-    } else {
-        PyErr_SetString(PyExc_TypeError,
-            "raise: exception class must be a subclass of BaseException");
-        goto bad;
-    }
-    if (cause) {
-        PyObject *fixed_cause;
-        if (cause == Py_None) {
-            fixed_cause = NULL;
-        } else if (PyExceptionClass_Check(cause)) {
-            fixed_cause = PyObject_CallObject(cause, NULL);
-            if (fixed_cause == NULL)
-                goto bad;
-        } else if (PyExceptionInstance_Check(cause)) {
-            fixed_cause = cause;
-            Py_INCREF(fixed_cause);
-        } else {
-            PyErr_SetString(PyExc_TypeError,
-                            "exception causes must derive from "
-                            "BaseException");
-            goto bad;
-        }
-        PyException_SetCause(value, fixed_cause);
-    }
-    PyErr_SetObject(type, value);
-    if (tb) {
-#if CYTHON_COMPILING_IN_PYPY
-        PyObject *tmp_type, *tmp_value, *tmp_tb;
-        PyErr_Fetch(&tmp_type, &tmp_value, &tmp_tb);
-        Py_INCREF(tb);
-        PyErr_Restore(tmp_type, tmp_value, tb);
-        Py_XDECREF(tmp_tb);
-#else
-        PyThreadState *tstate = __Pyx_PyThreadState_Current;
-        PyObject* tmp_tb = tstate->curexc_traceback;
-        if (tb != tmp_tb) {
-            Py_INCREF(tb);
-            tstate->curexc_traceback = tb;
-            Py_XDECREF(tmp_tb);
-        }
-#endif
-    }
-bad:
-    Py_XDECREF(owned_instance);
-    return;
-}
-#endif
-
-/* None */
-static CYTHON_INLINE void __Pyx_RaiseClosureNameError(const char *varname) {
-    PyErr_Format(PyExc_NameError, "free variable '%s' referenced before assignment in enclosing scope", varname);
-}
-
-/* PyObjectCallNoArg */
-#if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, NULL, 0);
-    }
-#endif
-#ifdef __Pyx_CyFunction_USED
-    if (likely(PyCFunction_Check(func) || __Pyx_CyFunction_Check(func)))
-#else
-    if (likely(PyCFunction_Check(func)))
-#endif
-    {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
-            return __Pyx_PyObject_CallMethO(func, NULL);
-        }
-    }
-    return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
-}
-#endif
-
 /* SliceObject */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
         Py_ssize_t cstart, Py_ssize_t cstop,
@@ -11384,6 +10391,31 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
 bad:
     return NULL;
 }
+
+/* PyErrExceptionMatches */
+#if CYTHON_FAST_THREAD_STATE
+static int __Pyx_PyErr_ExceptionMatchesTuple(PyObject *exc_type, PyObject *tuple) {
+    Py_ssize_t i, n;
+    n = PyTuple_GET_SIZE(tuple);
+#if PY_MAJOR_VERSION >= 3
+    for (i=0; i<n; i++) {
+        if (exc_type == PyTuple_GET_ITEM(tuple, i)) return 1;
+    }
+#endif
+    for (i=0; i<n; i++) {
+        if (__Pyx_PyErr_GivenExceptionMatches(exc_type, PyTuple_GET_ITEM(tuple, i))) return 1;
+    }
+    return 0;
+}
+static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tstate, PyObject* err) {
+    PyObject *exc_type = tstate->curexc_type;
+    if (exc_type == err) return 1;
+    if (unlikely(!exc_type)) return 0;
+    if (unlikely(PyTuple_Check(err)))
+        return __Pyx_PyErr_ExceptionMatchesTuple(exc_type, err);
+    return __Pyx_PyErr_GivenExceptionMatches(exc_type, err);
+}
+#endif
 
 /* PyObject_GenericGetAttrNoDict */
 #if CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP && PY_VERSION_HEX < 0x03070000
@@ -11667,20 +10699,6 @@ bad:
     return module;
 }
 
-/* ImportFrom */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
-    PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
-    if (unlikely(!value) && PyErr_ExceptionMatches(PyExc_AttributeError)) {
-        PyErr_Format(PyExc_ImportError,
-        #if PY_MAJOR_VERSION < 3
-            "cannot import name %.230s", PyString_AS_STRING(name));
-        #else
-            "cannot import name %S", name);
-        #endif
-    }
-    return value;
-}
-
 /* CLineInTraceback */
 #ifndef CYTHON_CLINE_IN_TRACEBACK
 static int __Pyx_CLineForTraceback(CYTHON_NCP_UNUSED PyThreadState *tstate, int c_line) {
@@ -11888,37 +10906,6 @@ bad:
     Py_XDECREF(py_frame);
 }
 
-/* CIntToPy */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
-    const long neg_one = (long) ((long) 0 - (long) 1), const_zero = (long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(long),
-                                     little, !is_unsigned);
-    }
-}
-
 /* CIntFromPyVerify */
 #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
     __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
@@ -11940,6 +10927,68 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
         }\
         return (target_type) value;\
     }
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value) {
+    const time_t neg_one = (time_t) ((time_t) 0 - (time_t) 1), const_zero = (time_t) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(time_t) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(time_t) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(time_t) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(time_t) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(time_t) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(time_t),
+                                     little, !is_unsigned);
+    }
+}
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_long(npy_long value) {
+    const npy_long neg_one = (npy_long) ((npy_long) 0 - (npy_long) 1), const_zero = (npy_long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(npy_long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(npy_long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(npy_long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(npy_long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(npy_long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(npy_long),
+                                     little, !is_unsigned);
+    }
+}
 
 /* Declarations */
 #if CYTHON_CCOMPLEX
@@ -12625,6 +11674,226 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to npy_long");
     return (npy_long) -1;
+}
+
+/* CIntFromPy */
+static CYTHON_INLINE time_t __Pyx_PyInt_As_time_t(PyObject *x) {
+    const time_t neg_one = (time_t) ((time_t) 0 - (time_t) 1), const_zero = (time_t) 0;
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(time_t) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(time_t, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (time_t) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (time_t) 0;
+                case  1: __PYX_VERIFY_RETURN_INT(time_t, digit, digits[0])
+                case 2:
+                    if (8 * sizeof(time_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) >= 2 * PyLong_SHIFT) {
+                            return (time_t) (((((time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(time_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) >= 3 * PyLong_SHIFT) {
+                            return (time_t) (((((((time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(time_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) >= 4 * PyLong_SHIFT) {
+                            return (time_t) (((((((((time_t)digits[3]) << PyLong_SHIFT) | (time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0]));
+                        }
+                    }
+                    break;
+            }
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+#else
+            {
+                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
+                if (unlikely(result < 0))
+                    return (time_t) -1;
+                if (unlikely(result == 1))
+                    goto raise_neg_overflow;
+            }
+#endif
+            if (sizeof(time_t) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(time_t, unsigned long, PyLong_AsUnsignedLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(time_t) <= sizeof(unsigned PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(time_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
+#endif
+            }
+        } else {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (time_t) 0;
+                case -1: __PYX_VERIFY_RETURN_INT(time_t, sdigit, (sdigit) (-(sdigit)digits[0]))
+                case  1: __PYX_VERIFY_RETURN_INT(time_t,  digit, +digits[0])
+                case -2:
+                    if (8 * sizeof(time_t) - 1 > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (time_t) (((time_t)-1)*(((((time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 2:
+                    if (8 * sizeof(time_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (time_t) ((((((time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -3:
+                    if (8 * sizeof(time_t) - 1 > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (time_t) (((time_t)-1)*(((((((time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(time_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (time_t) ((((((((time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -4:
+                    if (8 * sizeof(time_t) - 1 > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (time_t) (((time_t)-1)*(((((((((time_t)digits[3]) << PyLong_SHIFT) | (time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(time_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(time_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(time_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (time_t) ((((((((((time_t)digits[3]) << PyLong_SHIFT) | (time_t)digits[2]) << PyLong_SHIFT) | (time_t)digits[1]) << PyLong_SHIFT) | (time_t)digits[0])));
+                        }
+                    }
+                    break;
+            }
+#endif
+            if (sizeof(time_t) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(time_t, long, PyLong_AsLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(time_t) <= sizeof(PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(time_t, PY_LONG_LONG, PyLong_AsLongLong(x))
+#endif
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            time_t val;
+            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (time_t) -1;
+        }
+    } else {
+        time_t val;
+        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
+        if (!tmp) return (time_t) -1;
+        val = __Pyx_PyInt_As_time_t(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to time_t");
+    return (time_t) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to time_t");
+    return (time_t) -1;
+}
+
+/* CIntToPy */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
+    const long neg_one = (long) ((long) 0 - (long) 1), const_zero = (long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+    }
 }
 
 /* CIntFromPy */

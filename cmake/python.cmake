@@ -161,8 +161,9 @@ endif()
 # Add path to the library
 set_tests_properties(multitensor_python_test
     PROPERTIES
-    ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:multitensor_py>"
-    ENVIRONMENT "ROOT_DIR=${CMAKE_SOURCE_DIR}")
+        ENVIRONMENT
+            "PYTHONPATH=$<TARGET_FILE_DIR:multitensor_py>;ROOT_DIR=${CMAKE_SOURCE_DIR}"
+)
 
 # Sphinx documentation for Python extension
 if(MULTITENSOR_PYTHON_SPHINX)

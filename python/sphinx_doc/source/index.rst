@@ -28,7 +28,7 @@ Requirements
 Installation
 ============
 
-The package can be easily installed using `pip <https://pypi.python.org/pypi/pip>`_ on a distribution:
+The package can be easily installed using `pip <https://pypi.python.org/pypi/pip>`_ on a distribution (e.g. wheel, source tarball):
 
 .. code::
 
@@ -46,12 +46,17 @@ in your build directory:
 Getting started
 ===============
 
-To use the algorithm, import the module inside you *Python* session:
+To use the algorithm, import the module inside you Python session
+and use the :func:`multitensor.run` function:
 
 .. code-block:: python
 
     import multitensor
-    help(multitensor)
+
+    adjacency_file = '$MULTITENSOR_SRC_DIR/data/main/adjacency.dat'
+    num_groups = 2
+
+    u, v, affinity, report = multitensor.run(adjacency_file, num_groups)
 
 
 Indices and tables

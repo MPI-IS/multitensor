@@ -115,6 +115,7 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     {
         nof_groups = static_cast<size_t>(affinity.size() / nof_layers);
         affinity_size = nof_groups * nof_layers;
+        std::cout << "YYYESSSS" << std::endl;
     }
     else // Non-assortative case
     {
@@ -198,6 +199,7 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     // Diagnostics
     std::cout << "Starting algorithm...\n"
               << "\t- Number of vertices: " << nof_vertices << "\n"
+              << "\t- Number of edges: " << nof_edges << "\n"
               << "\t- Number of layers: " << nof_layers << "\n"
               << "\t- Number of groups: " << nof_groups << "\n"
               << "\t- Number of realizations: " << nof_realizations << "\n"

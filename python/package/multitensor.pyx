@@ -5,7 +5,7 @@
 '''
 Python wrapper for the multitensor library
 
-:author: Ivan Oreshnikov <ivan.oreshnikov@tuebingen.mog.de>
+:author: Ivan Oreshnikov <ivan.oreshnikov@tuebingen.mpg.de>
 :author: Jean-Claude Passy <jean-claude.passy@tuebingen.mpg.de>
 '''
 
@@ -183,7 +183,7 @@ cdef extern from "multitensor/utils.hpp" namespace "multitensor::utils":
 
 
 cdef extern from "<random>" namespace "std":
-    cdef cppclass mt19937_64 "std::mt19937_64":
+    cdef cppclass mt19937 "std::mt19937":
         pass
     cdef cppclass uniform_real_distribution "std::uniform_real_distribution<double>":
         pass
@@ -206,18 +206,16 @@ cdef extern from "multitensor/main.hpp" namespace "multitensor":
     ) except +RuntimeError
 
 
-def run(
-    adjacency_filename,
-    nof_groups,
-    directed=True,
-    assortative=False,
-    nof_realizations=1,
-    max_nof_iterations=500,
-    nof_convergences=10,
-    init_affinity_filename=None,
-    weigths_dtype=float,
-    seed=None
-):
+def run(adjacency_filename,
+        nof_groups,
+        directed=True,
+        assortative=False,
+        nof_realizations=1,
+        max_nof_iterations=500,
+        nof_convergences=10,
+        init_affinity_filename=None,
+        weigths_dtype=float,
+        seed=None):
     """
     Runs the multitensor factorization algorithm.
 
@@ -238,13 +236,17 @@ def run(
         * the numpy array linking incoming vertices
         * the numpy array containing the affinity values
         * the detailed report
-    :rtype: tuple(numpy.array, numpy.array, numpy.array, ReportWrapper)
+    :rtype:
+        tuple(:class:`~numpy:numpy.ndarray`,
+        :class:`~numpy:numpy.ndarray`,
+        :class:`~numpy:numpy.ndarray`,
+        :class:`ReportWrapper`)
     """
     # Load adjacency file
     adj_data = numpy.loadtxt(adjacency_filename)
 
     edges_start = adj_data[:, 0].astype(int)
-    edges_end = adj_data[:, 2].astype(int)
+    edges_end = adj_data[:, 1].astype(int)
     edges_weights = adj_data[:, 2:].astype(weigths_dtype).ravel()
 
     # The underlying C function deduces the number of groups from the
@@ -252,11 +254,11 @@ def run(
     # version we want to keep a more python approach and pass an
     # explicit parameter. This implies that we have to repeat the math
     # done in C function in reverse.
-    cdef size_t nof_edges = edges_start.size
+    nof_edges = edges_start.size
+    nof_layers = edges_weights.size // nof_edges
     cdef size_t nof_vertices = get_num_vertices[vertex_t](
         < const vector[vertex_t] & > edges_start,
         < const vector[vertex_t] & > edges_end)
-    cdef size_t nof_layers = edges_weights.size / nof_edges
 
     # Preallocate the output matrices.
     cdef Matrix[numpy.float_t] c_u = Matrix[numpy.float_t](nof_vertices, nof_groups)
@@ -297,8 +299,8 @@ def run(
     # See https://stackoverflow.com/questions/45991342/directly-call-c-struct-constructor-from-cython
     # and http://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus.html
     # So here we use a pointer
-    cdef RandomGenerator[mt19937_64, uniform_real_distribution] * rng = \
-        new RandomGenerator[mt19937_64, uniform_real_distribution](seed)
+    cdef RandomGenerator[mt19937, uniform_real_distribution] * rng = \
+        new RandomGenerator[mt19937, uniform_real_distribution](seed)
 
     # The code below reproduces the switch case from MultiTensor.hpp
     # (starting on line 175 as of moment of writing). This is done for
@@ -322,7 +324,7 @@ def run(
 
         if weigths_dtype is int and directed and not assortative and not init_affinity_filename:
             # case 1: directed + non-assortative + w random
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 SymmetricTensor[numpy.float_t],
@@ -355,7 +357,7 @@ def run(
 
         if weigths_dtype is int and directed and assortative and not init_affinity_filename:
             # case 3: directed + assortative + w random
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 DiagonalTensor[numpy.float_t],
@@ -388,7 +390,7 @@ def run(
 
         if weigths_dtype is int and directed and not assortative and init_affinity_filename:
             # case 5: directed + non-assortative + w from file
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 SymmetricTensor[numpy.float_t],
@@ -421,7 +423,7 @@ def run(
 
         if weigths_dtype is int and directed and assortative and init_affinity_filename:
             # case 7: directed + assortative + w from file
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 DiagonalTensor[numpy.float_t],
@@ -458,7 +460,7 @@ def run(
 
         if weigths_dtype is float and directed and not assortative and not init_affinity_filename:
             # case 1: directed + non-assortative + w random
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 SymmetricTensor[numpy.float_t],
@@ -491,7 +493,7 @@ def run(
 
         if weigths_dtype is float and directed and assortative and not init_affinity_filename:
             # case 3: directed + assortative + w random
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 DiagonalTensor[numpy.float_t],
@@ -524,7 +526,7 @@ def run(
 
         if weigths_dtype is float and directed and not assortative and init_affinity_filename:
             # case 5: directed + non-assortative + w from file
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 SymmetricTensor[numpy.float_t],
@@ -557,7 +559,7 @@ def run(
 
         if weigths_dtype is float and directed and assortative and init_affinity_filename:
             # case 7: directed + assortative + w from file
-            c_v.resize(nof_vertices, nof_groups)
+            c_v.resize(nof_vertices, nof_groups)  # we need v
             report.c_obj = c_multitensor_factorization[
                 bidirectionalS,
                 DiagonalTensor[numpy.float_t],
@@ -577,25 +579,30 @@ def run(
 
     # U and V outputs
     u = numpy.array(
-        [c_u(i, j) for i in range(c_u.get_nrows()) for j in range(c_u.get_ncols())]
-    ).reshape((c_u.get_nrows(), c_u.get_ncols()))
-    v = numpy.array(
-        [c_v(i, j) for i in range(c_v.get_nrows()) for j in range(c_v.get_ncols())]
-    ).reshape((c_v.get_nrows(), c_v.get_ncols()))
+        [[labels[i]] + [c_u(i, j) for j in range(c_u.get_ncols())] for i in range(c_u.get_nrows())]
+    )
+    # V is None if undirected
+    v = None
+    if directed:
+        v = numpy.array(
+            [[labels[i]] + [c_v(i, j) for j in range(c_v.get_ncols())]
+             for i in range(c_v.get_nrows())]
+        )
 
     # Affinity output
-    # We return a format similar to that returned
-    # by the function read_affinity_data
-    # i.e. a list of arrays
+    # We return a list of arrays
     affinity_ravel = numpy.array(
         c_affinity
     )
     num_vals = affinity_ravel.size // nof_layers
     affinity = []
+    # The data is transposed (rows are enumerated first)
+    # but we want to go through the columns for a given row
     for l in range(nof_layers):
         begin = l * num_vals
         end = (l + 1) * num_vals
-        affinity.append(
-            numpy.array(affinity_ravel[begin:end]).reshape((-1, nof_groups))
-        )
+        w_l = affinity_ravel[begin:end].reshape((-1, nof_groups)).T
+        if assortative:
+            w_l = w_l.ravel()
+        affinity.append(w_l)
     return u, v, affinity, report

@@ -13,6 +13,7 @@ from multitensor import ReportWrapper, run
 
 DATA_DIRECTORY = Path(os.environ['ROOT_DIR']) / "data"
 TEST_DATA_DIRECTORY = Path(os.environ['ROOT_DIR']) / "tests" / "data"
+RELATIVE_TOL = 1e-5
 
 
 class InputFileMixin:
@@ -32,7 +33,7 @@ class InputFileMixin:
     # Optinal arguments
     affinity_filename = None
     assortative = False
-    undirected = False
+    directed = True
     num_realizations = 1
     num_iterations = 100
     seed = 5489
@@ -48,43 +49,61 @@ class InputFileMixin:
         crashing and then verify that everything has a reasonable type
         and shape.
         """
-        w_file = DATA_DIRECTORY / self.folder / self.affinity_filename if self.affinity_filename else None
+        # Initial affinity data
+        w_file = None
+        if self.affinity_filename:
+            w_file = DATA_DIRECTORY / self.folder / self.affinity_filename
+
         u, v, w, report = run(
             DATA_DIRECTORY / self.folder / self.adjacency_filename,
             self.num_groups,
-            not self.undirected,
+            self.directed,
             self.assortative,
             self.num_realizations,
             self.num_iterations,
             init_affinity_filename=w_file,
-            seed=5489)
+            seed=self.seed)
 
-        self.assertIsInstance(u, np.ndarray)
-        self.assertIsInstance(v, np.ndarray)
-        self.assertIsInstance(w, list)
-        self.assertIsInstance(w[0], np.ndarray)
+        # Check report
         self.assertIsInstance(report, ReportWrapper)
         self.assertEqual(report.nof_realizations, self.num_realizations)
-        for i in range(self.num_realizations):
-            self.assertLessEqual(report.vec_iter[i], self.num_iterations)
+        self.assertEqual(len(report.vec_iter), report.nof_realizations)
+        for it in report.vec_iter:
+            self.assertLessEqual(it, self.num_iterations)
 
-        num_vertices, num_groups = u.shape
+        # Check u and w
+        self.assertIsInstance(u, np.ndarray)
+        num_vertices = u.shape[0]
+        num_groups = u.shape[1] - 1
         self.assertEqual(num_groups, self.num_groups)
-        if not self.undirected:
-            self.assertEqual(v.shape, (num_vertices, num_groups))
+
+        self.assertIsInstance(w, list)
+        self.assertIsInstance(w[0], np.ndarray)
         for l in w:
             if self.assortative:
-                self.assertEqual(l.shape, (1, num_groups))
+                self.assertEqual(l.shape, (num_groups,))
             else:
                 self.assertEqual(l.shape, (num_groups, num_groups))
 
-        # TODO check content
         u_compare = np.loadtxt(TEST_DATA_DIRECTORY / self.folder / self.u_compare_filename)
         w_compare = np.loadtxt(
             TEST_DATA_DIRECTORY / self.folder / self.w_compare_filename, comments=['#', "a="]
         )
-        if self.v_compare_filename:
+        self.assertTrue((u[:, 0] == u_compare[:, 0]).all())
+        np.testing.assert_allclose(u[:, 1:], u_compare[:, 1:], rtol=RELATIVE_TOL)
+        for l, w_layer in enumerate(w):
+            np.testing.assert_allclose(
+                w_layer, w_compare[num_groups * l:num_groups * (l + 1)], rtol=RELATIVE_TOL)
+
+        # Check v
+        if self.directed:
+            self.assertIsInstance(v, np.ndarray)
+            self.assertEqual(v.shape, (num_vertices, num_groups + 1))
             v_compare = np.loadtxt(TEST_DATA_DIRECTORY / self.folder / self.v_compare_filename)
+            self.assertTrue((v[:, 0] == v_compare[:, 0]).all())
+            np.testing.assert_allclose(v[:, 1:], v_compare[:, 1:], rtol=RELATIVE_TOL)
+        else:
+            self.assertIsNone(v)
 
 
 class TestDirectedMainInputFile(InputFileMixin, TestCase):
@@ -100,7 +119,7 @@ class TestUndirectedInputFile(InputFileMixin, TestCase):
     folder = "undirected"
     adjacency_filename = "adjacency.dat"
     num_groups = 2
-    undirected = True
+    directed = False
     u_compare_filename = "u_K2_compare.txt"
     w_compare_filename = "w_K2_compare.txt"
 
@@ -139,6 +158,7 @@ class TestAssortativeInputFile(InputFileMixin, TestCase):
 
 class TestErrorHandling(TestCase):
     """Class for testing how errors are handled."""
+
     folder = "main"
     adjacency_filename = "adjacency.dat"
     num_groups = 1  # that should cause an error

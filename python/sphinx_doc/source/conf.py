@@ -55,7 +55,9 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig'
 ]
-
+intersphinx_mapping = {
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None)
+}
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
 
