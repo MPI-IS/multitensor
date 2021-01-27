@@ -1,3 +1,7 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
@@ -14,7 +18,7 @@
 #include <cstdlib>
 #include <boost/test/unit_test.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/main.hpp"
 #include "fixtures.hpp"
 
@@ -29,8 +33,8 @@ struct fixture_multitensor : fixture_global
     std::vector<size_t> labels;
 
     fixture_multitensor()
-        : nof_groups(rng() % 10 + 2),
-          nof_realizations(1), //rng() % 10 + 1),
+        : nof_groups(rng() % 3 + 2),
+          nof_realizations(1),
           max_nof_iterations(rng() % 10 + 1),
           nof_convergences(rng() % 10 + 1),
           w(nof_groups * nof_groups * nof_layers),

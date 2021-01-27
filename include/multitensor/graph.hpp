@@ -1,12 +1,14 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
- * @brief Implementation of graphs and related functions
+ * @brief Implementation of graphs and multilayer network
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
- *
- * This file contains the implementation for creating and manipulating
- * graphs, and building a multilayer network of graphs.
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once
@@ -93,6 +95,8 @@ public:
 
     /*!
      * @brief Network constructor
+     *
+     * @tparam weight_t Weight type
      *
      * param[in] edges_start Labels of vertices where an edge starts
      * param[in] edges_end Labels of vertices where an edge ends
@@ -215,13 +219,23 @@ public:
         }
     }
 
-    //! @brief Returns a reference to a layer in the network
+    /*!
+     * @brief Returns a reference to a layer in the network
+     * @param[in] alpha Layer index
+     *
+     * @returns Layer
+     */
     graph_t &operator()(const size_t alpha)
     {
         return layers[alpha];
     }
 
-    //! @brief Returns a const reference to a layer in the network
+    /*!
+     * @brief Returns a const reference to a layer in the network
+     * @param[in] alpha Layer index
+     *
+     * @returns Layer
+     */
     const graph_t &operator()(const size_t alpha) const
     {
         return layers[alpha];
@@ -265,11 +279,13 @@ public:
     }
 };
 
-//! @brief Class for extractin outgoing edges and target vertices from a graph
+//! @brief Class for extracting outgoing edges and target vertices from a graph
 struct out_edges_target_vertices
 {
     /*
      * @brief Extracting outgoing edges from graph
+     *
+     * @tparam graph_t Graph type
      *
      * param[in] i Vertex number
      * param[in] g Graph
@@ -284,6 +300,8 @@ struct out_edges_target_vertices
 
     /*
      * @brief Extracting target vertex from an edge
+     *
+     * @tparam graph_t Graph type
      *
      * param[in] eit Outgoing edge iterator
      * param[in] g Graph
@@ -303,6 +321,8 @@ struct in_edges_source_vertices
     /*
      * @brief Extracting incoming edges from graph
      *
+     * @tparam graph_t Graph type
+     *
      * param[in] i Vertex number
      * param[in] g Graph
      *
@@ -316,6 +336,8 @@ struct in_edges_source_vertices
 
     /*
      * @brief Extracting source vertex from an edge
+     *
+     * @tparam graph_t Graph type
      *
      * param[in] eit Incoming edge iterator
      * param[in] g Graph

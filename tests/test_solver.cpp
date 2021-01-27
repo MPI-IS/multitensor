@@ -1,3 +1,7 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
@@ -13,7 +17,7 @@
 #include <cstddef>
 #include <boost/test/unit_test.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/initialization.hpp"
 #include "multitensor/solver.hpp"
 #include "fixtures.hpp"

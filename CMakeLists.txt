@@ -1,6 +1,7 @@
-# Copyright 2019, Max Planck Society.
-# Distributed under the "GNU GPL v3" licence.
-# (See accompanying file LICENSE.md)
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 
 cmake_minimum_required (VERSION 3.5)
 cmake_policy(SET CMP0054 NEW)
@@ -35,60 +36,13 @@ include(cmake/thirdparty.cmake)
 set(multitensor_src
     ${CMAKE_SOURCE_DIR}/include/multitensor/graph.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/initialization.hpp
-    ${CMAKE_SOURCE_DIR}/include/multitensor/parameters.hpp
+    ${CMAKE_SOURCE_DIR}/include/multitensor/params.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/solver.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/tensor.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/utils.hpp
     ${CMAKE_SOURCE_DIR}/include/multitensor/main.hpp)
-set(multitensor_legacy_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/main.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/include/mlg.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/tools_assortative.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/tools.cpp
-    )
-set(multitensor_legacy_default_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/cycle_over_realizations.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/cycle_over_realizations.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/em_update.cpp
-    )
-set(multitensor_legacy_undirected_src
-    ${CMAKE_SOURCE_DIR}/legacy/include/cycle_over_realizations_undirected.hpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/cycle_over_realizations_undirected.cpp
-    ${CMAKE_SOURCE_DIR}/legacy/src/em_update_undirected.cpp
-    )
 
 # libraries
-if(NOT MSVC)
-    add_library(multitensor_default INTERFACE)
-    target_include_directories(multitensor_default
-        INTERFACE
-            ${CMAKE_SOURCE_DIR}/legacy/include/
-            ${CMAKE_SOURCE_DIR}/legacy/src/)
-    target_sources(multitensor_default
-        INTERFACE
-            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_default_src}>) # for the IDE to see the library
-
-    add_library(multitensor_undirected INTERFACE)
-    target_include_directories(multitensor_undirected
-        INTERFACE
-            ${CMAKE_SOURCE_DIR}/legacy/include/
-            ${CMAKE_SOURCE_DIR}/legacy/src/)
-    target_sources(multitensor_undirected
-        INTERFACE
-            $<BUILD_INTERFACE:${multitensor_legacy_src} ${multitensor_legacy_undirected_src}>) # for the IDE to see the library
-
-    add_executable(Multitensor_main legacy/applications/src/MultiTensor_main.cpp)
-    target_link_libraries(Multitensor_main multitensor_default Boost::system Boost::filesystem Boost::program_options)
-
-    add_executable(Multitensor_undirected legacy/applications/src/MultiTensor_undirected.cpp)
-    target_link_libraries(Multitensor_undirected multitensor_undirected Boost::system Boost::filesystem Boost::program_options)
-
-    set_target_properties(
-        Multitensor_main
-        PROPERTIES
-        FOLDER "Applications")
-endif()
-
 add_library(multitensor INTERFACE)
 target_include_directories(multitensor
     INTERFACE
@@ -99,6 +53,7 @@ target_sources(multitensor
         $<BUILD_INTERFACE:${multitensor_src} >) # for the IDE to see the library
 
 add_library(multitensor_utils
+    ${CMAKE_SOURCE_DIR}/applications/include/app_params.hpp
     ${CMAKE_SOURCE_DIR}/applications/include/app_utils.hpp
     ${CMAKE_SOURCE_DIR}/applications/src/app_utils.cpp)
 target_link_libraries(multitensor_utils PUBLIC multitensor Boost::filesystem)
@@ -106,12 +61,9 @@ target_include_directories(multitensor_utils
     PUBLIC
     ${CMAKE_SOURCE_DIR}/applications/include/
     ${CMAKE_SOURCE_DIR}/applications/src/)
-target_compile_options(multitensor_utils PUBLIC -fPIC)
-
-
 
 # executables
-add_executable(Multitensor applications/src/MultiTensor.cpp)
+add_executable(Multitensor applications/src/multitensor.cpp)
 target_link_libraries(Multitensor multitensor multitensor_utils)
 
 # Unit tests
@@ -123,13 +75,14 @@ add_executable(test_multitensor
     tests/test_solver.cpp
     tests/test_tensor.cpp
     tests/test_utils.cpp)
-target_link_libraries(test_multitensor multitensor
-      Boost::unit_test_framework
-      Boost::system
-      Boost::filesystem)
+target_link_libraries(test_multitensor
+    multitensor
+    Boost::unit_test_framework
+    Boost::system
+    Boost::filesystem)
 add_test(
-      NAME multitensor_unit_tests
-      COMMAND test_multitensor)
+    NAME multitensor_unit_tests
+    COMMAND test_multitensor)
 
 # Functional tests
 # Helper for command line run
@@ -173,7 +126,8 @@ add_test_cmd_line(
     Multitensor
     --a adjacency.dat
     --k 2
-    --s 5489)
+    --s 5489
+    --maxit 100)
 
 add_test_cmd_line(
     "undirected"
@@ -181,7 +135,8 @@ add_test_cmd_line(
     --a adjacency.dat
     --k 2
     --s 5489
-    --undirected)
+    --undirected
+    --maxit 100)
 
 add_test_cmd_line(
     "w_input"
@@ -189,7 +144,8 @@ add_test_cmd_line(
     --a adjacency_k2L4.dat
     --k 2
     --s 5489
-    --w w_k2_k2L4_A.dat)
+    --w w_k2_k2L4_A.dat
+    --maxit 100)
 
 add_test_cmd_line(
     "multi_real"
@@ -198,7 +154,8 @@ add_test_cmd_line(
     --k 2
     --s 5489
     --w w_k2_k2L4_r2.dat
-    --r 2)
+    --r 2
+    --maxit 100)
 
 add_test_cmd_line(
     "assortative"
@@ -206,24 +163,8 @@ add_test_cmd_line(
     --a adjacency_assortative_k3L4.dat
     --k 3
     --s 5489
-    --r 1
-    --assortative)
-
-if(NOT MSVC)
-    add_test_cmd_line(
-        "legacy_main"
-        Multitensor_main
-        -a adjacency.dat
-        -k 2
-        -l 4)
-
-    add_test_cmd_line(
-        "legacy_undirected"
-        Multitensor_undirected
-        -a adjacency.dat
-        -k 2
-        -l 4)
-endif()
+    --assortative
+    --maxit 100)
 
 
 #########################
@@ -233,7 +174,7 @@ include(cmake/python.cmake)
 
 #########################
 # Documentation (Doxygen)
-include(cmake/documentation.cmake)
+include(cmake/doxygen_doc.cmake)
 
 
 ###########

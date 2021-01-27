@@ -1,9 +1,14 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
  * @brief Some global parameters for the projet.
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once
@@ -26,6 +31,9 @@ typedef size_t dimension_t;
 
 //! @brief Absolute precision
 const double EPS_PRECISION = 1e-6;
+
+//! @brief Absolute precision for logLikelihood convergence
+const double EPS_PRECISION_LIKELIHOOD = 1e-4;
 
 //! @brief Noise magnitude
 const double EPS_NOISE = 0.1;
@@ -53,15 +61,3 @@ get_termination_reason_name(termination_reason tr)
         return "NO_TERMINATION";
     }
 }
-
-//! @brief U output filename
-const std::string UOUT_FILENAME = "u_out.dat";
-
-//! @brief V output filename
-const std::string VOUT_FILENAME = "v_out.dat";
-
-//! @brief W output filename
-const std::string WOUT_FILENAME = "w_out.dat";
-
-//! @brief Information filename
-const std::string INFO_FILENAME = "run_info.dat";

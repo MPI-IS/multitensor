@@ -1,9 +1,14 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
  * @brief Application utilities.
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once
@@ -22,7 +27,7 @@
 #include <set>
 #include <boost/filesystem.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/tensor.hpp"
 #include "multitensor/utils.hpp"
 
@@ -80,9 +85,9 @@ void read_adjacency_data(const boost::filesystem::path &filename,
         std::istringstream is(line);
 
         // First character should be an E for edge
-        std::string tok;
-        is >> tok;
-        assert(tok == "E");
+        // std::string tok;
+        // is >> tok;
+        // assert(tok == "E");
 
         // Second two characters are the edges ids
         // TO DO: might use tuple later on
@@ -112,6 +117,7 @@ void read_adjacency_data(const boost::filesystem::path &filename,
  * @brief Read affinity file matrix data and creates the necessary tensor
  *
  * @param[in] filename Name of the file containing the data
+ * @param[in] assortative Whether the affinity matrix is assortative
  * @param[in,out] w Vector containing the values of the Affinity tensor
  */
 void read_affinity_data(const boost::filesystem::path &filename,

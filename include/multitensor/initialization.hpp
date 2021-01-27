@@ -1,19 +1,23 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
  * @brief Implementation of initializations functions
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/tensor.hpp"
 
 namespace multitensor
 {
-
 //! Initialization functions
 namespace initialization
 {
@@ -42,6 +46,8 @@ struct init_symmetric_tensor_random
               class random_t>
     void operator()(const tensor_t & /*Tinit*/, tensor_t &T, random_t &random_generator)
     {
+        using scalar_t = std::decay_t<decltype(T(0, 0))>;
+
         auto dims = T.dims();
         const dimension_t nrows{std::get<0>(dims)};
         const dimension_t ncols{std::get<1>(dims)};
@@ -54,7 +60,7 @@ struct init_symmetric_tensor_random
                 // DiagonalTensor
                 if constexpr (std::is_same_v<tensor_t, tensor::DiagonalTensor<double>>)
                 {
-                    T(i, alpha) = random_generator();
+                    T(i, alpha) = static_cast<scalar_t>(random_generator());
                 }
                 else // SymmetricTensor
                 {
@@ -62,11 +68,11 @@ struct init_symmetric_tensor_random
                     {
                         if (i == j)
                         {
-                            T(i, j, alpha) = random_generator();
+                            T(i, j, alpha) = static_cast<scalar_t>(random_generator());
                         }
                         else
                         {
-                            T(i, j, alpha) = T(j, i, alpha) = random_generator();
+                            T(i, j, alpha) = T(j, i, alpha) = static_cast<scalar_t>(random_generator());
                         }
                     }
                 }
@@ -166,7 +172,7 @@ void init_tensor_rows_random(const std::vector<dimension_t> &elements,
         for (auto j : elements)
         {
             assert(j < std::get<0>(dims));
-            mat(j, k) = random_generator();
+            mat(j, k) = static_cast<scalar_t>(random_generator());
         }
     }
 }

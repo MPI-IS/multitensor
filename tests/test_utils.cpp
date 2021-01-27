@@ -1,3 +1,7 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
@@ -15,7 +19,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/utils.hpp"
 #include "fixtures.hpp"
 
@@ -39,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_report)
     double max_L2 = std::numeric_limits<double>::lowest();
     for (size_t i = 0; i < (rng() % 100); i++)
     {
-        double rand_L2 = rng() % 10000 - 5000;
+        double rand_L2 = static_cast<double>(rng() % 10000 - 5000);
         results.vec_L2.emplace_back(rand_L2);
         max_L2 = std::max(max_L2, rand_L2);
     }

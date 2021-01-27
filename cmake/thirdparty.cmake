@@ -1,3 +1,6 @@
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
 #
 # This file contains the logic for setting up the thridparties configurations
 #
@@ -48,6 +51,9 @@ endif()
 
 # Python3 extension
 set(MULTITENSOR_PYTHON_EXTENSIONS FALSE)
+set(MULTITENSOR_PYTHON_SPHINX FALSE)
+set(MULTITENSOR_PYTHON_TEST_NOSE FALSE)
+
 if(ENABLE_PYTHON_WRAPPER)
     message(STATUS "[PYTHON] Checking python3 configuration")
 
@@ -109,6 +115,32 @@ if(ENABLE_PYTHON_WRAPPER)
     # if all the conditions are met, we enable the python+cython+numpy extensions
     if((NOT "${NUMPY_INCLUDE_PATH}" STREQUAL "") AND (NOT "${PYTHON_SHARED_LIBRARY_EXTENSION}" STREQUAL ""))
         set(MULTITENSOR_PYTHON_EXTENSIONS TRUE)
+
+        get_filename_component(_python_path "${Python3_EXECUTABLE}" DIRECTORY)
+
+        # Sphinx documentation
+        find_program(SPHINX_EXECUTABLE
+            NAMES sphinx-build
+            PATHS ${_python_path})
+        if(SPHINX_EXECUTABLE)
+            message(STATUS "[PYTHON] Sphinx found ${SPHINX_EXECUTABLE}")
+            set(MULTITENSOR_PYTHON_SPHINX TRUE)
+        else()
+            message(STATUS "[PYTHON] Sphinx not found - cannot build Sphinx documentation")
+        endif()
+
+
+        # If possible, use nosetests to get an XML report.
+        # Find nose
+        find_program(NOSE_PROGRAM
+            NAMES nosetests
+            HINTS ${_python_path})
+        if(NOSE_PROGRAM)
+            message(STATUS "[PYTHON] Nosetests found ${NOSE_PROGRAM}")
+            set(MULTITENSOR_PYTHON_TEST_NOSE TRUE)
+        else()
+            message(STATUS "[PYTHON] Nosetests not found - using standard unittest")
+        endif()
     endif()
 
 endif()

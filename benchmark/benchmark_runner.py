@@ -1,4 +1,12 @@
-"""Module for running and analyzing a benchmark."""
+# Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+# Distributed under the GNU GPL license version 3
+# See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
+"""
+Module for running and analyzing a benchmark.
+
+:author: Jean-Claude Passy <jean-claude.passy@tuebingen.mpg.de>
+"""
 
 
 import argparse
@@ -36,6 +44,12 @@ def cosine_similarity(U_infer, U0, P):
     CS = sum(
         (U_infer[:, k].T @ U0[:, k] for k in range(K))
     )
+
+    # OLD version
+    # CS1 = sum(
+    #     (np.dot(U_infer[i],U0[i]) for i in range(N) )
+    # )
+    # assert abs(CS/N-CS1/N)<0.01
     return CS / N
 
 
@@ -258,8 +272,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--exe', metavar='EXE', type=str,
                         default=str(Path.cwd().parent / 'Multitensor'), help='Executable')
-    parser.add_argument('--test', metavar='TEST', action='append', help='Benchmark to run',
-                        required=True, choices=list(all_benchmark_types.keys()) + ['all'])
+    parser.add_argument('--test', action='append', help='Benchmark to run',
+                        default=['all'], choices=list(all_benchmark_types.keys()) + ['all'])
 
     # Get args from command line
     args = parser.parse_args()

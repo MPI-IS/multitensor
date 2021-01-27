@@ -8,6 +8,7 @@ debug
 __pycache__
 dist/
 *egg-*
+.noseids
 
 # data from tests
 u_*.dat

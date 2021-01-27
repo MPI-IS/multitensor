@@ -1,9 +1,14 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
 /*!
  * @file
  *
  * @brief Implementation of the multitensor algorithm
  *
  * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
  */
 
 #pragma once
@@ -16,7 +21,7 @@
 #include <set>
 #include <boost/graph/adjacency_list.hpp>
 
-#include "multitensor/parameters.hpp"
+#include "multitensor/params.hpp"
 #include "multitensor/graph.hpp"
 #include "multitensor/initialization.hpp"
 #include "multitensor/solver.hpp"
@@ -35,6 +40,7 @@ namespace multitensor
  * @tparam affinity_init_t The type of the initialization for the affinity
  * @tparam vertex_t Edges label type
  * @tparam weight_t The type of an edge weight
+ * @tparam random_t The type of the random generator
  *
  * @param[in] edges_start Labels of vertices where an edge starts
  * @param[in] edges_end Labels of vertices where an edge ends
@@ -46,6 +52,7 @@ namespace multitensor
  * @param[in,out] u Tensors linking outgoing vertices
  * @param[in,out] v Tensors linking incoming vertices
  * @param[in,out] affinity Affinity values
+ * @param[in,out] random_generator Random generator
  *
  * @returns Detailed results of the algorithm.
  */
@@ -108,6 +115,7 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     {
         nof_groups = static_cast<size_t>(affinity.size() / nof_layers);
         affinity_size = nof_groups * nof_layers;
+        std::cout << "YYYESSSS" << std::endl;
     }
     else // Non-assortative case
     {
@@ -191,6 +199,7 @@ utils::Report multitensor_factorization(const std::vector<vertex_t> &edges_start
     // Diagnostics
     std::cout << "Starting algorithm...\n"
               << "\t- Number of vertices: " << nof_vertices << "\n"
+              << "\t- Number of edges: " << nof_edges << "\n"
               << "\t- Number of layers: " << nof_layers << "\n"
               << "\t- Number of groups: " << nof_groups << "\n"
               << "\t- Number of realizations: " << nof_realizations << "\n"

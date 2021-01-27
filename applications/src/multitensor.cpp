@@ -1,8 +1,20 @@
+// Copyright (c) 2019, Max Planck Society / Software Workshop - Max Planck Institute for Intelligent Systems
+// Distributed under the GNU GPL license version 3
+// See file LICENSE.md or at https://github.com/MPI-IS/multitensor/LICENSE.md
+
+/*!
+ * @file
+ *
+ * @author Jean-Claude Passy (jean-claude.passy@tuebingen.mpg.de)
+ * @author Caterina De Bacco (caterina.debacco@tuebingen.mpg.de)
+ */
+
 #include <iostream>
 #include <string>
 #include <ctime>
 #include <boost/graph/adjacency_list.hpp>
 
+#include "app_params.hpp"
 #include "app_utils.hpp"
 #include "multitensor/main.hpp"
 #include "multitensor/utils.hpp"
