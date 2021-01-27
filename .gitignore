@@ -1,29 +1,18 @@
-# Compiled Object files
-*.slo
-*.lo
+build
+release
+debug
+*.DS_Store
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
 *.exe
-*.out
-*.app
+*.vs*
+__pycache__
+dist/
+*egg-*
+.noseids
+
+# data from tests
+u_*.dat
+v_*.dat
+w_*.dat
+*out*.dat
+results/
