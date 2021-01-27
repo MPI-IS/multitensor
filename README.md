@@ -1,3 +1,7 @@
+[![Build Status](
+    https://raw.githubusercontent.com/MPI-IS-BambooAgent/sw_badges/master/badges/plans/multitensorfactorization-continuousbuilds/build.svg?sanitize=true)](
+        https://atlas.is.localnet/bamboo/browse/CV-MTF/latest)
+
 MultiTensor
 ===========
 
